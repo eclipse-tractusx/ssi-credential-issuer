@@ -1,0 +1,55 @@
+<!--
+- Copyright (c) 2024 Contributors to the Eclipse Foundation
+-
+- See the NOTICE file(s) distributed with this work for additional
+- information regarding copyright ownership.
+-
+- This program and the accompanying materials are made available under the
+- terms of the Apache License, Version 2.0 which is available at
+- https://www.apache.org/licenses/LICENSE-2.0.
+-
+- Unless required by applicable law or agreed to in writing, software
+- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+- License for the specific language governing permissions and limitations
+- under the License.
+-
+- SPDX-License-Identifier: Apache-2.0
+-->
+
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker</AssemblyName>
+        <RootNamespace>Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker</RootNamespace>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <OutputType>Exe</OutputType>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <DockerfileContext>..\..\..</DockerfileContext>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <UserSecretsId>eea9b02b-62ae-457d-91b9-b6717b99dd93</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\externalservices\Portal.Service\Portal.Service.csproj" />
+      <ProjectReference Include="..\CredentialProcess.Worker\CredentialProcess.Worker.csproj" />
+      <ProjectReference Include="..\Processes.Library\Processes.Library.csproj" />
+      <ProjectReference Include="..\Processes.Worker.Library\Processes.Worker.Library.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+      <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Logging" Version="1.1.0" />
+      <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Token" Version="1.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="appsettings.json" />
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+</Project>

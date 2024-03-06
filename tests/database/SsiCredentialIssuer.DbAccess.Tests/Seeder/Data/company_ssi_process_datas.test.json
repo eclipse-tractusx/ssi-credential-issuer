@@ -1,0 +1,12 @@
+[
+  {
+    "company_ssi_detail_id": "9f5b9934-4014-4099-91e9-7b1aee696b03",
+    "schema": {
+      "root": "test123"
+    },
+    "credential_type_kind_id": 1,
+    "encryption_mode": 1,
+    "holder_wallet_url": "https://example.org/wallet",
+    "client_id": "c123"
+  }
+]
