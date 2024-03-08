@@ -1,0 +1,119 @@
+###############################################################
+# Copyright (c) 2024 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+###############################################################
+
+name: Lint and Test Chart
+
+on:
+  push:
+    paths:
+      - 'charts/ssi-credential-issuer/**'
+    branches: [main, dev, release-candidate]
+  pull_request:
+    paths:
+      - 'charts/ssi-credential-issuer/**'
+  workflow_dispatch:
+    inputs:
+      node_image:
+        description: 'kindest/node image for k8s kind cluster'
+        # k8s version from 3.1 release as default
+        default: 'kindest/node:v1.27.3'
+        required: false
+        type: string
+      upgrade_from:
+        description: 'ssi credential issuer chart version to upgrade from'
+        # tbd
+        default: 'tbd'
+        required: false
+        type: string
+
+jobs:
+
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Kubernetes KinD Cluster
+        uses: container-tools/kind-action@v1
+        with:
+          # upgrade version, default (v0.17.0) uses node image v1.21.1 and doesn't work with more recent node image versions
+          version: v0.20.0
+          # default value for event_name != workflow_dispatch
+          node_image: ${{ github.event.inputs.node_image || 'kindest/node:v1.27.3' }}
+
+      - name: Build migration image
+        id: build-migration-image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/Dockerfile-migrations
+          push: true
+          tags: kind-registry:5000/migrations:testing
+
+      - name: Build service image
+        id: build-service-image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/Dockerfile-service
+          push: true
+          tags: kind-registry:5000/service:testing
+  
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.9.3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          check-latest: true
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.3.1
+
+      - name: Run chart-testing (list-changed)
+        id: list-changed
+        run: |
+          changed=$(ct list-changed --target-branch ${{ github.event.repository.default_branch }})
+          if [[ -n "$changed" ]]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run chart-testing (lint)
+        run: ct lint --validate-maintainers=false --check-version-increment=false --target-branch ${{ github.event.repository.default_branch }}
+
+      - name: Run service chart-testing (install)
+        run: ct install --charts charts/ssi-credential-issuer --config charts/chart-testing-config.yaml --helm-extra-set-args "--set=issuer.image=kind-registry:5000/service:testing --set=issuermigrations.image=kind-registry:5000/migrations:testing"
+        if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'
+
+      # TODO: re-add the step after the first version release  
+      # Upgrade the released chart version with the locally available chart
+      # default value for event_name != workflow_dispatch
+      # - name: Run helm upgrade
+      #   run: |
+      #     helm repo add bitnami https://charts.bitnami.com/bitnami
+      #     helm repo add tractusx-dev https://eclipse-tractusx.github.io/charts/dev
+      #     helm install ssi-credential-issuer tractusx-dev/ssi-credential-issuer --version ${{ github.event.inputs.upgrade_from || 'tbd' }} --namespace upgrade --create-namespace
+      #     helm dependency update charts/ssi-credential-issuer
+      #     helm upgrade ssi-credential-issuer charts/ssi-credential-issuer --set issuer.image=kind-registry:5000/service:testing --set=issuermigrations.image=kind-registry:5000/migrations:testing --namespace upgrade
+      #   if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'
