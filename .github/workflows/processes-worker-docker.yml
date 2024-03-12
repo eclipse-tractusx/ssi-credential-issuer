@@ -17,7 +17,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-name: Service
+name: Processes Worker
 
 on:
   push:
@@ -25,9 +25,9 @@ on:
       # service and transitive paths
       - 'src/**'
       # workflow file
-      - '.github/workflows/service-docker.yml'
+      - '.github/workflows/process-worker-docker.yml'
       # dockerfile
-      - 'docker/Dockerfile-credential-issuer-service'
+      - 'docker/Dockerfile-credential-issuer-process-worker'
 
     branches:
       - 'dev'
@@ -35,7 +35,7 @@ on:
 
 env:
   IMAGE_NAMESPACE: "tractusx"
-  IMAGE_NAME: "credential-issuer-service"
+  IMAGE_NAME: "credential-issuer-process-worker"
 
 jobs:
   build-and-push-image:
@@ -73,7 +73,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: docker/Dockerfile-service
+          file: docker/Dockerfile-credential-issuer-process-worker
           platforms: linux/amd64, linux/arm64
           pull: true
           push: ${{ github.event_name != 'pull_request' }}
@@ -88,4 +88,4 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
           repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
-          readme-filepath: "./docker/notice-service.md"
+          readme-filepath: "./docker/notice-credential-issuer-process-worker.md"

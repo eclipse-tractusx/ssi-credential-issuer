@@ -28,7 +28,7 @@ on:
       # workflow file
       - '.github/workflows/migrations-docker.yml'
       # dockerfile
-      - 'docker/Dockerfile-migrations'
+      - 'docker/Dockerfile-credential-issuer-migrations'
 
     branches:
       - 'dev'
