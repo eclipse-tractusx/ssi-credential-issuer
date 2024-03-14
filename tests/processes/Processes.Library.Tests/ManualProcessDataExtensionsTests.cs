@@ -136,7 +136,6 @@ public class ManualProcessDataExtensionsTests
     {
         // Arrange
         var process = new Process(Guid.NewGuid(), _fixture.Create<ProcessTypeId>(), Guid.NewGuid()) { LockExpiryDate = null };
-        var processSteps = _fixture.CreateMany<(Guid ProcessStepId, DateTimeOffset Now)>(5).Select(x => new ProcessStep(x.ProcessStepId, _fixture.Create<ProcessStepTypeId>(), ProcessStepStatusId.TODO, process.Id, x.Now)).ToImmutableArray();
 
         var sut = _fixture.Build<VerifyProcessData>()
             .With(x => x.Process, process)

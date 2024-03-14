@@ -74,7 +74,7 @@ public class CredentialProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetWalletCredentialId(_credentialId))
-            .Returns((Guid?)null);
+            .Returns<Guid?>(null);
         async Task Act() => await _sut.SignCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Act
