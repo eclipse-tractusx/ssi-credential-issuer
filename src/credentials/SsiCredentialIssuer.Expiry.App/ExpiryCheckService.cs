@@ -130,7 +130,7 @@ public class ExpiryCheckService
         CancellationToken cancellationToken)
     {
         var content = JsonSerializer.Serialize(new { Type = data.VerifiedCredentialTypeId, CredentialId = data.Id }, Options);
-        await portalService.AddNotification(content, data.Bpnl, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
+        await portalService.AddNotification(content, data.RequesterId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
         companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(data.Id, c =>
             {
                 c.CompanySsiDetailStatusId = data.CompanySsiDetailStatusId;
@@ -146,7 +146,7 @@ public class ExpiryCheckService
             { "requestName", typeValue },
             { "reason", "The credential is already expired" }
         };
-        await portalService.TriggerMail("CredentialRejected", data.Bpnl, mailParameters, cancellationToken);
+        await portalService.TriggerMail("CredentialRejected", data.RequesterId, mailParameters, cancellationToken);
     }
 
     private static async ValueTask HandleNotification(
@@ -182,7 +182,7 @@ public class ExpiryCheckService
             CredentialId = data.Id,
             ExpiryCheckTypeId = newExpiryCheckTypeId
         }, Options);
-        await portalService.AddNotification(content, data.Bpnl, NotificationTypeId.CREDENTIAL_EXPIRY, cancellationToken);
+        await portalService.AddNotification(content, data.RequesterId, NotificationTypeId.CREDENTIAL_EXPIRY, cancellationToken);
         var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
         var mailParameters = new Dictionary<string, string>
         {
@@ -191,6 +191,6 @@ public class ExpiryCheckService
             { "expiryDate", data.ExpiryDate?.ToString("dd MMMM yyyy") ?? throw new ConflictException("Expiry Date must be set here") }
         };
 
-        await portalService.TriggerMail("CredentialExpiry", data.Bpnl, mailParameters, cancellationToken);
+        await portalService.TriggerMail("CredentialExpiry", data.RequesterId, mailParameters, cancellationToken);
     }
 }

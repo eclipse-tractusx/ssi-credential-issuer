@@ -22,7 +22,7 @@ using System.Text.Json.Serialization;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 
 public record NotificationRequest(
-    [property: JsonPropertyName("bpnl")] string Bpnl,
+    [property: JsonPropertyName("requester")] Guid Requester,
     [property: JsonPropertyName("content")] string Content,
     [property: JsonPropertyName("notificationTypeId")] NotificationTypeId NotificationTypeId
 );

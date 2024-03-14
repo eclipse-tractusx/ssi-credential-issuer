@@ -40,19 +40,19 @@ public class PortalService : IPortalService
         _settings = options.Value;
     }
 
-    public async Task AddNotification(string content, string bpnl, NotificationTypeId notificationTypeId, CancellationToken cancellationToken)
+    public async Task AddNotification(string content, Guid requester, NotificationTypeId notificationTypeId, CancellationToken cancellationToken)
     {
         var client = await _tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(false);
-        var data = new NotificationRequest(bpnl, content, notificationTypeId);
-        await client.PostAsJsonAsync("api/notifications/notifications", data, Options, cancellationToken)
+        var data = new NotificationRequest(requester, content, notificationTypeId);
+        await client.PostAsJsonAsync("api/notifications/management", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("notification", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
             .ConfigureAwait(false);
     }
 
-    public async Task TriggerMail(string template, string bpnl, IDictionary<string, string> mailParameters, CancellationToken cancellationToken)
+    public async Task TriggerMail(string template, Guid requester, IDictionary<string, string> mailParameters, CancellationToken cancellationToken)
     {
         var client = await _tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(false);
-        var data = new MailData(bpnl, template, mailParameters);
+        var data = new MailData(requester, template, mailParameters);
         await client.PostAsJsonAsync("api/administration/mail", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("mail", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
             .ConfigureAwait(false);

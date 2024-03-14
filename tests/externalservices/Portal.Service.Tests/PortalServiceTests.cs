@@ -71,7 +71,7 @@ public class PortalServiceTests
     public async Task AddNotification_WithValid_DoesNotThrowException()
     {
         // Arrange
-        const string bpn = "123";
+        var requester = Guid.NewGuid();
         var httpMessageHandlerMock =
             new HttpMessageHandlerMock(HttpStatusCode.OK);
         using var httpClient = new HttpClient(httpMessageHandlerMock);
@@ -81,14 +81,14 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        await sut.AddNotification("Test", bpn, NotificationTypeId.CREDENTIAL_APPROVAL, CancellationToken.None).ConfigureAwait(false);
+        await sut.AddNotification("Test", requester, NotificationTypeId.CREDENTIAL_APPROVAL, CancellationToken.None).ConfigureAwait(false);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
             x.Content is JsonContent &&
             (x.Content as JsonContent)!.ObjectType == typeof(NotificationRequest) &&
             ((x.Content as JsonContent)!.Value as NotificationRequest)!.Content == "Test" &&
-            ((x.Content as JsonContent)!.Value as NotificationRequest)!.Bpnl == bpn &&
+            ((x.Content as JsonContent)!.Value as NotificationRequest)!.Requester == requester &&
             ((x.Content as JsonContent)!.Value as NotificationRequest)!.NotificationTypeId == NotificationTypeId.CREDENTIAL_APPROVAL
         );
     }
@@ -101,7 +101,7 @@ public class PortalServiceTests
     public async Task AddNotification_WithConflict_ThrowsServiceExceptionWithErrorContent(HttpStatusCode statusCode, string? content, string message)
     {
         // Arrange
-        const string bpn = "123";
+        var requester = Guid.NewGuid();
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
@@ -111,7 +111,7 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        async Task Act() => await sut.AddNotification("Test", bpn, NotificationTypeId.CREDENTIAL_APPROVAL, CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await sut.AddNotification("Test", requester, NotificationTypeId.CREDENTIAL_APPROVAL, CancellationToken.None).ConfigureAwait(false);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -127,7 +127,7 @@ public class PortalServiceTests
     public async Task TriggerMail_WithValid_DoesNotThrowException()
     {
         // Arrange
-        const string bpn = "123";
+        var requesterId = Guid.NewGuid();
         var httpMessageHandlerMock =
             new HttpMessageHandlerMock(HttpStatusCode.OK);
         using var httpClient = new HttpClient(httpMessageHandlerMock);
@@ -137,14 +137,14 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        await sut.TriggerMail("Test", bpn, new Dictionary<string, string>(), CancellationToken.None).ConfigureAwait(false);
+        await sut.TriggerMail("Test", requesterId, new Dictionary<string, string>(), CancellationToken.None).ConfigureAwait(false);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
             x.Content is JsonContent &&
             (x.Content as JsonContent)!.ObjectType == typeof(MailData) &&
             ((x.Content as JsonContent)!.Value as MailData)!.Template == "Test" &&
-            ((x.Content as JsonContent)!.Value as MailData)!.Bpnl == bpn
+            ((x.Content as JsonContent)!.Value as MailData)!.Requester == requesterId
         );
     }
 
@@ -156,7 +156,7 @@ public class PortalServiceTests
     public async Task TriggerMail_WithConflict_ThrowsServiceExceptionWithErrorContent(HttpStatusCode statusCode, string? content, string message)
     {
         // Arrange
-        const string bpn = "123";
+        var requesterId = Guid.NewGuid();
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
@@ -166,7 +166,7 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        async Task Act() => await sut.TriggerMail("Test", bpn, new Dictionary<string, string>(), CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await sut.TriggerMail("Test", requesterId, new Dictionary<string, string>(), CancellationToken.None).ConfigureAwait(false);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);

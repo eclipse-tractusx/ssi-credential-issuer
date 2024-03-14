@@ -249,6 +249,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
             .Where(x => x.IsVcToDecline || x.IsVcToDelete || x.IsOneDayNotification || x.IsTwoWeeksNotification || x.IsOneMonthNotification)
             .Select(x => new CredentialExpiryData(
                 x.Details.Id,
+                x.Details.CreatorUserId,
                 x.Details.ExpiryDate,
                 x.Details.ExpiryCheckTypeId,
                 x.Details.VerifiedCredentialExternalTypeDetailVersion!.Version,

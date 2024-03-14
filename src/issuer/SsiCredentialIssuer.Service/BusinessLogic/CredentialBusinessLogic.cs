@@ -197,14 +197,14 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
 
         var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CompanyDataErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
         var content = JsonSerializer.Serialize(new { data.Type, CredentialId = credentialId }, Options);
-        await _portalService.AddNotification(content, _identity.Bpnl, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
+        await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
         var mailParameters = new Dictionary<string, string>
         {
             { "requestName", typeValue },
             { "credentialType", typeValue },
             { "expiryDate", expiryDate.ToString("o", CultureInfo.InvariantCulture) }
         };
-        await _portalService.TriggerMail("CredentialApproval", _identity.Bpnl, mailParameters, cancellationToken).ConfigureAwait(false);
+        await _portalService.TriggerMail("CredentialApproval", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
         await _repositories.SaveAsync().ConfigureAwait(false);
     }
 
@@ -272,7 +272,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
 
         var typeValue = type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CompanyDataErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", type.ToString()) });
         var content = JsonSerializer.Serialize(new { Type = type, CredentialId = credentialId }, Options);
-        await _portalService.AddNotification(content, _identity.Bpnl, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
+        await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
 
         companySsiRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
@@ -292,7 +292,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             { "reason", "Declined by the Operator" }
         };
 
-        await _portalService.TriggerMail("CredentialRejected", _identity.Bpnl, mailParameters, cancellationToken).ConfigureAwait(false);
+        await _portalService.TriggerMail("CredentialRejected", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

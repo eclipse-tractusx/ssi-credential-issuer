@@ -151,7 +151,7 @@ public class CredentialBusinessLogicTests
 
         // Assert
         ex.Message.Should().Be(CompanyDataErrors.SSI_DETAILS_NOT_FOUND.ToString());
-        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
 
@@ -174,7 +174,7 @@ public class CredentialBusinessLogicTests
 
         // Assert
         ex.Message.Should().Be(CompanyDataErrors.CREDENTIAL_NOT_PENDING.ToString());
-        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
 
@@ -196,7 +196,7 @@ public class CredentialBusinessLogicTests
 
         // Assert
         ex.Message.Should().Be(CompanyDataErrors.BPN_NOT_SET.ToString());
-        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
 
@@ -232,8 +232,8 @@ public class CredentialBusinessLogicTests
         // Assert
         ex.Message.Should().Be(CompanyDataErrors.EXPIRY_DATE_IN_PAST.ToString());
 
-        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
-        A.CallTo(() => _portalService.AddNotification(A<string>._, A<string>._, A<NotificationTypeId>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, A<NotificationTypeId>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
 
@@ -291,7 +291,7 @@ public class CredentialBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
 
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
@@ -337,8 +337,8 @@ public class CredentialBusinessLogicTests
         await _sut.ApproveCredential(CredentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Assert
-        A.CallTo(() => _portalService.AddNotification(A<string>._, A<string>._, NotificationTypeId.CREDENTIAL_APPROVAL, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, NotificationTypeId.CREDENTIAL_APPROVAL, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
             .MustHaveHappenedOnceExactly();
@@ -365,7 +365,7 @@ public class CredentialBusinessLogicTests
 
         // Assert
         ex.Message.Should().Be(CompanyDataErrors.SSI_DETAILS_NOT_FOUND.ToString());
-        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
 
@@ -385,7 +385,7 @@ public class CredentialBusinessLogicTests
 
         // Assert
         ex.Message.Should().Be(CompanyDataErrors.CREDENTIAL_NOT_PENDING.ToString());
-        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
 
@@ -409,8 +409,8 @@ public class CredentialBusinessLogicTests
         await _sut.RejectCredential(CredentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Assert
-        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<string>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.AddNotification(A<string>._, A<string>._, NotificationTypeId.CREDENTIAL_REJECTED, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, NotificationTypeId.CREDENTIAL_REJECTED, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
 
         detail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.INACTIVE);

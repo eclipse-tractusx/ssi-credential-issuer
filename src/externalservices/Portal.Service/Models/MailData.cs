@@ -22,7 +22,7 @@ using System.Text.Json.Serialization;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 
 public record MailData(
-    [property: JsonPropertyName("bpnl")] string Bpnl,
+    [property: JsonPropertyName("requester")] Guid Requester,
     [property: JsonPropertyName("template")] string Template,
     [property: JsonPropertyName("mailParameters")] IDictionary<string, string> MailParameters
 );
