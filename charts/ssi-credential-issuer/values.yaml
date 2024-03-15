@@ -255,7 +255,7 @@ secrets:
 interfaces:
   # -- Secret containing the client-secrets for the connection to portal and wallet.
   secret: "secret-interfaces"
-  
+
 portContainer: 8080
 
 portService: 8080
