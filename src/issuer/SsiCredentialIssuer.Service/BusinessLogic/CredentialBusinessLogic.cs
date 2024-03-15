@@ -176,11 +176,9 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
         var (exists, data) = await companySsiRepository.GetSsiApprovalData(credentialId).ConfigureAwait(false);
         ValidateApprovalData(credentialId, exists, data);
 
-        var processStepRepository = _repositories.GetInstance<IProcessStepRepository>();
-        var processId = processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL).Id;
-        processStepRepository.CreateProcessStep(ProcessStepTypeId.CREATE_CREDENTIAL, ProcessStepStatusId.TODO, processId);
+        var processId = CreateProcess();
 
-        var expiryDate = GetExpiryDate(data.DetailData?.ExpiryDate);
+        var expiry = GetExpiryDate(data.DetailData?.ExpiryDate);
         companySsiRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
                 c.CompanySsiDetailStatusId = data.Status;
@@ -191,10 +189,9 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             {
                 c.CompanySsiDetailStatusId = CompanySsiDetailStatusId.ACTIVE;
                 c.DateLastChanged = _dateTimeProvider.OffsetNow;
-                c.ExpiryDate = expiryDate;
+                c.ExpiryDate = expiry;
                 c.ProcessId = processId;
             });
-
         var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CompanyDataErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
         var content = JsonSerializer.Serialize(new { data.Type, CredentialId = credentialId }, Options);
         await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
@@ -202,10 +199,18 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
         {
             { "requestName", typeValue },
             { "credentialType", typeValue },
-            { "expiryDate", expiryDate.ToString("o", CultureInfo.InvariantCulture) }
+            { "expiryDate", expiry.ToString("o", CultureInfo.InvariantCulture) }
         };
         await _portalService.TriggerMail("CredentialApproval", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
         await _repositories.SaveAsync().ConfigureAwait(false);
+    }
+
+    private Guid CreateProcess()
+    {
+        var processStepRepository = _repositories.GetInstance<IProcessStepRepository>();
+        var processId = processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL).Id;
+        processStepRepository.CreateProcessStep(ProcessStepTypeId.CREATE_CREDENTIAL, ProcessStepStatusId.TODO, processId);
+        return processId;
     }
 
     private static void ValidateApprovalData(Guid credentialId, bool exists, SsiApprovalData data)
@@ -319,7 +324,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             )
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.BPN, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, schema, requestData.TechnicalUserDetails, null, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.BPN, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     public async Task<Guid> CreateMembershipCredential(CreateMembershipCredentialRequest requestData, CancellationToken cancellationToken)
@@ -343,7 +348,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             )
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     public async Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken)
@@ -396,7 +401,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             )
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
@@ -413,7 +418,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
         return did.Id;
     }
 
-    private async Task<Guid> HandleCredentialProcessCreation(VerifiedCredentialTypeKindId kindId, VerifiedCredentialTypeId typeId, string schema, TechnicalUserDetails? technicalUserDetails, Guid? detailVersionId, ICompanySsiDetailsRepository companyCredentialDetailsRepository)
+    private async Task<Guid> HandleCredentialProcessCreation(VerifiedCredentialTypeKindId kindId, VerifiedCredentialTypeId typeId, string schema, TechnicalUserDetails? technicalUserDetails, Guid? detailVersionId, string? callbackUrl, ICompanySsiDetailsRepository companyCredentialDetailsRepository)
     {
         var documentContent = System.Text.Encoding.UTF8.GetBytes(schema);
         var hash = SHA512.HashData(documentContent);
@@ -425,11 +430,25 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
                 x.DocumentStatusId = DocumentStatusId.ACTIVE;
             }).Id;
 
+        Guid? processId = null;
+        var status = CompanySsiDetailStatusId.PENDING;
+        if (kindId != VerifiedCredentialTypeKindId.FRAMEWORK)
+        {
+            processId = CreateProcess();
+            status = CompanySsiDetailStatusId.ACTIVE;
+        }
+
         var ssiDetailId = companyCredentialDetailsRepository.CreateSsiDetails(
             _identity.Bpnl,
-            typeId, docId, CompanySsiDetailStatusId.PENDING,
+            typeId,
+            docId,
+            status,
             _identity.IdentityId,
-            c => c.VerifiedCredentialExternalTypeDetailVersionId = detailVersionId).Id;
+            c =>
+            {
+                c.VerifiedCredentialExternalTypeDetailVersionId = detailVersionId;
+                c.ProcessId = processId;
+            }).Id;
         documentRepository.AssignDocumentToCompanySsiDetails(docId, ssiDetailId);
 
         companyCredentialDetailsRepository.CreateProcessData(ssiDetailId, JsonDocument.Parse(schema), kindId,
@@ -447,6 +466,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
                 c.ClientSecret = secret;
                 c.InitializationVector = initializationVector;
                 c.HolderWalletUrl = technicalUserDetails.WalletUrl;
+                c.CallbackUrl = callbackUrl;
             });
 
         await _repositories.SaveAsync().ConfigureAwait(false);

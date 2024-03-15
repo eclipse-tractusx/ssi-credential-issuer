@@ -89,6 +89,8 @@ public class CredentialProcessTypeExecutor : IProcessTypeExecutor
                     .ConfigureAwait(false),
                 ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await _credentialProcessHandler.CreateCredentialForHolder(_credentialId, cancellationToken)
                     .ConfigureAwait(false),
+                ProcessStepTypeId.TRIGGER_CALLBACK => await _credentialProcessHandler.TriggerCallback(_credentialId, cancellationToken)
+                    .ConfigureAwait(false),
                 _ => (null, ProcessStepStatusId.TODO, false, null)
             };
         }

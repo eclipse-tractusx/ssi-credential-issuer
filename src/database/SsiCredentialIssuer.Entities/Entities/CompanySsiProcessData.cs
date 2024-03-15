@@ -45,6 +45,7 @@ public class CompanySsiProcessData
     public byte[]? InitializationVector { get; set; }
     public int EncryptionMode { get; set; }
     public string? HolderWalletUrl { get; set; }
+    public string? CallbackUrl { get; set; }
     public virtual CompanySsiDetail? CompanySsiDetail { get; private set; }
     public virtual VerifiedCredentialTypeKind? CredentialTypeKind { get; private set; }
 }

@@ -21,6 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
@@ -40,6 +41,7 @@ try
                 .AddIssuerRepositories(hostContext.Configuration)
                 .AddProcessExecutionService(hostContext.Configuration.GetSection("Processes"))
                 .AddPortalService(hostContext.Configuration.GetSection("Portal"))
+                .AddCallbackService(hostContext.Configuration.GetSection("Callback"))
                 .AddCredentialProcessExecutor(hostContext.Configuration);
         })
         .AddLogging()

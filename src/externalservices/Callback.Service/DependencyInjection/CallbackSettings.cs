@@ -17,20 +17,12 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
 
-public static class ProcessExecutionServiceExtensions
+[ExcludeFromCodeCoverage]
+public class CallbackSettings : KeyVaultAuthSettings
 {
-    public static IServiceCollection AddProcessExecutionService(this IServiceCollection services, IConfigurationSection section) =>
-        services
-            .AddProcessIdentity(section)
-            .AddTransient<ProcessExecutionService>()
-            .AddTransient<IProcessExecutor, ProcessExecutor>()
-            .AddTransient<IDateTimeProvider, UtcDateTimeProvider>();
 }

@@ -17,20 +17,17 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
+using System.Text.Json.Serialization;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Models;
 
-public static class ProcessExecutionServiceExtensions
+public record IssuerResponseData(
+    [property: JsonPropertyName("bpn")] string Bpn,
+    [property: JsonPropertyName("status")] IssuerResponseStatus Status,
+    [property: JsonPropertyName("message")] string? Message);
+
+public enum IssuerResponseStatus
 {
-    public static IServiceCollection AddProcessExecutionService(this IServiceCollection services, IConfigurationSection section) =>
-        services
-            .AddProcessIdentity(section)
-            .AddTransient<ProcessExecutionService>()
-            .AddTransient<IProcessExecutor, ProcessExecutor>()
-            .AddTransient<IDateTimeProvider, UtcDateTimeProvider>();
+    SUCCESSFUL = 1,
+    UNSUCCESSFUL = 2
 }

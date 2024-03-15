@@ -3,6 +3,7 @@ using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -25,6 +26,7 @@ public class CredentialProcessHandlerTests
 
     private readonly CredentialProcessHandler _sut;
     private readonly IFixture _fixture;
+    private readonly ICallbackService _callbackService;
 
     public CredentialProcessHandlerTests()
     {
@@ -39,8 +41,9 @@ public class CredentialProcessHandlerTests
         A.CallTo(() => _issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
 
         _walletBusinessLogic = A.Fake<IWalletBusinessLogic>();
+        _callbackService = A.Fake<ICallbackService>();
 
-        _sut = new CredentialProcessHandler(_issuerRepositories, _walletBusinessLogic);
+        _sut = new CredentialProcessHandler(_issuerRepositories, _walletBusinessLogic, _callbackService);
     }
 
     #region CreateCredential
@@ -114,7 +117,7 @@ public class CredentialProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetExternalCredentialAndKindId(_credentialId))
-            .Returns(new ValueTuple<Guid?, VerifiedCredentialTypeKindId>());
+            .Returns(new ValueTuple<Guid?, VerifiedCredentialTypeKindId, EncryptionTransformationData, string?>());
         async Task Act() => await _sut.SaveCredentialDocument(_credentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Act
@@ -130,7 +133,7 @@ public class CredentialProcessHandlerTests
         // Arrange
         var externalCredentialId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetExternalCredentialAndKindId(_credentialId))
-            .Returns(new ValueTuple<Guid?, VerifiedCredentialTypeKindId>(externalCredentialId, VerifiedCredentialTypeKindId.BPN));
+            .Returns(new ValueTuple<Guid?, VerifiedCredentialTypeKindId, EncryptionTransformationData, string?>(externalCredentialId, VerifiedCredentialTypeKindId.BPN, _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
 
         // Act
         var result = await _sut.SaveCredentialDocument(_credentialId, CancellationToken.None).ConfigureAwait(false);
@@ -154,7 +157,7 @@ public class CredentialProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData>());
+            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>());
         async Task Act() => await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Act
@@ -169,16 +172,14 @@ public class CredentialProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData>(new HolderWalletData(null, null), "test", _fixture.Create<EncryptionTransformationData>()));
+            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>(new HolderWalletData(null, null), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
+        async Task Act() => await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        result.modified.Should().BeFalse();
-        result.processMessage.Should().BeNull();
-        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
-        result.nextStepTypeIds.Should().BeNull();
+        ex.Message.Should().Be("Wallet information must be set");
     }
 
     [Fact]
@@ -186,16 +187,14 @@ public class CredentialProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData>(new HolderWalletData(null, "c1"), "test", _fixture.Create<EncryptionTransformationData>()));
+            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>(new HolderWalletData(null, "c1"), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
+        async Task Act() => await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        result.modified.Should().BeFalse();
-        result.processMessage.Should().BeNull();
-        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
-        result.nextStepTypeIds.Should().BeNull();
+        ex.Message.Should().Be("Wallet information must be set");
     }
 
     [Fact]
@@ -203,10 +202,11 @@ public class CredentialProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData>(
+            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>(
                 new HolderWalletData("https://example.org", "c1"),
                 "test",
-                new EncryptionTransformationData("test"u8.ToArray(), "test"u8.ToArray(), null)));
+                new EncryptionTransformationData("test"u8.ToArray(), "test"u8.ToArray(), 0),
+                "https://example.org"));
 
         // Act
         var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
@@ -214,8 +214,8 @@ public class CredentialProcessHandlerTests
         // Assert
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
-        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
-        result.nextStepTypeIds.Should().BeNull();
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
     }
 
     [Fact]
@@ -223,10 +223,11 @@ public class CredentialProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData>(
+            .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>(
                 new HolderWalletData("https://example.org", "c1"),
                 "test",
-                _fixture.Create<EncryptionTransformationData>()));
+                _fixture.Create<EncryptionTransformationData>(),
+                "https://example.org"));
 
         // Act
         var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
@@ -238,7 +239,7 @@ public class CredentialProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().BeNull();
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
     }
 
     #endregion

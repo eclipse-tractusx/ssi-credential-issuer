@@ -26,14 +26,16 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
 public record CreateBpnCredentialRequest(
     [property: JsonPropertyName("holder")] string Holder,
     [property: JsonPropertyName("businessPartnerNumber")] string BusinessPartnerNumber,
-    [property: JsonPropertyName("technicalUserDetails")] TechnicalUserDetails? TechnicalUserDetails
+    [property: JsonPropertyName("technicalUserDetails")] TechnicalUserDetails? TechnicalUserDetails,
+    [property: JsonPropertyName("callbackUrl")] string? CallbackUrl
 );
 
 public record CreateMembershipCredentialRequest(
     [property: JsonPropertyName("holder")] string Holder,
     [property: JsonPropertyName("businessPartnerNumber")] string HolderBpn,
     [property: JsonPropertyName("memberOf")] string MemberOf,
-    [property: JsonPropertyName("technicalUserDetails")] TechnicalUserDetails? TechnicalUserDetails
+    [property: JsonPropertyName("technicalUserDetails")] TechnicalUserDetails? TechnicalUserDetails,
+    [property: JsonPropertyName("callbackUrl")] string? CallbackUrl
 );
 
 public record CreateFrameworkCredentialRequest(
@@ -41,5 +43,6 @@ public record CreateFrameworkCredentialRequest(
     [property: JsonPropertyName("businessPartnerNumber")] string HolderBpn,
     [property: JsonPropertyName("useCaseFrameworkId")] VerifiedCredentialTypeId UseCaseFrameworkId,
     [property: JsonPropertyName("useCaseFrameworkVersionId")] Guid UseCaseFrameworkVersionId,
-    [property: JsonPropertyName("technicalUserDetails")] TechnicalUserDetails? TechnicalUserDetails
+    [property: JsonPropertyName("technicalUserDetails")] TechnicalUserDetails? TechnicalUserDetails,
+    [property: JsonPropertyName("callbackUrl")] string? CallbackUrl
 );

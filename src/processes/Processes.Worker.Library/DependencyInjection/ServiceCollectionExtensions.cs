@@ -19,18 +19,16 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
 
-public static class ProcessExecutionServiceExtensions
+public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddProcessExecutionService(this IServiceCollection services, IConfigurationSection section) =>
-        services
-            .AddProcessIdentity(section)
-            .AddTransient<ProcessExecutionService>()
-            .AddTransient<IProcessExecutor, ProcessExecutor>()
-            .AddTransient<IDateTimeProvider, UtcDateTimeProvider>();
+    public static IServiceCollection AddProcessIdentity(this IServiceCollection services, IConfigurationSection section)
+    {
+        services.AddOptions<ProcessExecutionServiceSettings>().Bind(section);
+        return services
+            .AddTransient<IIdentityIdService, ProcessIdentityIdService>();
+    }
 }

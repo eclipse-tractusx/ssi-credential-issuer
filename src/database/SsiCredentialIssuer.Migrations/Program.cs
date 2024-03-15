@@ -25,6 +25,8 @@ using Microsoft.Extensions.Hosting;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Seeding.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
 using Serilog;
 using System.Reflection;
 
@@ -36,6 +38,8 @@ try
         .ConfigureServices((hostContext, services) =>
         {
             services
+                .AddProcessIdentity(hostContext.Configuration.GetSection("ProcessIdentity"))
+                .AddDbAuditing()
                 .AddDbContext<IssuerDbContext>(o =>
                     o.UseNpgsql(hostContext.Configuration.GetConnectionString("IssuerDb"),
                         x => x.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name)

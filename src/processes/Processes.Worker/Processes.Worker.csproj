@@ -33,6 +33,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\externalservices\Callback.Service\Callback.Service.csproj" />
       <ProjectReference Include="..\..\externalservices\Portal.Service\Portal.Service.csproj" />
       <ProjectReference Include="..\CredentialProcess.Worker\CredentialProcess.Worker.csproj" />
       <ProjectReference Include="..\Processes.Library\Processes.Library.csproj" />

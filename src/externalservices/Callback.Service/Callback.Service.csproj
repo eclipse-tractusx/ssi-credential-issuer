@@ -19,18 +19,17 @@
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <AssemblyName>Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library</AssemblyName>
-        <RootNamespace>Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library</RootNamespace>
-        <TargetFramework>net7.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service</AssemblyName>
+    <RootNamespace>Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service</RootNamespace>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\..\database\SsiCredentialIssuer.DbAccess\SsiCredentialIssuer.DbAccess.csproj" />
-      <ProjectReference Include="..\..\externalservices\Callback.Service\Callback.Service.csproj" />
-      <ProjectReference Include="..\..\externalservices\Wallet.Service\Wallet.Service.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Token" Version="1.1.0" />
+  </ItemGroup>
 
 </Project>
