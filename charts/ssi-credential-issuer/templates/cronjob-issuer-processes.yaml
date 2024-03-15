@@ -20,7 +20,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "processesworker.fullname" . }}-worker
+  name: {{ include "issuer.fullname" . }}-worker
   annotations:
     "batch.kubernetes.io/job-tracking": "true"
     "helm.sh/hook": post-install,post-upgrade
