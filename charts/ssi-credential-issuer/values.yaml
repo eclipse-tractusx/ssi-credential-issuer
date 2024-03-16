@@ -53,8 +53,6 @@ dbConnection:
   schema: "issuer"
   sslMode: "Disable"
 
-placeholder: "empty"
-
 keycloak:
   central:
     authRealm: "CX-Central"
