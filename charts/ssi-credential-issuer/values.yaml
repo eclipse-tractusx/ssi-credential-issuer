@@ -75,6 +75,10 @@ healthChecks:
   readyness:
     path: "/ready"
 
+# -- Secret containing the client-secrets for the connection to portal and wallet
+# as well as encryptionKeys for issuer.credential and processesworker.wallet
+existingSecret: ""
+
 issuer:
   image: "docker.io/tractusx/credential-issuer-service:0.1.0-rc.1"
   imagePullPolicy: "IfNotPresent"
@@ -254,10 +258,6 @@ secrets:
         password: ""
         # -- Password for the non-root username 'repl_user'. Secret-key 'replication-password'.
         replicationPassword: ""
-
-interfaces:
-  # -- Secret containing the client-secrets for the connection to portal and wallet.
-  secret: "secret-interfaces"
 
 portContainer: 8080
 

@@ -96,7 +96,7 @@ spec:
         - name: "PORTAL__CLIENTSECRET"
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.interfaces.secret }}"
+              name: "{{ template "issuer.secretName" . }}"
               key: "portal-client-secret"
         - name: "PORTAL__GRANTTYPE"
           value: "{{ .Values.issuer.portal.grantType }}"
@@ -119,7 +119,7 @@ spec:
         - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__ENCRYPTIONKEY"
           valueFrom:
             secretKeyRef:
-              name: "{{ .Values.interfaces.secret }}"
+              name: "{{ template "issuer.secretName" . }}"
               key: "credential-encryption-key0"
         ports:
         - name: http

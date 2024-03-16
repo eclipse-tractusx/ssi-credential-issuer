@@ -31,6 +31,17 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Determine secret name.
+*/}}
+{{- define "issuer.secretName" -}}
+{{- if .Values.existingSecret -}}
+{{- .Values.existingSecret }}
+{{- else -}}
+{{- include "issuer.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Define secret name of postgres dependency.
 */}}
 {{- define "issuer.postgresSecretName" -}}

@@ -69,7 +69,7 @@ spec:
             - name: "PORTAL__CLIENTSECRET"
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.interfaces.secret }}"
+                  name: "{{ template "issuer.secretName" . }}"
                   key: "portal-client-secret"
             - name: "PORTAL__GRANTTYPE"
               value: "{{ .Values.processesworker.portal.grantType }}"
@@ -88,7 +88,7 @@ spec:
             - name: "WALLET__CLIENTSECRET"
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.interfaces.secret }}"
+                  name: "{{ template "issuer.secretName" . }}"
                   key: "wallet-client-secret"
             - name: "WALLET__GRANTTYPE"
               value: "{{ .Values.processesworker.wallet.grantType }}"
@@ -111,7 +111,7 @@ spec:
             - name: "WALLET__ENCRYPTIONCONFIGS__0__ENCRYPTIONKEY"
               valueFrom:
                 secretKeyRef:
-                  name: "{{ .Values.interfaces.secret }}"
+                  name: "{{ template "issuer.secretName" . }}"
                   key: "process-wallet-encryption-key0"
             - name: "SERILOG__MINIMUMLEVEL__Default"
               value: "{{ .Values.processesworker.logging.default }}"
