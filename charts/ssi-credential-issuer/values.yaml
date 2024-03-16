@@ -66,14 +66,6 @@ centralidp:
   # -- Flag if the api should be used with an leading /auth path
   useAuthTrail: true
 
-healthChecks:
-  startup:
-    path: "/health/startup"
-  liveness:
-    path: "/healthz"
-  readyness:
-    path: "/ready"
-
 # -- Secret containing the client-secrets for the connection to portal and wallet
 # as well as encryptionKeys for issuer.credential and processesworker.wallet
 existingSecret: ""
@@ -117,6 +109,13 @@ issuer:
         # -- EncryptionKey for wallet. Secret-key 'credential-encryption-key0'.
         # Expected format is 256 bit (64 digits) hex.
         encryptionKey: ""
+  healthChecks:
+    startup:
+      path: "/health/startup"
+    liveness:
+      path: "/healthz"
+    readyness:
+      path: "/ready"
 
 issuermigrations:
   name: "migrations"
