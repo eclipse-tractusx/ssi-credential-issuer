@@ -215,6 +215,12 @@ postgresql:
     # -- Secret containing the passwords for root usernames postgres and non-root username issuer.
     # Should not be changed without changing the "issuer-postgresSecretName" template as well.
     existingSecret: "{{ .Release.Name }}-issuer-postgres"
+    # -- Password for the root username 'postgres'. Secret-key 'postgres-password'.
+    postgrespassword: ""
+    # -- Password for the non-root username 'issuer'. Secret-key 'password'.
+    password: ""
+    # -- Password for the non-root username 'repl_user'. Secret-key 'replication-password'.
+    replicationPassword: ""
   architecture: replication
   audit:
     pgAuditLog: "write, ddl"
@@ -247,17 +253,6 @@ externalDatabase:
   existingSecret: "issuer-external-db"
   # -- Name of an existing secret key containing the database credentials.
   existingSecretPasswordKey: "password"
-
-secrets:
-  postgresql:
-    auth:
-      existingSecret:
-        # -- Password for the root username 'postgres'. Secret-key 'postgres-password'.
-        postgrespassword: ""
-        # -- Password for the non-root username 'issuer'. Secret-key 'password'.
-        password: ""
-        # -- Password for the non-root username 'repl_user'. Secret-key 'replication-password'.
-        replicationPassword: ""
 
 portContainer: 8080
 

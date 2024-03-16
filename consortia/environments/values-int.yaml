@@ -61,10 +61,8 @@ credentialexpiry:
   logging:
     default: "Debug"
 
-secrets:
-  postgresql:
-    auth:
-      existingSecret:
-        postgrespassword: "<path:portal/data/ssi-credential-issuer/int/postgres#postgres-password>"
-        password: "<path:portal/data/ssi-credential-issuer/int/postgres#password>"
-        replicationPassword: "<path:portal/data/ssi-credential-issuer/int/postgres#replication-password>"
+postgresql:
+  auth:
+    postgrespassword: "<path:portal/data/ssi-credential-issuer/int/postgres#postgres-password>"
+    password: "<path:portal/data/ssi-credential-issuer/int/postgres#password>"
+    replicationPassword: "<path:portal/data/ssi-credential-issuer/int/postgres#replication-password>"
