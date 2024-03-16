@@ -17,59 +17,6 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-ingress:
-  # -- SSI Credential Issuer ingress parameters,
-  # enable ingress record generation for ssi-credential-issuer.
-  enabled: false
-  name: "ssi-credential-issuer"
-  className: "nginx"
-  annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
-    # -- Provide CORS allowed origin.
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
-  tls:
-    # -- Provide tls secret.
-    - secretName: ""
-      # -- Provide host for tls secret.
-      hosts:
-        - "ssi-credential-issuer.example.org"
-  hosts:
-    # -- Provide default path for the ingress record.
-    - host: "ssi-credential-issuer.example.org"
-      paths:
-        - path: "/api/issuer"
-          pathType: "Prefix"
-          backend:
-            port: 8080
-
-dotnetEnvironment: "Production"
-
-dbConnection:
-  schema: "issuer"
-  sslMode: "Disable"
-
-centralidp:
-  # -- Provide centralidp base address (CX IAM), without trailing '/auth'.
-  address: "https://centralidp.example.org"
-  authRealm: "CX-Central"
-  jwtBearerOptions:
-    requireHttpsMetadata: "true"
-    metadataPath: "/auth/realms/CX-Central/.well-known/openid-configuration"
-    tokenValidationParameters:
-      validIssuerPath: "/auth/realms/CX-Central"
-      # -- TODO: Add Client
-      validAudience: "ClXX-CX-SSI"
-    refreshInterval: "00:00:30"
-  tokenPath: "/auth/realms/CX-Central/protocol/openid-connect/token"
-  # -- Flag if the api should be used with an leading /auth path
-  useAuthTrail: true
-
-# -- Secret containing the client-secrets for the connection to portal and wallet
-# as well as encryptionKeys for issuer.credential and processesworker.wallet
-existingSecret: ""
-
 issuer:
   image: "docker.io/tractusx/credential-issuer-service:0.1.0-rc.1"
   imagePullPolicy: "IfNotPresent"
@@ -197,6 +144,59 @@ credentialExpiry:
   expiry:
     expiredVcsToDeleteInMonth: 12
     inactiveVcsToDeleteInWeeks: 12
+
+# -- Secret containing the client-secrets for the connection to portal and wallet
+# as well as encryptionKeys for issuer.credential and processesworker.wallet
+existingSecret: ""
+
+dotnetEnvironment: "Production"
+
+centralidp:
+  # -- Provide centralidp base address (CX IAM), without trailing '/auth'.
+  address: "https://centralidp.example.org"
+  authRealm: "CX-Central"
+  jwtBearerOptions:
+    requireHttpsMetadata: "true"
+    metadataPath: "/auth/realms/CX-Central/.well-known/openid-configuration"
+    tokenValidationParameters:
+      validIssuerPath: "/auth/realms/CX-Central"
+      # -- TODO: Add Client
+      validAudience: "ClXX-CX-SSI"
+    refreshInterval: "00:00:30"
+  tokenPath: "/auth/realms/CX-Central/protocol/openid-connect/token"
+  # -- Flag if the api should be used with an leading /auth path
+  useAuthTrail: true
+
+ingress:
+  # -- SSI Credential Issuer ingress parameters,
+  # enable ingress record generation for ssi-credential-issuer.
+  enabled: false
+  name: "ssi-credential-issuer"
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+    # -- Provide CORS allowed origin.
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
+  tls:
+    # -- Provide tls secret.
+    - secretName: ""
+      # -- Provide host for tls secret.
+      hosts:
+        - "ssi-credential-issuer.example.org"
+  hosts:
+    # -- Provide default path for the ingress record.
+    - host: "ssi-credential-issuer.example.org"
+      paths:
+        - path: "/api/issuer"
+          pathType: "Prefix"
+          backend:
+            port: 8080
+
+dbConnection:
+  schema: "issuer"
+  sslMode: "Disable"
 
 postgresql:
   # -- PostgreSQL chart configuration;
