@@ -116,6 +116,7 @@ issuer:
         encryptionKey: ""
 
 issuermigrations:
+  name: "migrations"
   image: "docker.io/tractusx/credential-issuer-migrations:0.1.0-rc.1"
   imagePullPolicy: "IfNotPresent"
   # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
@@ -134,6 +135,7 @@ issuermigrations:
     default: "Information"
 
 processesworker:
+  name: "processesworker"
   image: "docker.io/tractusx/credential-issuer-processes-worker:0.1.0-rc.1"
   imagePullPolicy: "IfNotPresent"
   # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
@@ -174,6 +176,7 @@ processesworker:
         encryptionKey: ""
 
 credentialExpiry:
+  name: "expiry"
   image: "docker.io/tractusx/credential-expiry-app:0.1.0-rc.1"
   imagePullPolicy: "IfNotPresent"
   # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.

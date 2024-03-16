@@ -20,7 +20,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "issuer.fullname" . }}-expiry
+  name: {{ include "issuer.fullname" . }}-{{ .Values.credentialExpiry.name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "issuer.labels" . | nindent 4 }}
@@ -29,13 +29,13 @@ spec:
   concurrencyPolicy: Forbid
   jobTemplate:
     metadata:
-      name: {{ include "issuer.fullname" . }}-expiry
+      name: {{ include "issuer.fullname" . }}-{{ .Values.credentialExpiry.name }}
     spec:
       template:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: {{ include "issuer.fullname" . }}-expiry
+          - name: {{ include "issuer.fullname" . }}-{{ .Values.credentialExpiry.name }}
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:

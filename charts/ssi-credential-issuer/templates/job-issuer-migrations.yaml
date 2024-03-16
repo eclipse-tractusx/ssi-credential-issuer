@@ -20,7 +20,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "issuer.fullname" . }}-migrations
+  name: {{ include "issuer.fullname" . }}-{{ .Values.issuermigrations.name }}
   annotations:
     "batch.kubernetes.io/job-tracking": "true"
     "helm.sh/hook": post-install,post-upgrade
@@ -28,12 +28,11 @@ metadata:
 spec:
   template:
     metadata:
-      labels:
-        {{- include "issuer.selectorLabels" . | nindent 8 }}
+      name: {{ include "issuer.fullname" . }}-{{ .Values.issuermigrations.name }}
     spec:
       restartPolicy: Never
       containers:
-      - name: {{ include "issuer.fullname" . }}-migrations
+      - name: {{ include "issuer.fullname" . }}-{{ .Values.issuermigrations.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
