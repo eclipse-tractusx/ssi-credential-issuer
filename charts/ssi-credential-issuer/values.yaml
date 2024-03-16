@@ -171,23 +171,23 @@ ingress:
   # -- SSI Credential Issuer ingress parameters,
   # enable ingress record generation for ssi-credential-issuer.
   enabled: false
-  name: "ssi-credential-issuer"
-  className: "nginx"
-  annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
-    # -- Provide CORS allowed origin.
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
+  # className: "nginx"
+  ## Optional annotations when using the nginx ingress class
+  # annotations:
+  #   nginx.ingress.kubernetes.io/use-regex: "true"
+  #   nginx.ingress.kubernetes.io/enable-cors: "true"
+  #   nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+  #   # -- Provide CORS allowed origin.
+  #   nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
   tls:
     # -- Provide tls secret.
     - secretName: ""
       # -- Provide host for tls secret.
       hosts:
-        - "ssi-credential-issuer.example.org"
+        - ""
   hosts:
     # -- Provide default path for the ingress record.
-    - host: "ssi-credential-issuer.example.org"
+    - host: ""
       paths:
         - path: "/api/issuer"
           pathType: "Prefix"
