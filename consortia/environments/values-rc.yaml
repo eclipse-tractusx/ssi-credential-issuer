@@ -17,8 +17,6 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-centralidpAddress: "https://centralidp-rc.dev.demo.catena-x.net"
-
 ingress:
   enabled: true
   className: "nginx"
@@ -61,6 +59,12 @@ credentialexpiry:
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
+
+centralidp:
+  address: "https://centralidp.dev.demo.catena-x.net"
+  jwtBearerOptions:
+    tokenValidationParameters:
+      validAudience: "ClXX-CX-ISSUER"
 
 postgresql:
   auth:

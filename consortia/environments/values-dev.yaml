@@ -17,8 +17,6 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-centralidpAddress: "https://centralidp.dev.demo.catena-x.net"
-
 ingress:
   enabled: true
   className: "nginx"
@@ -38,12 +36,6 @@ ingress:
           pathType: "Prefix"
           backend:
             port: 8080
-
-keycloak:
-  central:
-    jwtBearerOptions:
-      tokenValidationParameters:
-        validAudience: "ClXX-CX-ISSUER"
 
 issuer:
   image: "docker.io/tractusx/ssi-credential-issuer-service:dev"
@@ -67,6 +59,12 @@ credentialexpiry:
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
+
+centralidp:
+  address: "https://centralidp.dev.demo.catena-x.net"
+  jwtBearerOptions:
+    tokenValidationParameters:
+      validAudience: "ClXX-CX-ISSUER"
 
 postgresql:
   auth:
