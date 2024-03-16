@@ -21,7 +21,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "issuer.fullname" . }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "issuer.labels" . | nindent 4 }}
 spec:
@@ -37,7 +37,7 @@ spec:
         {{- include "issuer.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-      - name: {{ .Chart.Name }}
+      - name: {{ include "issuer.fullname" . }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
