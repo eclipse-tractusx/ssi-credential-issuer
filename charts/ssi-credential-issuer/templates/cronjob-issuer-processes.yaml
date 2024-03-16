@@ -74,7 +74,7 @@ spec:
             - name: "PORTAL__GRANTTYPE"
               value: "{{ .Values.processesworker.portal.grantType }}"
             - name: "PORTAL__TOKENADDRESS"
-              value: "{{ .Values.centralidpAddress }}{{ .Values.keycloak.central.tokenPath }}"
+              value: "{{ .Values.centralidp.address }}{{ .Values.centralidp.tokenPath }}"
             - name: "PORTAL__PASSWORD"
               value: "empty"
             - name: "PORTAL__SCOPE"
