@@ -46,7 +46,9 @@ ingress:
           pathType: "Prefix"
           backend:
             port: 8080
+
 dotnetEnvironment: "Production"
+
 dbConnection:
   schema: "issuer"
   sslMode: "Disable"
