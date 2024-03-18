@@ -22,15 +22,14 @@ issuer:
     name: "docker.io/tractusx/credential-issuer-service"
     tag: ""
   imagePullPolicy: "IfNotPresent"
-  # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
-  # If you do want to specify resource limits, uncomment the following lines and adjust them as necessary.
+  # -- We recommend to review the default resource limits as this should a conscious choice.
   resources:
     requests:
       cpu: 15m
       memory: 300M
-    # limits:
-    #   cpu: 45m
-    #   memory: 400M
+    limits:
+      cpu: 45m
+      memory: 400M
   logging:
     businessLogic: "Information"
     default: "Information"
@@ -70,15 +69,14 @@ issuermigrations:
     name: "docker.io/tractusx/credential-issuer-migrations"
     tag: ""
   imagePullPolicy: "IfNotPresent"
-  # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
-  # If you do want to specify resource limits, uncomment the following lines and adjust them as necessary.
+  # -- We recommend to review the default resource limits as this should a conscious choice.
   resources:
     requests:
       cpu: 15m
       memory: 105M
-    # limits:
-    #   cpu: 45m
-    #   memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
   seeding:
     testDataEnvironments: ""
     testDataPaths: "Seeder/Data"
@@ -91,15 +89,14 @@ processesworker:
     name: "docker.io/tractusx/credential-issuer-processes-worker"
     tag: ""
   imagePullPolicy: "IfNotPresent"
-  # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
-  # If you do want to specify resource limits, uncomment the following lines and adjust them as necessary.
+  # -- We recommend to review the default resource limits as this should a conscious choice.
   resources:
     requests:
       cpu: 15m
       memory: 105M
-    # limits:
-    #   cpu: 45m
-    #   memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
   logging:
     default: "Information"
   portal:
@@ -134,15 +131,14 @@ credentialExpiry:
     name: "docker.io/tractusx/credential-expiry-app"
     tag: ""
   imagePullPolicy: "IfNotPresent"
-  # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
-  # If you do want to specify resource limits, uncomment the following lines and adjust them as necessary.
+  # -- We recommend to review the default resource limits as this should a conscious choice.
   resources:
     requests:
       cpu: 15m
       memory: 105M
-    # limits:
-    #   cpu: 45m
-    #   memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
   processIdentity:
     identityId: d21d2e8a-fe35-483c-b2b8-4100ed7f0953
   logging:
