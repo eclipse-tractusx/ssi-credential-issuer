@@ -26,7 +26,7 @@ issuer:
   resources:
     requests:
       cpu: 15m
-      memory: 300M
+      memory: 400M
     limits:
       cpu: 45m
       memory: 400M
