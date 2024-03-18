@@ -34,9 +34,14 @@ issuer:
     default: "Information"
   healthChecks:
     startup:
+      path: "/health/startup"
       tags:
       - name: "HEALTHCHECKS__0__TAGS__1"
         value: "issuerdb"
+    liveness:
+      path: "/healthz"
+    readyness:
+      path: "/ready"
   swaggerEnabled: false
   portal:
     scope: "openid"
@@ -56,13 +61,6 @@ issuer:
         # -- EncryptionKey for wallet. Secret-key 'credential-encryption-key0'.
         # Expected format is 256 bit (64 digits) hex.
         encryptionKey: ""
-  healthChecks:
-    startup:
-      path: "/health/startup"
-    liveness:
-      path: "/healthz"
-    readyness:
-      path: "/ready"
 
 issuermigrations:
   name: "migrations"
