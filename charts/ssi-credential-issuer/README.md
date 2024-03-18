@@ -27,7 +27,7 @@ To use the helm chart as a dependency:
 dependencies:
   - name: ssi-credential-issuer
     repository: https://eclipse-tractusx.github.io/charts/dev
-    version: 0.1.0-rc.1
+    version: 1.0.0-rc.1
 ```
 
 ## Requirements
@@ -40,65 +40,104 @@ dependencies:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| centralidpAddress | string | `"https://centralidp.example.org"` | Provide centralidp base address (CX IAM), without trailing '/auth'. |
-| ingress.enabled | bool | `false` | Policy Hub ingress parameters, enable ingress record generation for policy-hub. |
-| ingress.name | string | `"policy-hub"` |  |
-| ingress.className | string | `"nginx"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/use-regex" | string | `"true"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/enable-cors" | string | `"true"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/proxy-body-size" | string | `"8m"` |  |
-| ingress.annotations."nginx.ingress.kubernetes.io/cors-allow-origin" | string | `"https://*.example.org"` | Provide CORS allowed origin. |
-| ingress.tls[0] | object | `{"hosts":["policy-hub.example.org"],"secretName":""}` | Provide tls secret. |
-| ingress.tls[0].hosts | list | `["policy-hub.example.org"]` | Provide host for tls secret. |
-| ingress.hosts[0] | object | `{"host":"policy-hub.example.org","paths":[{"backend":{"port":8080},"path":"/api/policy-hub","pathType":"Prefix"}]}` | Provide default path for the ingress record. |
+| issuer.image.name | string | `"docker.io/tractusx/credential-issuer-service"` |  |
+| issuer.image.tag | string | `""` |  |
+| issuer.imagePullPolicy | string | `"IfNotPresent"` |  |
+| issuer.resources | object | `{"limits":{"cpu":"45m","memory":"400M"},"requests":{"cpu":"15m","memory":"300M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| issuer.logging.businessLogic | string | `"Information"` |  |
+| issuer.logging.default | string | `"Information"` |  |
+| issuer.healthChecks.startup.path | string | `"/health/startup"` |  |
+| issuer.healthChecks.startup.tags[0].name | string | `"HEALTHCHECKS__0__TAGS__1"` |  |
+| issuer.healthChecks.startup.tags[0].value | string | `"issuerdb"` |  |
+| issuer.healthChecks.liveness.path | string | `"/healthz"` |  |
+| issuer.healthChecks.readyness.path | string | `"/ready"` |  |
+| issuer.swaggerEnabled | bool | `false` |  |
+| issuer.portal.scope | string | `"openid"` |  |
+| issuer.portal.grantType | string | `"client_credentials"` |  |
+| issuer.portal.clientId | string | `"portal-client-id"` | Provide portal client-id from CX IAM centralidp. |
+| issuer.portal.clientSecret | string | `""` | Client-secret for portal client-id. Secret-key 'portal-client-secret'. |
+| issuer.credential.issuerDid | string | `""` |  |
+| issuer.credential.encryptionConfigIndex | int | `0` |  |
+| issuer.credential.encryptionConfigs.index0.index | int | `0` |  |
+| issuer.credential.encryptionConfigs.index0.cipherMode | string | `"CBC"` |  |
+| issuer.credential.encryptionConfigs.index0.paddingMode | string | `"PKCS7"` |  |
+| issuer.credential.encryptionConfigs.index0.encryptionKey | string | `""` | EncryptionKey for wallet. Secret-key 'credential-encryption-key0'. Expected format is 256 bit (64 digits) hex. |
+| issuermigrations.name | string | `"migrations"` |  |
+| issuermigrations.image.name | string | `"docker.io/tractusx/credential-issuer-migrations"` |  |
+| issuermigrations.image.tag | string | `""` |  |
+| issuermigrations.imagePullPolicy | string | `"IfNotPresent"` |  |
+| issuermigrations.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| issuermigrations.seeding.testDataEnvironments | string | `""` |  |
+| issuermigrations.seeding.testDataPaths | string | `"Seeder/Data"` |  |
+| issuermigrations.logging.default | string | `"Information"` |  |
+| processesworker.name | string | `"processesworker"` |  |
+| processesworker.image.name | string | `"docker.io/tractusx/credential-issuer-processes-worker"` |  |
+| processesworker.image.tag | string | `""` |  |
+| processesworker.imagePullPolicy | string | `"IfNotPresent"` |  |
+| processesworker.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| processesworker.logging.default | string | `"Information"` |  |
+| processesworker.portal.scope | string | `"openid"` |  |
+| processesworker.portal.grantType | string | `"client_credentials"` |  |
+| processesworker.portal.clientId | string | `"portal-client-id"` | Provide portal client-id from CX IAM centralidp. |
+| processesworker.portal.clientSecret | string | `""` | Client-secret for portal client-id. Secret-key 'portal-client-secret'. |
+| processesworker.processIdentity.identityId | string | `"d21d2e8a-fe35-483c-b2b8-4100ed7f0953"` |  |
+| processesworker.wallet.scope | string | `"openid"` |  |
+| processesworker.wallet.grantType | string | `"client_credentials"` |  |
+| processesworker.wallet.clientId | string | `"wallet-client-id"` | Provide wallet client-id from CX IAM centralidp. |
+| processesworker.wallet.clientSecret | string | `""` | Client-secret for wallet client-id. Secret-key 'wallet-client-secret'. |
+| processesworker.wallet.encryptionConfigIndex | int | `0` |  |
+| processesworker.wallet.encryptionConfigs.index0.index | int | `0` |  |
+| processesworker.wallet.encryptionConfigs.index0.cipherMode | string | `"CBC"` |  |
+| processesworker.wallet.encryptionConfigs.index0.paddingMode | string | `"PKCS7"` |  |
+| processesworker.wallet.encryptionConfigs.index0.encryptionKey | string | `""` | EncryptionKey for wallet. Secret-key 'process-wallet-encryption-key0'. Expected format is 256 bit (64 digits) hex. |
+| credentialExpiry.name | string | `"expiry"` |  |
+| credentialExpiry.image.name | string | `"docker.io/tractusx/credential-expiry-app"` |  |
+| credentialExpiry.image.tag | string | `""` |  |
+| credentialExpiry.imagePullPolicy | string | `"IfNotPresent"` |  |
+| credentialExpiry.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| credentialExpiry.processIdentity.identityId | string | `"d21d2e8a-fe35-483c-b2b8-4100ed7f0953"` |  |
+| credentialExpiry.logging.default | string | `"Information"` |  |
+| credentialExpiry.expiry.expiredVcsToDeleteInMonth | int | `12` |  |
+| credentialExpiry.expiry.inactiveVcsToDeleteInWeeks | int | `12` |  |
+| existingSecret | string | `""` | Secret containing the client-secrets for the connection to portal and wallet as well as encryptionKeys for issuer.credential and processesworker.wallet |
 | dotnetEnvironment | string | `"Production"` |  |
-| dbConnection.schema | string | `"hub"` |  |
+| centralidp.address | string | `"https://centralidp.example.org"` | Provide centralidp base address (CX IAM), without trailing '/auth'. |
+| centralidp.authRealm | string | `"CX-Central"` |  |
+| centralidp.jwtBearerOptions.requireHttpsMetadata | string | `"true"` |  |
+| centralidp.jwtBearerOptions.metadataPath | string | `"/auth/realms/CX-Central/.well-known/openid-configuration"` |  |
+| centralidp.jwtBearerOptions.tokenValidationParameters.validIssuerPath | string | `"/auth/realms/CX-Central"` |  |
+| centralidp.jwtBearerOptions.tokenValidationParameters.validAudience | string | `"ClXX-CX-SSI"` | TODO: Add Client |
+| centralidp.jwtBearerOptions.refreshInterval | string | `"00:00:30"` |  |
+| centralidp.tokenPath | string | `"/auth/realms/CX-Central/protocol/openid-connect/token"` |  |
+| centralidp.useAuthTrail | bool | `true` | Flag if the api should be used with an leading /auth path |
+| ingress.enabled | bool | `false` | SSI Credential Issuer ingress parameters, enable ingress record generation for ssi-credential-issuer. |
+| ingress.tls[0] | object | `{"hosts":[""],"secretName":""}` | Provide tls secret. |
+| ingress.tls[0].hosts | list | `[""]` | Provide host for tls secret. |
+| ingress.hosts[0] | object | `{"host":"","paths":[{"backend":{"port":8080},"path":"/api/issuer","pathType":"Prefix"}]}` | Provide default path for the ingress record. |
+| dbConnection.schema | string | `"issuer"` |  |
 | dbConnection.sslMode | string | `"Disable"` |  |
-| keycloak.central.authRealm | string | `"CX-Central"` |  |
-| keycloak.central.jwtBearerOptions.requireHttpsMetadata | string | `"true"` |  |
-| keycloak.central.jwtBearerOptions.metadataPath | string | `"/auth/realms/CX-Central/.well-known/openid-configuration"` |  |
-| keycloak.central.jwtBearerOptions.tokenValidationParameters.validIssuerPath | string | `"/auth/realms/CX-Central"` |  |
-| keycloak.central.jwtBearerOptions.tokenValidationParameters.validAudience | string | `"Cl23-CX-Policy-Hub"` |  |
-| keycloak.central.jwtBearerOptions.refreshInterval | string | `"00:00:30"` |  |
-| keycloak.central.tokenPath | string | `"/auth/realms/CX-Central/protocol/openid-connect/token"` |  |
-| keycloak.central.useAuthTrail | bool | `true` | Flag if the api should be used with an leading /auth path |
-| healthChecks.startup.path | string | `"/health/startup"` |  |
-| healthChecks.liveness.path | string | `"/healthz"` |  |
-| healthChecks.readyness.path | string | `"/ready"` |  |
-| policyhub.image | string | `"docker.io/tractusx/policy-hub-service:0.1.0-rc.3"` |  |
-| policyhub.imagePullPolicy | string | `"IfNotPresent"` |  |
-| policyhub.resources | object | `{"requests":{"cpu":"15m","memory":"300M"}}` | We recommend not to specify default resource limits and to leave this as a conscious choice for the user. If you do want to specify resource limits, uncomment the following lines and adjust them as necessary. |
-| policyhub.logging.businessLogic | string | `"Information"` |  |
-| policyhub.logging.default | string | `"Information"` |  |
-| policyhub.healthChecks.startup.tags[0].name | string | `"HEALTHCHECKS__0__TAGS__1"` |  |
-| policyhub.healthChecks.startup.tags[0].value | string | `"policyhubdb"` |  |
-| policyhub.swaggerEnabled | bool | `false` |  |
-| policyhubmigrations.image | string | `"docker.io/tractusx/policy-hub-migrations:0.1.0-rc.3"` |  |
-| policyhubmigrations.imagePullPolicy | string | `"IfNotPresent"` |  |
-| policyhubmigrations.resources | object | `{"requests":{"cpu":"15m","memory":"105M"}}` | We recommend not to specify default resource limits and to leave this as a conscious choice for the user. If you do want to specify resource limits, uncomment the following lines and adjust them as necessary. |
-| policyhubmigrations.seeding.testDataEnvironments | string | `""` |  |
-| policyhubmigrations.seeding.testDataPaths | string | `"Seeder/Data"` |  |
-| policyhubmigrations.logging.default | string | `"Information"` |  |
-| postgresql.enabled | bool | `true` | PostgreSQL chart configuration; default configurations: host: "policy-hub-postgresql-primary", port: 5432; Switch to enable or disable the PostgreSQL helm chart. |
-| postgresql.auth.username | string | `"hub"` | Non-root username. |
-| postgresql.auth.database | string | `"policy-hub"` | Database name. |
-| postgresql.auth.existingSecret | string | `"{{ .Release.Name }}-phub-postgres"` | Secret containing the passwords for root usernames postgres and non-root username hub. Should not be changed without changing the "phub-postgresSecretName" template as well. |
+| postgresql.enabled | bool | `true` | PostgreSQL chart configuration; default configurations: host: "issuer-postgresql-primary", port: 5432; Switch to enable or disable the PostgreSQL helm chart. |
+| postgresql.image | object | `{"tag":"15-debian-12"}` | Setting image tag to major to get latest minor updates |
+| postgresql.commonLabels."app.kubernetes.io/version" | string | `"15"` |  |
+| postgresql.auth.username | string | `"issuer"` | Non-root username. |
+| postgresql.auth.database | string | `"issuer"` | Database name. |
+| postgresql.auth.existingSecret | string | `"{{ .Release.Name }}-issuer-postgres"` | Secret containing the passwords for root usernames postgres and non-root username issuer. Should not be changed without changing the "issuer-postgresSecretName" template as well. |
+| postgresql.auth.postgrespassword | string | `""` | Password for the root username 'postgres'. Secret-key 'postgres-password'. |
+| postgresql.auth.password | string | `""` | Password for the non-root username 'issuer'. Secret-key 'password'. |
+| postgresql.auth.replicationPassword | string | `""` | Password for the non-root username 'repl_user'. Secret-key 'replication-password'. |
 | postgresql.architecture | string | `"replication"` |  |
 | postgresql.audit.pgAuditLog | string | `"write, ddl"` |  |
 | postgresql.audit.logLinePrefix | string | `"%m %u %d "` |  |
 | postgresql.primary.extendedConfiguration | string | `""` | Extended PostgreSQL Primary configuration (increase of max_connections recommended - default is 100) |
-| postgresql.primary.initdb.scriptsConfigMap | string | `"{{ .Release.Name }}-phub-cm-postgres"` |  |
+| postgresql.primary.initdb.scriptsConfigMap | string | `"{{ .Release.Name }}-issuer-cm-postgres"` |  |
 | postgresql.readReplicas.extendedConfiguration | string | `""` | Extended PostgreSQL read only replicas configuration (increase of max_connections recommended - default is 100) |
-| externalDatabase.host | string | `"phub-postgres-ext"` | External PostgreSQL configuration IMPORTANT: non-root db user needs to be created beforehand on external database. And the init script (02-init-db.sql) available in templates/configmap-postgres-init.yaml needs to be executed beforehand. Database host ('-primary' is added as postfix). |
+| externalDatabase.host | string | `"issuer-postgres-ext"` | External PostgreSQL configuration IMPORTANT: non-root db user needs to be created beforehand on external database. And the init script (02-init-db.sql) available in templates/configmap-postgres-init.yaml needs to be executed beforehand. Database host ('-primary' is added as postfix). |
 | externalDatabase.port | int | `5432` | Database port number. |
-| externalDatabase.user | string | `"hub"` | Non-root username for policy-hub. |
-| externalDatabase.database | string | `"policy-hub"` | Database name. |
-| externalDatabase.password | string | `""` | Password for the non-root username (default 'hub'). Secret-key 'password'. |
-| externalDatabase.existingSecret | string | `"policy-hub-external-db"` | Secret containing the password non-root username, (default 'hub'). |
+| externalDatabase.user | string | `"issuer"` | Non-root username for issuer. |
+| externalDatabase.database | string | `"issuer"` | Database name. |
+| externalDatabase.password | string | `""` | Password for the non-root username (default 'issuer'). Secret-key 'password'. |
+| externalDatabase.existingSecret | string | `"issuer-external-db"` | Secret containing the password non-root username, (default 'issuer'). |
 | externalDatabase.existingSecretPasswordKey | string | `"password"` | Name of an existing secret key containing the database credentials. |
-| secrets.postgresql.auth.existingSecret.postgrespassword | string | `""` | Password for the root username 'postgres'. Secret-key 'postgres-password'. |
-| secrets.postgresql.auth.existingSecret.password | string | `""` | Password for the non-root username 'hub'. Secret-key 'password'. |
-| secrets.postgresql.auth.existingSecret.replicationPassword | string | `""` | Password for the non-root username 'repl_user'. Secret-key 'replication-password'. |
 | portContainer | int | `8080` |  |
 | portService | int | `8080` |  |
 | replicaCount | int | `3` |  |
