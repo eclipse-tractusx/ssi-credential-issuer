@@ -32,7 +32,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240308143713_0.1.0-rc.1")]
+    [Migration("20240308143713_1.0.0-rc.1")]
     partial class _010rc1
     {
         /// <inheritdoc />
