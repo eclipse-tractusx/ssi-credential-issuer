@@ -107,7 +107,7 @@ jobs:
           helm dependency build
 
       - name: Install the chart on KinD cluster
-        run: helm install testing -n apps --create-namespace --wait --set issuer.image=kind-registry:5000/credential-issuer-service:testing --set=issuermigrations.image=kind-registry:5000/credential-issuer-migrations:testing --set=processesworker.image=kind-registry:5000/credential-issuer-processes-worker:testing --set=credentialexpiry.image=kind-registry:5000/credential-expiry-app:testing --set=issuer.swaggerEnabled=true charts/ssi-credential-issuer
+        run: helm install testing -n apps --create-namespace --wait --set issuer.image=kind-registry:5000/credential-issuer-service:testing --set=issuermigrations.image=kind-registry:5000/credential-issuer-migrations:testing --set=processesworker.image=kind-registry:5000/credential-issuer-processes-worker:testing --set=credentialExpiry.image=kind-registry:5000/credential-expiry-app:testing --set=issuer.swaggerEnabled=true charts/ssi-credential-issuer
 
       - name: Configure port forward to app in KinD
         run: |

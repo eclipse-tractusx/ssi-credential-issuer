@@ -17,84 +17,32 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-# -- Provide centralidp base address (CX IAM), without trailing '/auth'.
-centralidpAddress: "https://centralidp.example.org"
-
-ingress:
-  # -- SSI Credential Issuer ingress parameters,
-  # enable ingress record generation for ssi-credential-issuer.
-  enabled: false
-  name: "ssi-credential-issuer"
-  className: "nginx"
-  annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: "8m"
-    # -- Provide CORS allowed origin.
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
-  tls:
-    # -- Provide tls secret.
-    - secretName: ""
-      # -- Provide host for tls secret.
-      hosts:
-        - "ssi-credential-issuer.example.org"
-  hosts:
-    # -- Provide default path for the ingress record.
-    - host: "ssi-credential-issuer.example.org"
-      paths:
-        - path: "/api/issuer"
-          pathType: "Prefix"
-          backend:
-            port: 8080
-dotnetEnvironment: "Production"
-dbConnection:
-  schema: "issuer"
-  sslMode: "Disable"
-
-placeholder: "empty"
-
-keycloak:
-  central:
-    authRealm: "CX-Central"
-    jwtBearerOptions:
-      requireHttpsMetadata: "true"
-      metadataPath: "/auth/realms/CX-Central/.well-known/openid-configuration"
-      tokenValidationParameters:
-        validIssuerPath: "/auth/realms/CX-Central"
-        # -- TODO: Add Client
-        validAudience: "ClXX-CX-SSI"
-      refreshInterval: "00:00:30"
-    tokenPath: "/auth/realms/CX-Central/protocol/openid-connect/token"
-    # -- Flag if the api should be used with an leading /auth path
-    useAuthTrail: true
-healthChecks:
-  startup:
-    path: "/health/startup"
-  liveness:
-    path: "/healthz"
-  readyness:
-    path: "/ready"
-
 issuer:
-  image: "docker.io/tractusx/credential-issuer-service:0.1.0-rc.1"
+  image:
+    name: "docker.io/tractusx/credential-issuer-service"
+    tag: ""
   imagePullPolicy: "IfNotPresent"
-  # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
-  # If you do want to specify resource limits, uncomment the following lines and adjust them as necessary.
+  # -- We recommend to review the default resource limits as this should a conscious choice.
   resources:
     requests:
       cpu: 15m
-      memory: 300M
-    # limits:
-    #   cpu: 45m
-    #   memory: 400M
+      memory: 400M
+    limits:
+      cpu: 45m
+      memory: 400M
   logging:
     businessLogic: "Information"
     default: "Information"
   healthChecks:
     startup:
+      path: "/health/startup"
       tags:
       - name: "HEALTHCHECKS__0__TAGS__1"
         value: "issuerdb"
+    liveness:
+      path: "/healthz"
+    readyness:
+      path: "/ready"
   swaggerEnabled: false
   portal:
     scope: "openid"
@@ -116,17 +64,19 @@ issuer:
         encryptionKey: ""
 
 issuermigrations:
-  image: "docker.io/tractusx/credential-issuer-migrations:0.1.0-rc.1"
+  name: "migrations"
+  image:
+    name: "docker.io/tractusx/credential-issuer-migrations"
+    tag: ""
   imagePullPolicy: "IfNotPresent"
-  # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
-  # If you do want to specify resource limits, uncomment the following lines and adjust them as necessary.
+  # -- We recommend to review the default resource limits as this should a conscious choice.
   resources:
     requests:
       cpu: 15m
       memory: 105M
-    # limits:
-    #   cpu: 45m
-    #   memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
   seeding:
     testDataEnvironments: ""
     testDataPaths: "Seeder/Data"
@@ -134,17 +84,19 @@ issuermigrations:
     default: "Information"
 
 processesworker:
-  image: "docker.io/tractusx/credential-issuer-processes-worker:0.1.0-rc.1"
+  name: "processesworker"
+  image:
+    name: "docker.io/tractusx/credential-issuer-processes-worker"
+    tag: ""
   imagePullPolicy: "IfNotPresent"
-  # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
-  # If you do want to specify resource limits, uncomment the following lines and adjust them as necessary.
+  # -- We recommend to review the default resource limits as this should a conscious choice.
   resources:
     requests:
       cpu: 15m
       memory: 105M
-    # limits:
-    #   cpu: 45m
-    #   memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
   logging:
     default: "Information"
   portal:
@@ -173,18 +125,20 @@ processesworker:
         # Expected format is 256 bit (64 digits) hex.
         encryptionKey: ""
 
-credentialexpiry:
-  image: "docker.io/tractusx/credential-expiry-app:0.1.0-rc.1"
+credentialExpiry:
+  name: "expiry"
+  image:
+    name: "docker.io/tractusx/credential-expiry-app"
+    tag: ""
   imagePullPolicy: "IfNotPresent"
-  # -- We recommend not to specify default resource limits and to leave this as a conscious choice for the user.
-  # If you do want to specify resource limits, uncomment the following lines and adjust them as necessary.
+  # -- We recommend to review the default resource limits as this should a conscious choice.
   resources:
     requests:
       cpu: 15m
       memory: 105M
-    # limits:
-    #   cpu: 45m
-    #   memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
   processIdentity:
     identityId: d21d2e8a-fe35-483c-b2b8-4100ed7f0953
   logging:
@@ -193,6 +147,59 @@ credentialexpiry:
     expiredVcsToDeleteInMonth: 12
     inactiveVcsToDeleteInWeeks: 12
 
+# -- Secret containing the client-secrets for the connection to portal and wallet
+# as well as encryptionKeys for issuer.credential and processesworker.wallet
+existingSecret: ""
+
+dotnetEnvironment: "Production"
+
+centralidp:
+  # -- Provide centralidp base address (CX IAM), without trailing '/auth'.
+  address: "https://centralidp.example.org"
+  authRealm: "CX-Central"
+  jwtBearerOptions:
+    requireHttpsMetadata: "true"
+    metadataPath: "/auth/realms/CX-Central/.well-known/openid-configuration"
+    tokenValidationParameters:
+      validIssuerPath: "/auth/realms/CX-Central"
+      # -- TODO: Add Client
+      validAudience: "ClXX-CX-SSI"
+    refreshInterval: "00:00:30"
+  tokenPath: "/auth/realms/CX-Central/protocol/openid-connect/token"
+  # -- Flag if the api should be used with an leading /auth path
+  useAuthTrail: true
+
+ingress:
+  # -- SSI Credential Issuer ingress parameters,
+  # enable ingress record generation for ssi-credential-issuer.
+  enabled: false
+  # className: "nginx"
+  ## Optional annotations when using the nginx ingress class
+  # annotations:
+  #   nginx.ingress.kubernetes.io/use-regex: "true"
+  #   nginx.ingress.kubernetes.io/enable-cors: "true"
+  #   nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+  #   # -- Provide CORS allowed origin.
+  #   nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
+  tls:
+    # -- Provide tls secret.
+    - secretName: ""
+      # -- Provide host for tls secret.
+      hosts:
+        - ""
+  hosts:
+    # -- Provide default path for the ingress record.
+    - host: ""
+      paths:
+        - path: "/api/issuer"
+          pathType: "Prefix"
+          backend:
+            port: 8080
+
+dbConnection:
+  schema: "issuer"
+  sslMode: "Disable"
+
 postgresql:
   # -- PostgreSQL chart configuration;
   # default configurations:
@@ -200,6 +207,11 @@ postgresql:
   # port: 5432;
   # Switch to enable or disable the PostgreSQL helm chart.
   enabled: true
+  # -- Setting image tag to major to get latest minor updates
+  image:
+    tag: "15-debian-12"
+  commonLabels:
+    app.kubernetes.io/version: "15"
   auth:
     # -- Non-root username.
     username: issuer
@@ -208,6 +220,12 @@ postgresql:
     # -- Secret containing the passwords for root usernames postgres and non-root username issuer.
     # Should not be changed without changing the "issuer-postgresSecretName" template as well.
     existingSecret: "{{ .Release.Name }}-issuer-postgres"
+    # -- Password for the root username 'postgres'. Secret-key 'postgres-password'.
+    postgrespassword: ""
+    # -- Password for the non-root username 'issuer'. Secret-key 'password'.
+    password: ""
+    # -- Password for the non-root username 'repl_user'. Secret-key 'replication-password'.
+    replicationPassword: ""
   architecture: replication
   audit:
     pgAuditLog: "write, ddl"
@@ -241,21 +259,6 @@ externalDatabase:
   # -- Name of an existing secret key containing the database credentials.
   existingSecretPasswordKey: "password"
 
-secrets:
-  postgresql:
-    auth:
-      existingSecret:
-        # -- Password for the root username 'postgres'. Secret-key 'postgres-password'.
-        postgrespassword: ""
-        # -- Password for the non-root username 'issuer'. Secret-key 'password'.
-        password: ""
-        # -- Password for the non-root username 'repl_user'. Secret-key 'replication-password'.
-        replicationPassword: ""
-
-interfaces:
-  # -- Secret containing the client-secrets for the connection to portal and wallet.
-  secret: "secret-interfaces"
-  
 portContainer: 8080
 
 portService: 8080

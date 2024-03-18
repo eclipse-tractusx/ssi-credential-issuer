@@ -17,8 +17,6 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-centralidpAddress: "https://centralidp.dev.demo.catena-x.net"
-
 ingress:
   enabled: true
   className: "nginx"
@@ -39,39 +37,41 @@ ingress:
           backend:
             port: 8080
 
-keycloak:
-  central:
-    jwtBearerOptions:
-      tokenValidationParameters:
-        validAudience: "ClXX-CX-ISSUER"
-
 issuer:
-  image: "docker.io/tractusx/ssi-credential-issuer-service:dev"
+  image: 
+    tag: "dev"
   imagePullPolicy: "Always"
   swaggerEnabled: true
 
 issuermigrations:
-  image: "docker.io/tractusx/ssi-credential-issuer-migrations:dev"
+  image: 
+    tag: "dev"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
 
 processesworker:
-  image: "docker.io/tractusx/ssi-credential-issuer-processes-worker:dev"
+  image: 
+    tag: "dev"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
 
 credentialexpiry:
-  image: "docker.io/tractusx/ssi-credential-expiry-app:dev"
+  image: 
+    tag: "dev"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
 
-secrets:
-  postgresql:
-    auth:
-      existingSecret:
-        postgrespassword: "<path:portal/data/ssi-credential-issuer/dev/postgres#postgres-password>"
-        password: "<path:portal/data/ssi-credential-issuer/dev/postgres#password>"
-        replicationPassword: "<path:portal/data/ssi-credential-issuer/dev/postgres#replication-password>"
+centralidp:
+  address: "https://centralidp.dev.demo.catena-x.net"
+  jwtBearerOptions:
+    tokenValidationParameters:
+      validAudience: "ClXX-CX-ISSUER"
+
+postgresql:
+  auth:
+    postgrespassword: "<path:portal/data/ssi-credential-issuer/dev/postgres#postgres-password>"
+    password: "<path:portal/data/ssi-credential-issuer/dev/postgres#password>"
+    replicationPassword: "<path:portal/data/ssi-credential-issuer/dev/postgres#replication-password>"

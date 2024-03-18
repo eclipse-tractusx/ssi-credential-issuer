@@ -20,106 +20,106 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "processesworker.fullname" . }}-worker
-  annotations:
-    "batch.kubernetes.io/job-tracking": "true"
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "-5"
+  name: {{ include "issuer.fullname" . }}-{{ .Values.processesworker.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "issuer.labels" . | nindent 4 }}
 spec:
   schedule: "*/5 * * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     metadata:
-      labels:
-        {{- include "issuer.selectorLabels" . | nindent 8 }}
+      name: {{ include "issuer.fullname" . }}-{{ .Values.processesworker.name }}
     spec:
-      restartPolicy: OnFailure
-      containers:
-      - name: {{ include "issuer.fullname" . }}-worker
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-        image: "{{ .Values.processesworker.image }}"
-        imagePullPolicy: "{{ .Values.processesworker.imagePullPolicy }}"
-        env:
-        - name: DOTNET_ENVIRONMENT
-          value: "{{ .Values.dotnetEnvironment }}"
-        {{- if .Values.postgresql.enabled }}
-        - name: "ISSUER_PASSWORD"
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Values.postgresql.auth.existingSecret }}"
-              key: "issuer-password"
-        - name: "CONNECTIONSTRINGS__ISSUERDB"
-          value: "Server={{ template "postgresql.primary.fullname" . }};Database={{ .Values.postgresql.auth.database }};Port={{ .Values.postgresql.auth.port }};User Id={{ .Values.postgresql.auth.issuerUser }};Password=$(ISSUER_PASSWORD);Ssl Mode={{ .Values.dbConnection.sslMode }};"
-        {{- end }}
-        {{- if not .Values.postgresql.enabled }}
-        - name: "ISSUER_PASSWORD"
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Values.externalDatabase.secret }}"
-              key: "issuer-password"
-        - name: "CONNECTIONSTRINGS__ISSUERDB"
-          value: "Server={{ .Values.externalDatabase.host }};Database={{ .Values.externalDatabase.database }};Port={{ .Values.externalDatabase.port }};User Id={{ .Values.externalDatabase.issuerUser }};Password=$(ISSUER_PASSWORD);Ssl Mode={{ .Values.dbConnection.sslMode }};"
-        {{- end }}
-        - name: "PORTAL__CLIENTSECRET"
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Values.interfaces.secret }}"
-              key: "portal-client-secret"
-        - name: "PORTAL__GRANTTYPE"
-          value: "{{ .Values.processesworker.portal.grantType }}"
-        - name: "PORTAL__TOKENADDRESS"
-          value: "{{ .Values.centralidpAddress }}{{ .Values.keycloak.central.tokenPath }}"
-        - name: "PORTAL__PASSWORD"
-          value: "{{ .Values.placeholder }}"
-        - name: "PORTAL__SCOPE"
-          value: "{{ .Values.processesworker.portal.scope }}"
-        - name: "PORTAL__USERNAME"
-          value: "{{ .Values.placeholder }}"
-        - name: "WALLET__BASEADDRESS"
-          value: "{{ .Values.walletAddress }}"
-        - name: "WALLET__CLIENTID"
-          value: "{{ .Values.processesworker.wallet.clientId }}"
-        - name: "WALLET__CLIENTSECRET"
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Values.interfaces.secret }}"
-              key: "wallet-client-secret"
-        - name: "WALLET__GRANTTYPE"
-          value: "{{ .Values.processesworker.wallet.grantType }}"
-        - name: "WALLET__TOKENADDRESS"
-          value: "{{ .Values.walletTokenAddress }}"
-        - name: "WALLET__PASSWORD"
-          value: "{{ .Values.placeholder }}"
-        - name: "WALLET__SCOPE"
-          value: "{{ .Values.processesworker.wallet.scope }}"
-        - name: "WALLET__USERNAME"
-          value: "{{ .Values.placeholder }}"
-        - name: "WALLET__ENCRYPTIONCONFIG__ENCRYPTIONCONFIGINDEX"
-          value: "{{ .Values.processesworker.wallet.encryptionConfigIndex }}"
-        - name: "WALLET__ENCRYPTIONCONFIGS__0__INDEX"
-          value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.index}}"
-        - name: "WALLET__ENCRYPTIONCONFIGS__0__CIPHERMODE"
-          value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.cipherMode}}"
-        - name: "WALLET__ENCRYPTIONCONFIGS__0__PADDINGMODE"
-          value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.paddingMode}}"
-        - name: "WALLET__ENCRYPTIONCONFIGS__0__ENCRYPTIONKEY"
-          valueFrom:
-            secretKeyRef:
-              name: "{{ .Values.interfaces.secret }}"
-              key: "process-wallet-encryption-key0"
-        - name: "SERILOG__MINIMUMLEVEL__Default"
-          value: "{{ .Values.processesworker.logging.default }}"
-        - name: "PROCESSES__IDENTITYID"
-          value: "{{ .Values.processesworker.processIdentity.identityId }}"
-        ports:
-        - name: http
-          containerPort: {{ .Values.portContainer }}
-          protocol: TCP
-        resources:
-          {{- toYaml .Values.processesworker.resources | nindent 14 }}
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: {{ include "issuer.fullname" . }}-{{ .Values.processesworker.name }}
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              readOnlyRootFilesystem: true
+              runAsNonRoot: true
+            image: "{{ .Values.processesworker.image.name }}:{{ .Values.processesworker.image.tag | default .Chart.AppVersion }}"
+            imagePullPolicy: "{{ .Values.processesworker.imagePullPolicy }}"
+            env:
+            - name: DOTNET_ENVIRONMENT
+              value: "{{ .Values.dotnetEnvironment }}"
+            {{- if .Values.postgresql.enabled }}
+            - name: "ISSUER_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.postgresql.auth.existingSecret }}"
+                  key: "issuer-password"
+            - name: "CONNECTIONSTRINGS__ISSUERDB"
+              value: "Server={{ template "issuer.postgresql.primary.fullname" . }};Database={{ .Values.postgresql.auth.database }};Port={{ .Values.postgresql.auth.port }};User Id={{ .Values.postgresql.auth.issuerUser }};Password=$(ISSUER_PASSWORD);Ssl Mode={{ .Values.dbConnection.sslMode }};"
+            {{- end }}
+            {{- if not .Values.postgresql.enabled }}
+            - name: "ISSUER_PASSWORD"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.externalDatabase.secret }}"
+                  key: "issuer-password"
+            - name: "CONNECTIONSTRINGS__ISSUERDB"
+              value: "Server={{ .Values.externalDatabase.host }};Database={{ .Values.externalDatabase.database }};Port={{ .Values.externalDatabase.port }};User Id={{ .Values.externalDatabase.issuerUser }};Password=$(ISSUER_PASSWORD);Ssl Mode={{ .Values.dbConnection.sslMode }};"
+            {{- end }}
+            - name: "PORTAL__CLIENTSECRET"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "issuer.secretName" . }}"
+                  key: "portal-client-secret"
+            - name: "PORTAL__GRANTTYPE"
+              value: "{{ .Values.processesworker.portal.grantType }}"
+            - name: "PORTAL__TOKENADDRESS"
+              value: "{{ .Values.centralidp.address }}{{ .Values.centralidp.tokenPath }}"
+            - name: "PORTAL__PASSWORD"
+              value: "empty"
+            - name: "PORTAL__SCOPE"
+              value: "{{ .Values.processesworker.portal.scope }}"
+            - name: "PORTAL__USERNAME"
+              value: "empty"
+            - name: "WALLET__BASEADDRESS"
+              value: "{{ .Values.walletAddress }}"
+            - name: "WALLET__CLIENTID"
+              value: "{{ .Values.processesworker.wallet.clientId }}"
+            - name: "WALLET__CLIENTSECRET"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "issuer.secretName" . }}"
+                  key: "wallet-client-secret"
+            - name: "WALLET__GRANTTYPE"
+              value: "{{ .Values.processesworker.wallet.grantType }}"
+            - name: "WALLET__TOKENADDRESS"
+              value: "{{ .Values.walletTokenAddress }}"
+            - name: "WALLET__PASSWORD"
+              value: "empty"
+            - name: "WALLET__SCOPE"
+              value: "{{ .Values.processesworker.wallet.scope }}"
+            - name: "WALLET__USERNAME"
+              value: "empty"
+            - name: "WALLET__ENCRYPTIONCONFIG__ENCRYPTIONCONFIGINDEX"
+              value: "{{ .Values.processesworker.wallet.encryptionConfigIndex }}"
+            - name: "WALLET__ENCRYPTIONCONFIGS__0__INDEX"
+              value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.index}}"
+            - name: "WALLET__ENCRYPTIONCONFIGS__0__CIPHERMODE"
+              value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.cipherMode}}"
+            - name: "WALLET__ENCRYPTIONCONFIGS__0__PADDINGMODE"
+              value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.paddingMode}}"
+            - name: "WALLET__ENCRYPTIONCONFIGS__0__ENCRYPTIONKEY"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "issuer.secretName" . }}"
+                  key: "process-wallet-encryption-key0"
+            - name: "SERILOG__MINIMUMLEVEL__Default"
+              value: "{{ .Values.processesworker.logging.default }}"
+            - name: "PROCESSES__IDENTITYID"
+              value: "{{ .Values.processesworker.processIdentity.identityId }}"
+            ports:
+            - name: http
+              containerPort: {{ .Values.portContainer }}
+              protocol: TCP
+            resources:
+              {{- toYaml .Values.processesworker.resources | nindent 14 }}
