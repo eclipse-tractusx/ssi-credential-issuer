@@ -43,7 +43,7 @@ spec:
                 - ALL
               readOnlyRootFilesystem: true
               runAsNonRoot: true
-            image: "{{ .Values.processesworker.image }}"
+            image: "{{ .Values.processesworker.image.name }}:{{ .Values.processesworker.image.tag | default .Chart.AppVersion }}"
             imagePullPolicy: "{{ .Values.processesworker.imagePullPolicy }}"
             env:
             - name: DOTNET_ENVIRONMENT

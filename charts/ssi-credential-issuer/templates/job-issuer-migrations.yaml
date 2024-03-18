@@ -40,7 +40,7 @@ spec:
             - ALL
           readOnlyRootFilesystem: true
           runAsNonRoot: true
-        image: "{{ .Values.issuermigrations.image }}"
+        image: "{{ .Values.issuermigrations.image.name }}:{{ .Values.issuermigrations.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: "{{ .Values.issuermigrations.imagePullPolicy }}"
         env:
           - name: DOTNET_ENVIRONMENT

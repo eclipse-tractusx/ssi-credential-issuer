@@ -43,7 +43,7 @@ spec:
                 - ALL
               readOnlyRootFilesystem: true
               runAsNonRoot: true
-            image: "{{ .Values.credentialExpiry.image }}"
+            image: "{{ .Values.credentialExpiry.image.name }}:{{ .Values.credentialExpiry.image.tag | default .Chart.AppVersion }}"
             imagePullPolicy: "{{ .Values.credentialExpiry.imagePullPolicy }}"
             env:
             - name: DOTNET_ENVIRONMENT

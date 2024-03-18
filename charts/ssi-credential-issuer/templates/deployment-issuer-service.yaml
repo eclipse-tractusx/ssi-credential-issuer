@@ -45,7 +45,7 @@ spec:
             - ALL
           readOnlyRootFilesystem: true
           runAsNonRoot: true
-        image: "{{ .Values.issuer.image }}"
+        image: "{{ .Values.issuer.image.name }}:{{ .Values.issuer.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: "{{ .Values.issuer.imagePullPolicy }}"
         env:
         - name: DOTNET_ENVIRONMENT

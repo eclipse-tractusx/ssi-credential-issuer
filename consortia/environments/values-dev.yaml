@@ -38,24 +38,28 @@ ingress:
             port: 8080
 
 issuer:
-  image: "docker.io/tractusx/ssi-credential-issuer-service:dev"
+  image: 
+    tag: "dev"
   imagePullPolicy: "Always"
   swaggerEnabled: true
 
 issuermigrations:
-  image: "docker.io/tractusx/ssi-credential-issuer-migrations:dev"
+  image: 
+    tag: "dev"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
 
 processesworker:
-  image: "docker.io/tractusx/ssi-credential-issuer-processes-worker:dev"
+  image: 
+    tag: "dev"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
 
 credentialexpiry:
-  image: "docker.io/tractusx/ssi-credential-expiry-app:dev"
+  image: 
+    tag: "dev"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
