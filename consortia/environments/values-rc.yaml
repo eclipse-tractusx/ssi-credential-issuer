@@ -38,27 +38,27 @@ ingress:
             port: 8080
 
 issuer:
-  image: 
+  image:
     tag: "rc"
   imagePullPolicy: "Always"
   swaggerEnabled: true
 
 issuermigrations:
-  image: 
+  image:
     tag: "rc"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
 
 processesworker:
-  image: 
+  image:
     tag: "rc"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
 
 credentialexpiry:
-  image: 
+  image:
     tag: "rc"
   imagePullPolicy: "Always"
   logging:
