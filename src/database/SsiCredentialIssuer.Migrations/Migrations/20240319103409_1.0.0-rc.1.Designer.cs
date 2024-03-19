@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
 // * Copyright (c) 2024 Contributors to the Eclipse Foundation
 // *
 // * See the NOTICE file(s) distributed with this work for additional
@@ -32,8 +32,8 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240315140702_0.1.0-rc.1")]
-    partial class _010rc1
+    [Migration("20240319103409_1.0.0-rc.1")]
+    partial class _100rc1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

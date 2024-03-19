@@ -24,12 +24,17 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInject
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Models;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
 
 public class CallbackService : ICallbackService
 {
-    private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    private static readonly JsonSerializerOptions Options = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter(allowIntegerValues: false) }
+    };
 
     private readonly ITokenService _tokenService;
     private readonly CallbackSettings _settings;

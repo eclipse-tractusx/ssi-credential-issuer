@@ -3,6 +3,7 @@ using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
@@ -240,6 +241,45 @@ public class CredentialProcessHandlerTests
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
         result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+    }
+
+    #endregion
+
+    #region TriggerCallback
+
+    [Fact]
+    public async Task TriggerCallback_WithCallbackUrlNotSet_ThrowsConflictException()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetCallbackUrl(_credentialId))
+            .Returns(new ValueTuple<string, string?>("BPNL000001234", null));
+        async Task Act() => await _sut.TriggerCallback(_credentialId, CancellationToken.None).ConfigureAwait(false);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+
+        // Assert
+        ex.Message.Should().Be("CallbackUrl must be set");
+    }
+
+    [Fact]
+    public async Task TriggerCallback_WithValid_CallsExpected()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetCallbackUrl(_credentialId))
+            .Returns(new ValueTuple<string, string?>("BPNL00000123456", "https://example.org"));
+
+        // Act
+        var result = await _sut.TriggerCallback(_credentialId, CancellationToken.None).ConfigureAwait(false);
+
+        // Assert
+        A.CallTo(() => _callbackService.TriggerCallback("https://example.org", A<IssuerResponseData>._, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().BeNull();
     }
 
     #endregion

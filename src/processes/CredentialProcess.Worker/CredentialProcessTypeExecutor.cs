@@ -36,7 +36,8 @@ public class CredentialProcessTypeExecutor : IProcessTypeExecutor
         ProcessStepTypeId.CREATE_CREDENTIAL,
         ProcessStepTypeId.SIGN_CREDENTIAL,
         ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
-        ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER);
+        ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
+        ProcessStepTypeId.TRIGGER_CALLBACK);
 
     private Guid _credentialId;
 

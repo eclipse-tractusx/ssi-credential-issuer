@@ -28,7 +28,7 @@ using System.Text.Json;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     /// <inheritdoc />
-    public partial class _010rc1 : Migration
+    public partial class _100rc1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

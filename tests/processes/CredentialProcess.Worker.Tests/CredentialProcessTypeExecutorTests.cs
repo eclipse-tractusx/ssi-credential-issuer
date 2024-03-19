@@ -52,11 +52,12 @@ public class CredentialProcessTypeExecutorTests
     public void GetExecutableStepTypeIds_ReturnsExpected()
     {
         // Assert
-        _sut.GetExecutableStepTypeIds().Should().HaveCount(4).And.Satisfy(
+        _sut.GetExecutableStepTypeIds().Should().HaveCount(5).And.Satisfy(
             x => x == ProcessStepTypeId.CREATE_CREDENTIAL,
             x => x == ProcessStepTypeId.SIGN_CREDENTIAL,
             x => x == ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
-            x => x == ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER);
+            x => x == ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
+            x => x == ProcessStepTypeId.TRIGGER_CALLBACK);
     }
 
     [Fact]
