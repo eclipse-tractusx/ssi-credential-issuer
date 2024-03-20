@@ -65,19 +65,37 @@ jobs:
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           context: .
-          file: docker/Dockerfile-migrations
+          file: docker/Dockerfile-credential-issuer-migrations
           push: true
-          tags: kind-registry:5000/migrations:testing
+          tags: kind-registry:5000/credential-issuer-migrations:testing
 
       - name: Build service image
         id: build-service-image
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           context: .
-          file: docker/Dockerfile-service
+          file: docker/Dockerfile-credential-issuer-service
           push: true
-          tags: kind-registry:5000/service:testing
+          tags: kind-registry:5000/credential-issuer-service:testing
 
+      - name: Build Worker image
+        id: build-worker-image
+        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
+        with:
+          context: .
+          file: docker/Dockerfile-credential-issuer-processes-worker
+          push: true
+          tags: kind-registry:5000/credential-issuer-processes-worker:testing
+  
+      - name: Build Expiry image
+        id: build-expiry-image
+        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
+        with:
+          context: .
+          file: docker/Dockerfile-credential-expiry-app
+          push: true
+          tags: kind-registry:5000/credential-expiry-app:testing
+  
       - name: Add bitnami repo
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami 
@@ -89,7 +107,7 @@ jobs:
           helm dependency build
 
       - name: Install the chart on KinD cluster
-        run: helm install testing -n apps --create-namespace --wait --set issuer.image=kind-registry:5000/service:testing --set=issuermigrations.image=kind-registry:5000/migrations:testing --set=issuer.swaggerEnabled=true charts/ssi-credential-issuer
+        run: helm install testing -n apps --create-namespace --wait --set issuer.image.name=kind-registry:5000/credential-issuer-service --set issuer.image.tag=testing --set issuermigrations.image.name=kind-registry:5000/credential-issuer-migrations --set issuermigrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-expiry-app --set credentialExpiry.image.tag=testing --set issuer.swaggerEnabled=true charts/ssi-credential-issuer
 
       - name: Configure port forward to app in KinD
         run: |

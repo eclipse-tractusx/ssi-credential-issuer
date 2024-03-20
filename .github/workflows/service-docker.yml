@@ -17,7 +17,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-name: Service
+name: Build Service Image
 
 on:
   push:
@@ -27,7 +27,7 @@ on:
       # workflow file
       - '.github/workflows/service-docker.yml'
       # dockerfile
-      - 'docker/Dockerfile-service'
+      - 'docker/Dockerfile-credential-issuer-service'
 
     branches:
       - 'dev'
@@ -35,7 +35,7 @@ on:
 
 env:
   IMAGE_NAMESPACE: "tractusx"
-  IMAGE_NAME: "service"
+  IMAGE_NAME: "credential-issuer-service"
 
 jobs:
   build-and-push-image:
@@ -73,7 +73,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: docker/Dockerfile-service
+          file: docker/Dockerfile-credential-issuer-service
           platforms: linux/amd64, linux/arm64
           pull: true
           push: ${{ github.event_name != 'pull_request' }}
