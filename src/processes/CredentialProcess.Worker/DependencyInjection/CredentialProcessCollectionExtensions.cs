@@ -21,11 +21,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.DependencyInjection;
 
-[ExcludeFromCodeCoverage]
 public static class CredentialProcessCollectionExtensions
 {
     public static IServiceCollection AddCredentialProcessExecutor(this IServiceCollection services, IConfiguration config) =>

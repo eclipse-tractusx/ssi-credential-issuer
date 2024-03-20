@@ -18,11 +18,9 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
 
-[ExcludeFromCodeCoverage]
 public class CallbackSettings : KeyVaultAuthSettings
 {
 }

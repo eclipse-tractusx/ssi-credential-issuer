@@ -22,13 +22,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 
 public static class IssuerRepositoriesStartupServiceExtensions
 {
-    [ExcludeFromCodeCoverage]
     public static IServiceCollection AddIssuerRepositories(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IIssuerRepositories, IssuerRepositories>()

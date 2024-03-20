@@ -18,15 +18,13 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.DependencyInjection;
 
 public static class CredentialServiceCollectionExtensions
 {
-    [ExcludeFromCodeCoverage]
     public static IServiceCollection AddCredentialService(this IServiceCollection services, IConfigurationSection section) =>
         services
             .ConfigureCredentialSettings(section)
-            .AddTransient<ICredentialBusinessLogic, CredentialBusinessLogic>();
+            .AddTransient<IIssuerBusinessLogic, IssuerBusinessLogic>();
 }

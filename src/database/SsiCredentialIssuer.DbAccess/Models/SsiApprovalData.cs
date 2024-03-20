@@ -24,6 +24,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 public record SsiApprovalData(
     CompanySsiDetailStatusId Status,
     VerifiedCredentialTypeId Type,
+    Guid? ProcessId,
     VerifiedCredentialTypeKindId? Kind,
     string? Bpn,
     DetailData? DetailData

@@ -20,11 +20,9 @@
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 
-[ExcludeFromCodeCoverage]
 public class WalletSettings : BasicAuthSettings
 {
     [Required(AllowEmptyStrings = false)]

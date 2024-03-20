@@ -21,11 +21,9 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.AuditEntities;
 
-[ExcludeFromCodeCoverage]
 public class AuditCompanySsiDetail20240228 : IAuditEntityV1
 {
     /// <inheritdoc />

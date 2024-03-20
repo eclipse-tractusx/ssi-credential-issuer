@@ -27,7 +27,7 @@ data:
   02-init-db.sql: |
     CREATE SCHEMA issuer;
     ALTER SCHEMA issuer OWNER TO issuer;
-    CREATE TABLE public.issuer (
+    CREATE TABLE public.__efmigrations_history_issuer (
         migration_id character varying(150) NOT NULL,
         product_version character varying(32) NOT NULL
     );

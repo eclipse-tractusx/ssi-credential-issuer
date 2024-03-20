@@ -18,11 +18,9 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Web;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Extensions;
 
-[ExcludeFromCodeCoverage]
 public static class RouteHandlerBuilderExtensions
 {
     public static RouteHandlerBuilder WithSwaggerDescription(this RouteHandlerBuilder builder, string summary, string description, params string[] parameterDescriptions) =>

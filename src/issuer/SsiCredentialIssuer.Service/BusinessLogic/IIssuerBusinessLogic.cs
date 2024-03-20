@@ -24,7 +24,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
-public interface ICredentialBusinessLogic
+public interface IIssuerBusinessLogic
 {
     Task<IEnumerable<UseCaseParticipationData>> GetUseCaseParticipationAsync();
 

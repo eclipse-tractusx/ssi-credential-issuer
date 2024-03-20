@@ -19,11 +19,9 @@
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 
-[ExcludeFromCodeCoverage]
 public class PortalSettings : KeyVaultAuthSettings
 {
     [Required(AllowEmptyStrings = false)]

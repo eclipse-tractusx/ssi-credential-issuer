@@ -21,13 +21,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    [ExcludeFromCodeCoverage]
     public static IServiceCollection AddCallbackService(this IServiceCollection services, IConfigurationSection section)
     {
         services.AddOptions<CallbackSettings>()

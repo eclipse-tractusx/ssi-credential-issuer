@@ -19,13 +19,11 @@
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Validation;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
-public class CredentialSettings
+public class IssuerSettings
 {
     /// <summary>
     /// The Did of the issuer
@@ -46,13 +44,12 @@ public class CredentialSettings
 
 public static class CompanyDataSettingsExtensions
 {
-    [ExcludeFromCodeCoverage]
     public static IServiceCollection ConfigureCredentialSettings(
         this IServiceCollection services,
         IConfigurationSection section
     )
     {
-        services.AddOptions<CredentialSettings>()
+        services.AddOptions<IssuerSettings>()
             .Bind(section)
             .ValidateDistinctValues(section)
             .ValidateEnumEnumeration(section)

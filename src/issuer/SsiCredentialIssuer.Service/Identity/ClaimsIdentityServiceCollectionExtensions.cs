@@ -18,11 +18,9 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 
-[ExcludeFromCodeCoverage]
 public static class ClaimsIdentityServiceCollectionExtensions
 {
     public static IServiceCollection AddClaimsIdentityService(this IServiceCollection services)

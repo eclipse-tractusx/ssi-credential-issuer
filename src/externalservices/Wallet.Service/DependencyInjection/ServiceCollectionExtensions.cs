@@ -23,13 +23,11 @@ using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    [ExcludeFromCodeCoverage]
     public static IServiceCollection AddWalletService(this IServiceCollection services, IConfiguration config)
     {
         services.AddOptions<WalletSettings>()

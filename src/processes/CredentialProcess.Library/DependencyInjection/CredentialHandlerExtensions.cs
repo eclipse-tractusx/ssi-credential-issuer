@@ -20,11 +20,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 
-[ExcludeFromCodeCoverage]
 public static class CredentialHandlerExtensions
 {
     public static IServiceCollection AddCredentialProcessHandler(this IServiceCollection services, IConfiguration config)

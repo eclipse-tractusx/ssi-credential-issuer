@@ -22,13 +22,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    [ExcludeFromCodeCoverage]
     public static IServiceCollection AddPortalService(this IServiceCollection services, IConfigurationSection section)
     {
         services.AddOptions<PortalSettings>()

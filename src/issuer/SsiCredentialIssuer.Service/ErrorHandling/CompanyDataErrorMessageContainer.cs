@@ -19,11 +19,9 @@
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Service;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 
-[ExcludeFromCodeCoverage]
 public class CompanyDataErrorMessageContainer : IErrorMessageContainer
 {
     private static readonly IReadOnlyDictionary<int, string> _messageContainer = new Dictionary<CompanyDataErrors, string> {
@@ -51,7 +49,8 @@ public class CompanyDataErrorMessageContainer : IErrorMessageContainer
         { CompanyDataErrors.EMPTY_TEMPLATE, "Template must not be null" },
         { CompanyDataErrors.KIND_NOT_SUPPORTED, "{kind} is currently not supported" },
         { CompanyDataErrors.MULTIPLE_USE_CASES, "There must only be one use case" },
-        { CompanyDataErrors.DID_NOT_SET, "Did must not be null" }
+        { CompanyDataErrors.DID_NOT_SET, "Did must not be null" },
+        { CompanyDataErrors.ALREADY_LINKED_PROCESS, "Credential should not already be linked to a process" },
     }.ToImmutableDictionary(x => (int)x.Key, x => x.Value);
 
     public Type Type { get => typeof(CompanyDataErrors); }
@@ -84,5 +83,6 @@ public enum CompanyDataErrors
     EMPTY_TEMPLATE,
     KIND_NOT_SUPPORTED,
     MULTIPLE_USE_CASES,
-    DID_NOT_SET
+    DID_NOT_SET,
+    ALREADY_LINKED_PROCESS
 }

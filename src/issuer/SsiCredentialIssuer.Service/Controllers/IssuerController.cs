@@ -25,7 +25,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
-using System.Diagnostics.CodeAnalysis;
 using Constants = Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models.Constants;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Controllers;
@@ -38,12 +37,11 @@ public static class IssuerController
     private const string RequestSsiRole = "request_ssicredential";
     private const string DecisionSsiRole = "decision_ssicredential";
 
-    [ExcludeFromCodeCoverage]
     public static RouteGroupBuilder MapIssuerApi(this RouteGroupBuilder group)
     {
         var issuer = group.MapGroup("/issuer");
 
-        issuer.MapGet("useCaseParticipation", (ICredentialBusinessLogic logic) => logic.GetUseCaseParticipationAsync())
+        issuer.MapGet("useCaseParticipation", (IIssuerBusinessLogic logic) => logic.GetUseCaseParticipationAsync())
             .WithSwaggerDescription("Gets all use case frameworks and the participation status of the acting company",
                 "Example: GET: api/issuer/useCaseParticipation")
             .RequireAuthorization(r =>
@@ -55,7 +53,7 @@ public static class IssuerController
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<UseCaseParticipationData>), Constants.JsonContentType)
             .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
 
-        issuer.MapGet("certificates", (ICredentialBusinessLogic logic) => logic.GetSsiCertificatesAsync())
+        issuer.MapGet("certificates", (IIssuerBusinessLogic logic) => logic.GetSsiCertificatesAsync())
             .WithSwaggerDescription("Gets all company certificate requests and their status",
                 "Example: GET: api/issuer/certificates")
             .RequireAuthorization(r =>
@@ -66,7 +64,7 @@ public static class IssuerController
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<SsiCertificateTransferData>), Constants.JsonContentType);
 
-        issuer.MapGet("certificateTypes", (ICredentialBusinessLogic logic) => logic.GetCertificateTypes())
+        issuer.MapGet("certificateTypes", (IIssuerBusinessLogic logic) => logic.GetCertificateTypes())
             .WithSwaggerDescription("Gets the certificate types for which the company can apply for",
                 "Example: GET: api/issuer/certificateTypes")
             .RequireAuthorization(r =>
@@ -77,7 +75,7 @@ public static class IssuerController
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<VerifiedCredentialTypeId>), Constants.JsonContentType);
 
-        issuer.MapGet(string.Empty, (ICredentialBusinessLogic logic, [FromQuery] int? page,
+        issuer.MapGet(string.Empty, (IIssuerBusinessLogic logic, [FromQuery] int? page,
                 [FromQuery] int? size,
                 [FromQuery] CompanySsiDetailStatusId? companySsiDetailStatusId,
                 [FromQuery] VerifiedCredentialTypeId? credentialTypeId,
@@ -95,7 +93,7 @@ public static class IssuerController
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<CredentialDetailData>), Constants.JsonContentType);
 
-        issuer.MapPost("bpn", ([FromBody] CreateBpnCredentialRequest requestData, CancellationToken cancellationToken, ICredentialBusinessLogic logic) => logic.CreateBpnCredential(requestData, cancellationToken))
+        issuer.MapPost("bpn", ([FromBody] CreateBpnCredentialRequest requestData, CancellationToken cancellationToken, IIssuerBusinessLogic logic) => logic.CreateBpnCredential(requestData, cancellationToken))
             .WithSwaggerDescription("Creates a bpn credential for the given data",
                 "POST: api/issuer/bpn",
                 "The request data containing information over the credential that should be created")
@@ -107,7 +105,7 @@ public static class IssuerController
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(Guid), contentType: Constants.JsonContentType);
 
-        issuer.MapPost("membership", ([FromBody] CreateMembershipCredentialRequest requestData, CancellationToken cancellationToken, ICredentialBusinessLogic logic) => logic.CreateMembershipCredential(requestData, cancellationToken))
+        issuer.MapPost("membership", ([FromBody] CreateMembershipCredentialRequest requestData, CancellationToken cancellationToken, IIssuerBusinessLogic logic) => logic.CreateMembershipCredential(requestData, cancellationToken))
             .WithSwaggerDescription("Creates a membership credential for the given data",
                 "POST: api/issuer/membership",
                 "The request data containing information over the credential that should be created")
@@ -119,7 +117,7 @@ public static class IssuerController
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(Guid), contentType: Constants.JsonContentType);
 
-        issuer.MapPost("framework", ([FromBody] CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken, ICredentialBusinessLogic logic) => logic.CreateFrameworkCredential(requestData, cancellationToken))
+        issuer.MapPost("framework", ([FromBody] CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken, IIssuerBusinessLogic logic) => logic.CreateFrameworkCredential(requestData, cancellationToken))
             .WithSwaggerDescription("Creates a framework credential for the given data",
                 "POST: api/issuer/framework",
                 "The request data containing information over the credential that should be created")
@@ -132,7 +130,7 @@ public static class IssuerController
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(Guid), contentType: Constants.JsonContentType);
 
-        issuer.MapPut("{credentialId}/approval", async ([FromRoute] Guid credentialId, CancellationToken cancellationToken, ICredentialBusinessLogic logic) =>
+        issuer.MapPut("{credentialId}/approval", async ([FromRoute] Guid credentialId, CancellationToken cancellationToken, IIssuerBusinessLogic logic) =>
             {
                 await logic.ApproveCredential(credentialId, cancellationToken).ConfigureAwait(false);
                 return Results.NoContent();
@@ -152,7 +150,7 @@ public static class IssuerController
             .Produces(StatusCodes.Status404NotFound, typeof(ErrorResponse), Constants.JsonContentType)
             .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
 
-        issuer.MapPut("{credentialId}/reject", async ([FromRoute] Guid credentialId, CancellationToken cancellationToken, ICredentialBusinessLogic logic) =>
+        issuer.MapPut("{credentialId}/reject", async ([FromRoute] Guid credentialId, CancellationToken cancellationToken, IIssuerBusinessLogic logic) =>
             {
                 await logic.RejectCredential(credentialId, cancellationToken).ConfigureAwait(false);
                 return Results.NoContent();

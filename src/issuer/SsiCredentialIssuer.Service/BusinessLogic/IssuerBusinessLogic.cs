@@ -28,6 +28,7 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Encryption;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
@@ -37,11 +38,12 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Web;
 using ErrorParameter = Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.ErrorParameter;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
-public class CredentialBusinessLogic : ICredentialBusinessLogic
+public class IssuerBusinessLogic : IIssuerBusinessLogic
 {
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private static readonly IEnumerable<string> Context = new[] { "https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0" };
@@ -50,7 +52,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IHttpClientFactory _clientFactory;
     private readonly IPortalService _portalService;
-    private readonly CredentialSettings _settings;
+    private readonly IssuerSettings _settings;
     private readonly IIdentityData _identity;
 
     /// <summary>
@@ -62,13 +64,13 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
     /// <param name="clientFactory"></param>
     /// <param name="portalService" />
     /// <param name="options"></param>
-    public CredentialBusinessLogic(
+    public IssuerBusinessLogic(
         IIssuerRepositories repositories,
         IIdentityService identityService,
         IDateTimeProvider dateTimeProvider,
         IHttpClientFactory clientFactory,
         IPortalService portalService,
-        IOptions<CredentialSettings> options)
+        IOptions<IssuerSettings> options)
     {
         _repositories = repositories;
         _identity = identityService.IdentityData;
@@ -244,6 +246,11 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
         {
             throw ConflictException.Create(CompanyDataErrors.EMPTY_VERSION);
         }
+
+        if (data.ProcessId is not null)
+        {
+            throw UnexpectedConditionException.Create(CompanyDataErrors.ALREADY_LINKED_PROCESS);
+        }
     }
 
     private DateTimeOffset GetExpiryDate(DateTimeOffset? expiryDate)
@@ -264,7 +271,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
     public async Task RejectCredential(Guid credentialId, CancellationToken cancellationToken)
     {
         var companySsiRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var (exists, status, type) = await companySsiRepository.GetSsiRejectionData(credentialId).ConfigureAwait(false);
+        var (exists, status, type, processId, processStepIds) = await companySsiRepository.GetSsiRejectionData(credentialId).ConfigureAwait(false);
         if (!exists)
         {
             throw NotFoundException.Create(CompanyDataErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
@@ -279,6 +286,14 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
         var content = JsonSerializer.Serialize(new { Type = type, CredentialId = credentialId }, Options);
         await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
 
+        var mailParameters = new Dictionary<string, string>
+        {
+            { "requestName", typeValue },
+            { "reason", "Declined by the Operator" }
+        };
+
+        await _portalService.TriggerMail("CredentialRejected", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
+
         companySsiRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
                 c.CompanySsiDetailStatusId = status;
@@ -289,15 +304,17 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
                 c.DateLastChanged = _dateTimeProvider.OffsetNow;
             });
 
-        await _repositories.SaveAsync().ConfigureAwait(false);
-
-        var mailParameters = new Dictionary<string, string>
+        if (processId is not null)
         {
-            { "requestName", typeValue },
-            { "reason", "Declined by the Operator" }
-        };
+            _repositories.GetInstance<IProcessStepRepository>().AttachAndModifyProcessSteps(
+                processStepIds.Select(p => new ValueTuple<Guid, Action<ProcessStep>?, Action<ProcessStep>>(
+                    p,
+                    ps => ps.ProcessStepStatusId = ProcessStepStatusId.TODO,
+                    ps => ps.ProcessStepStatusId = ProcessStepStatusId.SKIPPED
+                )));
+        }
 
-        await _portalService.TriggerMail("CredentialRejected", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
+        await _repositories.SaveAsync().ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -407,7 +424,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
     {
         var client = _clientFactory.CreateClient("didDocumentDownload");
-        var result = await client.GetAsync(didDocumentLocation, cancellationToken)
+        var result = await client.GetAsync(HttpUtility.HtmlEncode(didDocumentLocation), cancellationToken)
             .CatchingIntoServiceExceptionFor("get-did-document").ConfigureAwait(false);
         var did = await result.Content.ReadFromJsonAsync<DidDocument>(Options, cancellationToken).ConfigureAwait(false);
         if (did == null)

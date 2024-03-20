@@ -20,14 +20,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
 
 /// <summary>
 /// Extension method to register the expiry check service and dependent services
 /// </summary>
-[ExcludeFromCodeCoverage]
 public static class ExpiryCheckServiceExtensions
 {
     /// <summary>

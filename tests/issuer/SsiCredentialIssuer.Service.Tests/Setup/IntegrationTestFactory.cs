@@ -44,7 +44,7 @@ using Testcontainers.PostgreSql;
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.Setup;
 
-public class IntegrationTestFactory : WebApplicationFactory<CredentialBusinessLogic>, IAsyncLifetime
+public class IntegrationTestFactory : WebApplicationFactory<IssuerBusinessLogic>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _container = new PostgreSqlBuilder()
         .WithDatabase("test_db")
