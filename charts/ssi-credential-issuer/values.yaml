@@ -153,49 +153,6 @@ existingSecret: ""
 
 dotnetEnvironment: "Production"
 
-centralidp:
-  # -- Provide centralidp base address (CX IAM), without trailing '/auth'.
-  address: "https://centralidp.example.org"
-  authRealm: "CX-Central"
-  jwtBearerOptions:
-    requireHttpsMetadata: "true"
-    metadataPath: "/auth/realms/CX-Central/.well-known/openid-configuration"
-    tokenValidationParameters:
-      validIssuerPath: "/auth/realms/CX-Central"
-      # -- TODO: Add Client
-      validAudience: "ClXX-CX-SSI"
-    refreshInterval: "00:00:30"
-  tokenPath: "/auth/realms/CX-Central/protocol/openid-connect/token"
-  # -- Flag if the api should be used with an leading /auth path
-  useAuthTrail: true
-
-ingress:
-  # -- SSI Credential Issuer ingress parameters,
-  # enable ingress record generation for ssi-credential-issuer.
-  enabled: false
-  # className: "nginx"
-  ## Optional annotations when using the nginx ingress class
-  # annotations:
-  #   nginx.ingress.kubernetes.io/use-regex: "true"
-  #   nginx.ingress.kubernetes.io/enable-cors: "true"
-  #   nginx.ingress.kubernetes.io/proxy-body-size: "8m"
-  #   # -- Provide CORS allowed origin.
-  #   nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
-  tls:
-    # -- Provide tls secret.
-    - secretName: ""
-      # -- Provide host for tls secret.
-      hosts:
-        - ""
-  hosts:
-    # -- Provide default path for the ingress record.
-    - host: ""
-      paths:
-        - path: "/api/issuer"
-          pathType: "Prefix"
-          backend:
-            port: 8080
-
 dbConnection:
   schema: "issuer"
   sslMode: "Disable"
@@ -258,6 +215,50 @@ externalDatabase:
   existingSecret: "issuer-external-db"
   # -- Name of an existing secret key containing the database credentials.
   existingSecretPasswordKey: "password"
+
+# -- Provide details about centralidp (CX IAM) Keycloak instance.
+centralidp:
+  # -- Provide centralidp base address (CX IAM), without trailing '/auth'.
+  address: "https://centralidp.example.org"
+  authRealm: "CX-Central"
+  jwtBearerOptions:
+    requireHttpsMetadata: "true"
+    metadataPath: "/auth/realms/CX-Central/.well-known/openid-configuration"
+    tokenValidationParameters:
+      validIssuerPath: "/auth/realms/CX-Central"
+      # -- TODO: Add Client
+      validAudience: "ClXX-CX-SSI"
+    refreshInterval: "00:00:30"
+  tokenPath: "/auth/realms/CX-Central/protocol/openid-connect/token"
+  # -- Flag if the api should be used with an leading /auth path
+  useAuthTrail: true
+
+ingress:
+  # -- SSI Credential Issuer ingress parameters,
+  # enable ingress record generation for ssi-credential-issuer.
+  enabled: false
+  # className: "nginx"
+  ## Optional annotations when using the nginx ingress class
+  # annotations:
+  #   nginx.ingress.kubernetes.io/use-regex: "true"
+  #   nginx.ingress.kubernetes.io/enable-cors: "true"
+  #   nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+  #   # -- Provide CORS allowed origin.
+  #   nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
+  tls:
+    # -- Provide tls secret.
+    - secretName: ""
+      # -- Provide host for tls secret.
+      hosts:
+        - ""
+  hosts:
+    # -- Provide default path for the ingress record.
+    - host: ""
+      paths:
+        - path: "/api/issuer"
+          pathType: "Prefix"
+          backend:
+            port: 8080
 
 portContainer: 8080
 
