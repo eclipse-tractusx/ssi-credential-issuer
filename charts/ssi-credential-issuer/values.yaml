@@ -82,6 +82,8 @@ issuermigrations:
     testDataPaths: "Seeder/Data"
   logging:
     default: "Information"
+  processIdentity:
+    identityId: ac1cf001-7fbc-1f2f-817f-bce058020006
 
 processesworker:
   name: "processesworker"
@@ -107,7 +109,7 @@ processesworker:
     # -- Client-secret for portal client-id. Secret-key 'portal-client-secret'.
     clientSecret: ""
   processIdentity:
-    identityId: d21d2e8a-fe35-483c-b2b8-4100ed7f0953
+    identityId: ac1cf001-7fbc-1f2f-817f-bce058020006
   wallet:
     scope: "openid"
     grantType: "client_credentials"
@@ -140,7 +142,7 @@ credentialExpiry:
       cpu: 45m
       memory: 105M
   processIdentity:
-    identityId: d21d2e8a-fe35-483c-b2b8-4100ed7f0953
+    identityId: ac1cf001-7fbc-1f2f-817f-bce058020006
   logging:
     default: "Information"
   expiry:

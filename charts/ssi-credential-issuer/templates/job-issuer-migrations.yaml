@@ -69,8 +69,8 @@ spec:
             value: "{{ .Values.issuermigrations.seeding.testDataPaths }}"
           - name: "SERILOG__MINIMUMLEVEL__Default"
             value: "{{ .Values.issuermigrations.logging.default }}"
-          - name: "PROCESSESIDENTITY__IDENTITYID"
-            value: "{{ .Values.processesworker.processIdentity.identityId }}"
+          - name: "PROCESSIDENTITY__IDENTITYID"
+            value: "{{ .Values.issuermigrations.processIdentity.identityId }}"
         ports:
         - name: http
           containerPort: {{ .Values.portContainer }}
