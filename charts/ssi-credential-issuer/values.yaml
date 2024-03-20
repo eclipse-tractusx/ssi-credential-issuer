@@ -208,7 +208,7 @@ externalDatabase:
   # -- Database port number.
   port: 5432
   # -- Non-root username for issuer.
-  user: "issuer"
+  username: "issuer"
   # -- Database name.
   database: "issuer"
   # -- Password for the non-root username (default 'issuer'). Secret-key 'password'.
