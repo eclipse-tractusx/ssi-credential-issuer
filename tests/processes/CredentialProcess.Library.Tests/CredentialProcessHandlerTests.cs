@@ -1,3 +1,22 @@
+/********************************************************************************
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ********************************************************************************/
+
 using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
@@ -11,7 +30,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
-using System.Text;
 using System.Text.Json;
 using Xunit;
 
@@ -118,7 +136,7 @@ public class CredentialProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetExternalCredentialAndKindId(_credentialId))
-            .Returns(new ValueTuple<Guid?, VerifiedCredentialTypeKindId, EncryptionTransformationData, string?>());
+            .Returns(default((Guid?, VerifiedCredentialTypeKindId, bool, string?)));
         async Task Act() => await _sut.SaveCredentialDocument(_credentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Act
@@ -134,7 +152,7 @@ public class CredentialProcessHandlerTests
         // Arrange
         var externalCredentialId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetExternalCredentialAndKindId(_credentialId))
-            .Returns(new ValueTuple<Guid?, VerifiedCredentialTypeKindId, EncryptionTransformationData, string?>(externalCredentialId, VerifiedCredentialTypeKindId.BPN, _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
+            .Returns((externalCredentialId, VerifiedCredentialTypeKindId.BPN, true, "https://example.org"));
 
         // Act
         var result = await _sut.SaveCredentialDocument(_credentialId, CancellationToken.None).ConfigureAwait(false);
