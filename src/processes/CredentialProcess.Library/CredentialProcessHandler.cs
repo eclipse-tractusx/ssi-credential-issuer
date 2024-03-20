@@ -70,7 +70,7 @@ public class CredentialProcessHandler : ICredentialProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> SaveCredentialDocument(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (externalCredentialId, kindId, encryptionInformation, callbackUrl) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(false);
+        var (externalCredentialId, kindId, hasEncryptionInformation, callbackUrl) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(false);
         if (externalCredentialId == null)
         {
             throw new ConflictException("ExternalCredentialId must be set here");
@@ -79,9 +79,9 @@ public class CredentialProcessHandler : ICredentialProcessHandler
         await _walletBusinessLogic.GetCredential(credentialId, externalCredentialId.Value, kindId, cancellationToken).ConfigureAwait(false);
         var nextProcessStep = callbackUrl == null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1);
         return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
-            encryptionInformation.Secret == null || encryptionInformation.InitializationVector == null || encryptionInformation.EncryptionMode == null ?
-                nextProcessStep :
-                Enumerable.Repeat(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, 1),
+            hasEncryptionInformation
+                ? Enumerable.Repeat(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, 1)
+                : nextProcessStep,
             ProcessStepStatusId.DONE,
             false,
             null);
@@ -105,7 +105,7 @@ public class CredentialProcessHandler : ICredentialProcessHandler
             throw new ConflictException("Wallet secret must be set");
         }
 
-        await _walletBusinessLogic.CreateCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret!, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credential, cancellationToken).ConfigureAwait(false);
+        await _walletBusinessLogic.CreateCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credential, cancellationToken).ConfigureAwait(false);
         return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
             callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
             ProcessStepStatusId.DONE,

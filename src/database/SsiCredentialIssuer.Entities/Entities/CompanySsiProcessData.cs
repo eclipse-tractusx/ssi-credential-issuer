@@ -43,7 +43,7 @@ public class CompanySsiProcessData
     public string? ClientId { get; set; }
     public byte[]? ClientSecret { get; set; }
     public byte[]? InitializationVector { get; set; }
-    public int EncryptionMode { get; set; }
+    public int? EncryptionMode { get; set; }
     public string? HolderWalletUrl { get; set; }
     public string? CallbackUrl { get; set; }
     public virtual CompanySsiDetail? CompanySsiDetail { get; private set; }

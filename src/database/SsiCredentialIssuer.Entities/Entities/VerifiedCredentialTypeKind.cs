@@ -36,7 +36,6 @@ public class VerifiedCredentialTypeKind
     {
         Id = verifiedCredentialTypeKindId;
         Label = verifiedCredentialTypeKindId.ToString();
-        VerifiedCredentialTypeAssignedKinds = new HashSet<VerifiedCredentialTypeAssignedKind>();
     }
 
     public VerifiedCredentialTypeKindId Id { get; private set; }

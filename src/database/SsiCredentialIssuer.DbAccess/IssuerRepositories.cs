@@ -43,7 +43,7 @@ public class IssuerRepositories : IIssuerRepositories
 
     public RepositoryType GetInstance<RepositoryType>()
     {
-        Object? repository = default;
+        object? repository = default;
 
         if (Types.TryGetValue(typeof(RepositoryType), out var createFunc))
         {

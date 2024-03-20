@@ -108,11 +108,15 @@ public class WalletBusinessLogic : IWalletBusinessLogic
             {
                 c.ClientId = clientId;
                 c.ClientSecret = encryptionInformation.Secret;
+                c.InitializationVector = encryptionInformation.InitializationVector;
+                c.EncryptionMode = encryptionInformation.EncryptionMode;
             },
             c =>
             {
                 c.ClientId = null;
                 c.ClientSecret = null;
+                c.InitializationVector = null;
+                c.EncryptionMode = null;
             });
     }
 }

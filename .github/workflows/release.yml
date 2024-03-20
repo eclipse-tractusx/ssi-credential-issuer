@@ -212,4 +212,3 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
           repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_EXPIRY }}
           readme-filepath: "./docker/notice-credential-expiry-app.md"
-        

@@ -35,7 +35,6 @@ public class ExpiryCheckType
     {
         Id = expiryCheckId;
         Label = expiryCheckId.ToString();
-        CompanySsiDetails = new HashSet<CompanySsiDetail>();
     }
 
     public ExpiryCheckTypeId Id { get; private set; }

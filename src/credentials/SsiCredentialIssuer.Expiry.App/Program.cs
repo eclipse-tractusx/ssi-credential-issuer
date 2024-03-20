@@ -25,7 +25,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 using Serilog;
-using System.Diagnostics.CodeAnalysis;
 
 LoggingExtensions.EnsureInitialized();
 Log.Information("Building worker");

@@ -61,13 +61,13 @@ public class CredentialRepository : ICredentialRepository
             .Select(c => new ValueTuple<VerifiedCredentialTypeKindId, JsonDocument>(c.CompanySsiProcessData!.CredentialTypeKindId, c.CompanySsiProcessData.Schema))
             .SingleOrDefaultAsync();
 
-    public Task<(Guid? ExternalCredentialId, VerifiedCredentialTypeKindId KindId, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetExternalCredentialAndKindId(Guid credentialId) =>
+    public Task<(Guid? ExternalCredentialId, VerifiedCredentialTypeKindId KindId, bool HasEncryptionInformation, string? CallbackUrl)> GetExternalCredentialAndKindId(Guid credentialId) =>
         _dbContext.CompanySsiDetails
             .Where(c => c.Id == credentialId)
-            .Select(c => new ValueTuple<Guid?, VerifiedCredentialTypeKindId, EncryptionTransformationData, string?>(
+            .Select(c => new ValueTuple<Guid?, VerifiedCredentialTypeKindId, bool, string?>(
                 c.ExternalCredentialId,
                 c.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId,
-                new EncryptionTransformationData(c.CompanySsiProcessData!.ClientSecret, c.CompanySsiProcessData.InitializationVector, c.CompanySsiProcessData.EncryptionMode),
+                c.CompanySsiProcessData!.ClientSecret != null && c.CompanySsiProcessData.InitializationVector != null && c.CompanySsiProcessData.EncryptionMode != null,
                 c.CompanySsiProcessData!.CallbackUrl))
             .SingleOrDefaultAsync();
 

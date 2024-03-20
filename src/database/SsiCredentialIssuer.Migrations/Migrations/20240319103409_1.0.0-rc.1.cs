@@ -541,7 +541,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                     client_id = table.Column<string>(type: "text", nullable: true),
                     client_secret = table.Column<byte[]>(type: "bytea", nullable: true),
                     initialization_vector = table.Column<byte[]>(type: "bytea", nullable: true),
-                    encryption_mode = table.Column<int>(type: "integer", nullable: false),
+                    encryption_mode = table.Column<int>(type: "integer", nullable: true),
                     holder_wallet_url = table.Column<string>(type: "text", nullable: true),
                     callback_url = table.Column<string>(type: "text", nullable: true)
                 },
