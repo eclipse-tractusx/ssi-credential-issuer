@@ -572,7 +572,8 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                 {
                     { 1, "PENDING" },
                     { 2, "ACTIVE" },
-                    { 3, "INACTIVE" }
+                    { 3, "REVOKED" },
+                    { 4, "INACTIVE" }
                 });
 
             migrationBuilder.InsertData(

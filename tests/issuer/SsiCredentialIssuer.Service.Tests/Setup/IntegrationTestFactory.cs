@@ -112,7 +112,7 @@ public class IntegrationTestFactory : WebApplicationFactory<CredentialBusinessLo
         optionsBuilder.UseNpgsql(
             _container.GetConnectionString(),
             x => x.MigrationsAssembly(typeof(BatchInsertSeeder).Assembly.GetName().Name)
-                .MigrationsHistoryTable("__efmigrations_history_hub", "public")
+                .MigrationsHistoryTable("__efmigrations_history_issuer", "public")
         );
         var context = new IssuerDbContext(optionsBuilder.Options, new NoAuditHandler());
         context.Database.Migrate();

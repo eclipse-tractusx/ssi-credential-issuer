@@ -23,5 +23,6 @@ public enum CompanySsiDetailStatusId
 {
     PENDING = 1,
     ACTIVE = 2,
-    INACTIVE = 3
+    REVOKED = 3,
+    INACTIVE = 4
 }

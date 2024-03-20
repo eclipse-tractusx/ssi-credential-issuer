@@ -59,7 +59,7 @@ public class TestDbFixture : IAsyncLifetime
         optionsBuilder.UseNpgsql(
             _container.GetConnectionString(),
             x => x.MigrationsAssembly(typeof(BatchInsertSeeder).Assembly.GetName().Name)
-                .MigrationsHistoryTable("__efmigrations_history_portal")
+                .MigrationsHistoryTable("__efmigrations_history_issuer")
         );
         var context = new IssuerDbContext(optionsBuilder.Options, new AuditHandlerV1(new FakeIdentityIdService(), dateTimeProvider ?? new UtcDateTimeProvider()));
         await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
@@ -85,7 +85,7 @@ public class TestDbFixture : IAsyncLifetime
         optionsBuilder.UseNpgsql(
             _container.GetConnectionString(),
             x => x.MigrationsAssembly(typeof(BatchInsertSeeder).Assembly.GetName().Name)
-                .MigrationsHistoryTable("__efmigrations_history_portal")
+                .MigrationsHistoryTable("__efmigrations_history_issuer")
         );
         var context = new IssuerDbContext(optionsBuilder.Options, new AuditHandlerV1(new FakeIdentityIdService(), new UtcDateTimeProvider()));
         await context.Database.MigrateAsync();

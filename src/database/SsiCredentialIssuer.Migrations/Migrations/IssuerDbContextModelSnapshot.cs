@@ -331,6 +331,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         new
                         {
                             Id = 3,
+                            Label = "REVOKED"
+                        },
+                        new
+                        {
+                            Id = 4,
                             Label = "INACTIVE"
                         });
                 });
@@ -357,7 +362,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("credential_type_kind_id");
 
-                    b.Property<int>("EncryptionMode")
+                    b.Property<int?>("EncryptionMode")
                         .HasColumnType("integer")
                         .HasColumnName("encryption_mode");
 

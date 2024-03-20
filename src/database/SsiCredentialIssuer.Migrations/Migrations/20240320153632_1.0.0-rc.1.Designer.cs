@@ -32,7 +32,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240319103409_1.0.0-rc.1")]
+    [Migration("20240320153632_1.0.0-rc.1")]
     partial class _100rc1
     {
         /// <inheritdoc />
@@ -338,6 +338,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         new
                         {
                             Id = 3,
+                            Label = "REVOKED"
+                        },
+                        new
+                        {
+                            Id = 4,
                             Label = "INACTIVE"
                         });
                 });
@@ -364,7 +369,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("credential_type_kind_id");
 
-                    b.Property<int>("EncryptionMode")
+                    b.Property<int?>("EncryptionMode")
                         .HasColumnType("integer")
                         .HasColumnName("encryption_mode");
 
