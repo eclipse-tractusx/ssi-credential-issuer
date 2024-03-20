@@ -324,7 +324,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             )
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.BPN, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(requestData.BusinessPartnerNumber, VerifiedCredentialTypeKindId.BPN, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     public async Task<Guid> CreateMembershipCredential(CreateMembershipCredentialRequest requestData, CancellationToken cancellationToken)
@@ -348,7 +348,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             )
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     public async Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken)
@@ -401,7 +401,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             )
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(_identity.Bpnl, VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
@@ -418,7 +418,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
         return did.Id;
     }
 
-    private async Task<Guid> HandleCredentialProcessCreation(VerifiedCredentialTypeKindId kindId, VerifiedCredentialTypeId typeId, string schema, TechnicalUserDetails? technicalUserDetails, Guid? detailVersionId, string? callbackUrl, ICompanySsiDetailsRepository companyCredentialDetailsRepository)
+    private async Task<Guid> HandleCredentialProcessCreation(string bpnl, VerifiedCredentialTypeKindId kindId, VerifiedCredentialTypeId typeId, string schema, TechnicalUserDetails? technicalUserDetails, Guid? detailVersionId, string? callbackUrl, ICompanySsiDetailsRepository companyCredentialDetailsRepository)
     {
         var documentContent = System.Text.Encoding.UTF8.GetBytes(schema);
         var hash = SHA512.HashData(documentContent);
@@ -439,7 +439,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
         }
 
         var ssiDetailId = companyCredentialDetailsRepository.CreateSsiDetails(
-            _identity.Bpnl,
+            bpnl,
             typeId,
             docId,
             status,

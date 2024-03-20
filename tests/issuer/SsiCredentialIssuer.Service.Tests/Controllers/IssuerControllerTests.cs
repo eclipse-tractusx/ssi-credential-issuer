@@ -26,7 +26,7 @@ using System.Text.Json.Serialization;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.Controllers;
 
-public class CredentialControllerTests : IClassFixture<IntegrationTestFactory>
+public class IssuerControllerTests : IClassFixture<IntegrationTestFactory>
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -38,7 +38,7 @@ public class CredentialControllerTests : IClassFixture<IntegrationTestFactory>
     private const string BaseUrl = "/api/issuer";
     private readonly HttpClient _client;
 
-    public CredentialControllerTests(IntegrationTestFactory factory)
+    public IssuerControllerTests(IntegrationTestFactory factory)
     {
         _client = factory.CreateClient();
     }

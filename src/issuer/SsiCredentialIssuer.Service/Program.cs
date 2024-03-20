@@ -60,5 +60,5 @@ WebApplicationBuildRunner
     {
         app.MapGroup("/api")
             .WithOpenApi()
-            .MapCompanyDataApi();
+            .MapIssuerApi();
     });
