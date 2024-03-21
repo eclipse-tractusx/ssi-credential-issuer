@@ -45,7 +45,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
             .Where(t => t.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.FRAMEWORK)
             .Select(t => new
             {
-                UseCase = t.VerifiedCredentialTypeAssignedUseCase!.UseCase,
+                t.VerifiedCredentialTypeAssignedUseCase!.UseCase,
                 TypeId = t.Id,
                 ExternalTypeDetails = t.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalType!.VerifiedCredentialExternalTypeDetailVersions
             })
@@ -126,9 +126,9 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
             .ToAsyncEnumerable();
 
     /// <inheritdoc />
-    public CompanySsiDetail CreateSsiDetails(string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, Guid docId, CompanySsiDetailStatusId companySsiDetailStatusId, Guid userId, Action<CompanySsiDetail>? setOptionalFields)
+    public CompanySsiDetail CreateSsiDetails(string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, Guid userId, Action<CompanySsiDetail>? setOptionalFields)
     {
-        var detail = new CompanySsiDetail(Guid.NewGuid(), bpnl, verifiedCredentialTypeId, companySsiDetailStatusId, userId, DateTimeOffset.UtcNow);
+        var detail = new CompanySsiDetail(Guid.NewGuid(), bpnl, verifiedCredentialTypeId, companySsiDetailStatusId, issuerBpn, userId, DateTimeOffset.UtcNow);
         setOptionalFields?.Invoke(detail);
         return _context.CompanySsiDetails.Add(detail).Entity;
     }
@@ -165,7 +165,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
                 x.VerifiedCredentialTypeKindId != VerifiedCredentialTypeKindId.FRAMEWORK)
             .Select(x => new ValueTuple<bool, IEnumerable<Guid>>(
                 true,
-                x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalType!.VerifiedCredentialExternalTypeDetailVersions.Select(x => x.Id)
+                x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalType!.VerifiedCredentialExternalTypeDetailVersions.Select(v => v.Id)
             ))
             .SingleOrDefaultAsync();
 
@@ -216,7 +216,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
     /// <inheritdoc />
     public void AttachAndModifyCompanySsiDetails(Guid id, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields)
     {
-        var entity = new CompanySsiDetail(id, null!, default, default, Guid.Empty, default);
+        var entity = new CompanySsiDetail(id, null!, default, default, null!, Guid.Empty, DateTimeOffset.MinValue);
         initialize?.Invoke(entity);
         _context.Attach(entity);
         updateFields.Invoke(entity);
@@ -270,7 +270,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
     }
 
     public void RemoveSsiDetail(Guid companySsiDetailId) =>
-        _context.CompanySsiDetails.Remove(new CompanySsiDetail(companySsiDetailId, null!, default, default, Guid.Empty, default));
+        _context.CompanySsiDetails.Remove(new CompanySsiDetail(companySsiDetailId, null!, default, default, null!, Guid.Empty, DateTimeOffset.MinValue));
 
     public void CreateProcessData(Guid companySsiDetailId, JsonDocument schema, VerifiedCredentialTypeKindId credentialTypeKindId, Action<CompanySsiProcessData>? setOptionalFields)
     {

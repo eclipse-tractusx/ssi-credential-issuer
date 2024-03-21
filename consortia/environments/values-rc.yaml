@@ -42,6 +42,8 @@ issuer:
     tag: "rc"
   imagePullPolicy: "Always"
   swaggerEnabled: true
+  credential:
+    issuerBpn: "BPNL00000003CRHK"
 
 issuermigrations:
   image:

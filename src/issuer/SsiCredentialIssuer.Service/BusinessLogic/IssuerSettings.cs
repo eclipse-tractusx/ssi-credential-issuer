@@ -28,6 +28,7 @@ public class IssuerSettings
     /// <summary>
     /// The Did of the issuer
     /// </summary>
+    [Required(AllowEmptyStrings = false)]
     public string IssuerDid { get; set; } = null!;
 
     /// <summary>
@@ -40,14 +41,19 @@ public class IssuerSettings
 
     [Required]
     public int EncrptionConfigIndex { get; set; }
+
+    [Required(AllowEmptyStrings = false)]
+    public string StatusListUrl { get; set; } = null!;
+
+    [Required(AllowEmptyStrings = false)]
+    public string IssuerBpn { get; set; } = null!;
 }
 
 public static class CompanyDataSettingsExtensions
 {
     public static IServiceCollection ConfigureCredentialSettings(
         this IServiceCollection services,
-        IConfigurationSection section
-    )
+        IConfigurationSection section)
     {
         services.AddOptions<IssuerSettings>()
             .Bind(section)

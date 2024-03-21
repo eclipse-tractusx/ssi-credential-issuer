@@ -196,7 +196,7 @@ public class CompanySsiDetailsRepositoryTests
         var (sut, context) = await CreateSutWithContext();
 
         // Act
-        sut.CreateSsiDetails(new("9f5b9934-4014-4099-91e9-7b1aee696b03"), VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, new Guid("00000000-0000-0000-0000-000000000001"), CompanySsiDetailStatusId.PENDING, _userId, null);
+        sut.CreateSsiDetails(new("9f5b9934-4014-4099-91e9-7b1aee696b03"), VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, "BPNL0001ISSUER", _userId, null);
 
         // Assert
         context.ChangeTracker.HasChanges().Should().BeTrue();

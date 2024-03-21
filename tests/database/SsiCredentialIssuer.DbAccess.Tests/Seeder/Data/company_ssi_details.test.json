@@ -2,6 +2,7 @@
   {
     "id": "9f5b9934-4014-4099-91e9-7b1aee696b03",
     "bpnl": "BPNL00000003AYRE",
+    "issuer_bpn": "BPNL000003ISSUER",
     "verified_credential_type_id": 1,
     "company_ssi_detail_status_id": 1,
     "document_id": "e020787d-1e04-4c0b-9c06-bd1cd44724b1",
@@ -16,6 +17,7 @@
   {
     "id": "9f5b9934-4014-4099-91e9-7b1aee696b04",
     "bpnl": "BPNL00000003AYRE",
+    "issuer_bpn": "BPNL000003ISSUER",
     "verified_credential_type_id": 2,
     "company_ssi_detail_status_id": 1,
     "document_id": "5adbdf90-c6ef-47a5-b596-2f00a731c39b",
@@ -28,6 +30,7 @@
   {
     "id": "9f5b9934-4014-4099-91e9-7b1aee696b05",
     "bpnl": "BPNL00000003AYRE",
+    "issuer_bpn": "BPNL000003ISSUER",
     "verified_credential_type_id": 4,
     "company_ssi_detail_status_id": 1,
     "document_id": "5adbdf90-c6ef-47a5-b596-2f00a731c39a",
@@ -40,6 +43,7 @@
   {
     "id": "9f5b9934-4014-4099-91e9-7b1aee696b06",
     "bpnl": "BPNL00000001LLHA",
+    "issuer_bpn": "BPNL000003ISSUER",
     "verified_credential_type_id": 1,
     "company_ssi_detail_status_id": 1,
     "document_id": "3291cae8-3c7b-4862-8cec-93ea0dc8c61e",
@@ -52,6 +56,7 @@
   {
     "id": "9f5b9934-4014-4099-91e9-7b1aee696b07",
     "bpnl": "BPNL00000003AYRE",
+    "issuer_bpn": "BPNL000003ISSUER",
     "verified_credential_type_id": 3,
     "company_ssi_detail_status_id": 4,
     "document_id": "e020787d-1e04-4c0b-9c06-bd1cd44724b2",
@@ -64,6 +69,7 @@
   {
     "id": "9f5b9934-4014-4099-91e9-7b1aee696b08",
     "bpnl": "BPNL00000003AYRE",
+    "issuer_bpn": "BPNL000003ISSUER",
     "verified_credential_type_id": 4,
     "company_ssi_detail_status_id": 4,
     "document_id": "9685f744-9d90-4102-a949-fcd0bb86f954",
@@ -76,6 +82,7 @@
   {
     "id": "9f5b9934-4014-4099-91e9-7b1aee696b09",
     "bpnl": "BPNL00000003AYRE",
+    "issuer_bpn": "BPNL000003ISSUER",
     "verified_credential_type_id": 4,
     "company_ssi_detail_status_id": 4,
     "document_id": "88793f9f-c5a4-4621-847b-3d47cd839283",

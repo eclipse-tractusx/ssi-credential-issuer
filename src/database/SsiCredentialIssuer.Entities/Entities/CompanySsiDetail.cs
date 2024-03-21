@@ -30,22 +30,25 @@ public class CompanySsiDetail : IAuditableV1, IBaseEntity
     private CompanySsiDetail()
     {
         Bpnl = null!;
+        IssuerBpn = null!;
         Documents = new HashSet<Document>();
     }
 
-    public CompanySsiDetail(Guid id, string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, Guid creatorUserId, DateTimeOffset dateCreated)
+    public CompanySsiDetail(Guid id, string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, Guid creatorUserId, DateTimeOffset dateCreated)
         : this()
     {
         Id = id;
         Bpnl = bpnl;
         VerifiedCredentialTypeId = verifiedCredentialTypeId;
         CompanySsiDetailStatusId = companySsiDetailStatusId;
+        IssuerBpn = issuerBpn;
         CreatorUserId = creatorUserId;
         DateCreated = dateCreated;
     }
 
     public Guid Id { get; set; }
     public string Bpnl { get; set; }
+    public string IssuerBpn { get; set; }
     public VerifiedCredentialTypeId VerifiedCredentialTypeId { get; set; }
     public CompanySsiDetailStatusId CompanySsiDetailStatusId { get; set; }
     public DateTimeOffset DateCreated { get; set; }

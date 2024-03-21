@@ -47,13 +47,12 @@ public interface ICompanySsiDetailsRepository
     /// </summary>
     /// <param name="bpnl">Id of the company</param>
     /// <param name="verifiedCredentialTypeId">Id of the credential types</param>
-    /// <param name="docId">id of the document</param>
     /// <param name="companySsiDetailStatusId">id of detail status</param>
+    /// <param name="issuerBpn">bpn of the credential issuer</param>
     /// <param name="userId">Id of the creator</param>
-    /// <param name="processId">Id of the linked Process</param>
     /// <param name="setOptionalFields">sets the optional fields</param>
     /// <returns>The created entity</returns>
-    CompanySsiDetail CreateSsiDetails(string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, Guid docId, CompanySsiDetailStatusId companySsiDetailStatusId, Guid userId, Action<CompanySsiDetail>? setOptionalFields);
+    CompanySsiDetail CreateSsiDetails(string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, Guid userId, Action<CompanySsiDetail>? setOptionalFields);
 
     /// <summary>
     /// Checks whether the credential details are already exists for the company and the given version

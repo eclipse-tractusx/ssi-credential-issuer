@@ -54,7 +54,7 @@ WebApplicationBuildRunner
                 .AddCredentialService(builder.Configuration.GetSection("Credential"))
                 .AddPortalService(builder.Configuration.GetSection("Portal"))
                 .AddSingleton<IErrorMessageService, ErrorMessageService>()
-                .AddSingleton<IErrorMessageContainer, CompanyDataErrorMessageContainer>();
+                .AddSingleton<IErrorMessageContainer, CredentialErrorMessageContainer>();
         },
     (app, _) =>
     {

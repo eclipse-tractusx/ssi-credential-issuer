@@ -43,6 +43,7 @@ public class IssuerBusinessLogicTests
 {
     private static readonly Guid CredentialId = Guid.NewGuid();
     private static readonly string Bpnl = "BPNL00000001TEST";
+    private static readonly string IssuerBpnl = "BPNL000001ISSUER";
 
     private readonly IFixture _fixture;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
@@ -95,7 +96,9 @@ public class IssuerBusinessLogicTests
             }, 1),
             MaxPageSize = 15,
             IssuerDid = "did:web:example:org:bpn:18273z682734rt",
-            EncrptionConfigIndex = 0
+            IssuerBpn = IssuerBpnl,
+            EncrptionConfigIndex = 0,
+            StatusListUrl = "https://example.org/statuslist"
         });
 
         _sut = new IssuerBusinessLogic(_issuerRepositories, _identityService, _dateTimeProvider, _clientFactory, _portalService, options);
@@ -150,7 +153,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.SSI_DETAILS_NOT_FOUND.ToString());
+        ex.Message.Should().Be(CredentialErrors.SSI_DETAILS_NOT_FOUND.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -173,7 +176,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.CREDENTIAL_NOT_PENDING.ToString());
+        ex.Message.Should().Be(CredentialErrors.CREDENTIAL_NOT_PENDING.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -195,7 +198,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.BPN_NOT_SET.ToString());
+        ex.Message.Should().Be(CredentialErrors.BPN_NOT_SET.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -231,7 +234,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.EXPIRY_DATE_IN_PAST.ToString());
+        ex.Message.Should().Be(CredentialErrors.EXPIRY_DATE_IN_PAST.ToString());
 
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, A<NotificationTypeId>._, A<CancellationToken>._)).MustNotHaveHappened();
@@ -268,7 +271,7 @@ public class IssuerBusinessLogicTests
 
         // Assert
         var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(Act).ConfigureAwait(false);
-        ex.Message.Should().Be(CompanyDataErrors.CREDENTIAL_TYPE_NOT_FOUND.ToString());
+        ex.Message.Should().Be(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND.ToString());
     }
 
     [Fact]
@@ -299,7 +302,7 @@ public class IssuerBusinessLogicTests
 
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
             .MustNotHaveHappened();
-        ex.Message.Should().Be(CompanyDataErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET.ToString());
+        ex.Message.Should().Be(CredentialErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET.ToString());
     }
 
     [Fact]
@@ -335,7 +338,7 @@ public class IssuerBusinessLogicTests
 
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
             .MustNotHaveHappened();
-        ex.Message.Should().Be(CompanyDataErrors.ALREADY_LINKED_PROCESS.ToString());
+        ex.Message.Should().Be(CredentialErrors.ALREADY_LINKED_PROCESS.ToString());
     }
 
     [Theory]
@@ -362,7 +365,7 @@ public class IssuerBusinessLogicTests
             detailData
         );
 
-        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, typeId, CompanySsiDetailStatusId.PENDING, Guid.NewGuid(), DateTimeOffset.Now);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, typeId, CompanySsiDetailStatusId.PENDING, "", Guid.NewGuid(), DateTimeOffset.Now);
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetSsiApprovalData(CredentialId))
             .Returns(new ValueTuple<bool, SsiApprovalData>(true, data));
@@ -404,7 +407,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.SSI_DETAILS_NOT_FOUND.ToString());
+        ex.Message.Should().Be(CredentialErrors.SSI_DETAILS_NOT_FOUND.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -430,7 +433,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.CREDENTIAL_NOT_PENDING.ToString());
+        ex.Message.Should().Be(CredentialErrors.CREDENTIAL_NOT_PENDING.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -440,7 +443,7 @@ public class IssuerBusinessLogicTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, Guid.NewGuid(), DateTimeOffset.Now);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid(), DateTimeOffset.Now);
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetSsiRejectionData(CredentialId))
             .Returns(new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, Guid?, IEnumerable<Guid>>(
@@ -473,7 +476,7 @@ public class IssuerBusinessLogicTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, Guid.NewGuid(), DateTimeOffset.Now);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid(), DateTimeOffset.Now);
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetSsiRejectionData(CredentialId))
             .Returns(new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, Guid?, IEnumerable<Guid>>(
@@ -544,7 +547,7 @@ public class IssuerBusinessLogicTests
         // Assert
         A.CallTo(() => _documentRepository.CreateDocument("schema.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, A<Guid>._, CompanySsiDetailStatusId.ACTIVE, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();
@@ -577,7 +580,7 @@ public class IssuerBusinessLogicTests
         // Assert
         A.CallTo(() => _documentRepository.CreateDocument("schema.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, A<Guid>._, CompanySsiDetailStatusId.ACTIVE, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();
@@ -602,7 +605,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND.ToString());
+        ex.Message.Should().Be(CredentialErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND.ToString());
     }
 
     [Fact]
@@ -621,7 +624,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.EXPIRY_DATE_IN_PAST.ToString());
+        ex.Message.Should().Be(CredentialErrors.EXPIRY_DATE_IN_PAST.ToString());
     }
 
     [Fact]
@@ -640,7 +643,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.EMPTY_VERSION.ToString());
+        ex.Message.Should().Be(CredentialErrors.EMPTY_VERSION.ToString());
     }
 
     [Fact]
@@ -659,7 +662,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.EMPTY_TEMPLATE.ToString());
+        ex.Message.Should().Be(CredentialErrors.EMPTY_TEMPLATE.ToString());
     }
 
     [Fact]
@@ -678,7 +681,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.MULTIPLE_USE_CASES.ToString());
+        ex.Message.Should().Be(CredentialErrors.MULTIPLE_USE_CASES.ToString());
     }
 
     [Fact]
@@ -697,7 +700,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CompanyDataErrors.MULTIPLE_USE_CASES.ToString());
+        ex.Message.Should().Be(CredentialErrors.MULTIPLE_USE_CASES.ToString());
     }
 
     [Fact]
@@ -725,7 +728,7 @@ public class IssuerBusinessLogicTests
         // Assert
         A.CallTo(() => _documentRepository.CreateDocument("schema.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, A<Guid>._, CompanySsiDetailStatusId.PENDING, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();

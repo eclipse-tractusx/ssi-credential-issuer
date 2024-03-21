@@ -45,6 +45,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
 public class IssuerBusinessLogic : IIssuerBusinessLogic
 {
+    private const string StatusList = "StatusList2021";
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private static readonly IEnumerable<string> Context = new[] { "https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0" };
 
@@ -101,7 +102,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                                         d.ExpiryDate,
                                         d.Documents))
                                     .SingleOrDefault(),
-                                (InvalidOperationException _) => throw ConflictException.Create(CompanyDataErrors.MULTIPLE_SSI_DETAIL))))
+                                (InvalidOperationException _) => throw ConflictException.Create(CredentialErrors.MULTIPLE_SSI_DETAIL))))
                     .ToList()))
             .ToListAsync()
             .ConfigureAwait(false);
@@ -125,7 +126,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                                         d.ExpiryDate,
                                         d.Documents))
                                     .SingleOrDefault(),
-                                (InvalidOperationException _) => throw ConflictException.Create(CompanyDataErrors.MULTIPLE_SSI_DETAIL))))
+                                (InvalidOperationException _) => throw ConflictException.Create(CredentialErrors.MULTIPLE_SSI_DETAIL))))
                     .ToList()))
             .ToListAsync()
             .ConfigureAwait(false);
@@ -194,7 +195,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 c.ExpiryDate = expiry;
                 c.ProcessId = processId;
             });
-        var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CompanyDataErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
+        var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
         var content = JsonSerializer.Serialize(new { data.Type, CredentialId = credentialId }, Options);
         await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
         var mailParameters = new Dictionary<string, string>
@@ -219,37 +220,37 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     {
         if (!exists)
         {
-            throw NotFoundException.Create(CompanyDataErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
+            throw NotFoundException.Create(CredentialErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
         }
 
         if (data.Status != CompanySsiDetailStatusId.PENDING)
         {
-            throw ConflictException.Create(CompanyDataErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
+            throw ConflictException.Create(CredentialErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
         }
 
         if (string.IsNullOrWhiteSpace(data.Bpn))
         {
-            throw UnexpectedConditionException.Create(CompanyDataErrors.BPN_NOT_SET);
+            throw UnexpectedConditionException.Create(CredentialErrors.BPN_NOT_SET);
         }
 
         if (data.DetailData == null && data.Kind == VerifiedCredentialTypeKindId.FRAMEWORK)
         {
-            throw ConflictException.Create(CompanyDataErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET);
+            throw ConflictException.Create(CredentialErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET);
         }
 
         if (data.Kind != VerifiedCredentialTypeKindId.FRAMEWORK && data.Kind != VerifiedCredentialTypeKindId.MEMBERSHIP && data.Kind != VerifiedCredentialTypeKindId.BPN)
         {
-            throw ConflictException.Create(CompanyDataErrors.KIND_NOT_SUPPORTED, new ErrorParameter[] { new("kind", data.Kind != null ? data.Kind.Value.ToString() : "empty kind") });
+            throw ConflictException.Create(CredentialErrors.KIND_NOT_SUPPORTED, new ErrorParameter[] { new("kind", data.Kind != null ? data.Kind.Value.ToString() : "empty kind") });
         }
 
         if (data.Kind == VerifiedCredentialTypeKindId.FRAMEWORK && string.IsNullOrWhiteSpace(data.DetailData!.Version))
         {
-            throw ConflictException.Create(CompanyDataErrors.EMPTY_VERSION);
+            throw ConflictException.Create(CredentialErrors.EMPTY_VERSION);
         }
 
         if (data.ProcessId is not null)
         {
-            throw UnexpectedConditionException.Create(CompanyDataErrors.ALREADY_LINKED_PROCESS);
+            throw UnexpectedConditionException.Create(CredentialErrors.ALREADY_LINKED_PROCESS);
         }
     }
 
@@ -261,7 +262,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
         if (expiry < now)
         {
-            throw ConflictException.Create(CompanyDataErrors.EXPIRY_DATE_IN_PAST);
+            throw ConflictException.Create(CredentialErrors.EXPIRY_DATE_IN_PAST);
         }
 
         return expiry > future ? future : expiry;
@@ -274,15 +275,15 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var (exists, status, type, processId, processStepIds) = await companySsiRepository.GetSsiRejectionData(credentialId).ConfigureAwait(false);
         if (!exists)
         {
-            throw NotFoundException.Create(CompanyDataErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
+            throw NotFoundException.Create(CredentialErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
         }
 
         if (status != CompanySsiDetailStatusId.PENDING)
         {
-            throw ConflictException.Create(CompanyDataErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
+            throw ConflictException.Create(CredentialErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
         }
 
-        var typeValue = type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CompanyDataErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", type.ToString()) });
+        var typeValue = type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", type.ToString()) });
         var content = JsonSerializer.Serialize(new { Type = type, CredentialId = credentialId }, Options);
         await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
 
@@ -338,7 +339,10 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 holderDid,
                 requestData.BusinessPartnerNumber,
                 requestData.BusinessPartnerNumber
-            )
+            ),
+            new CredentialStatus(
+                _settings.StatusListUrl,
+                StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
         return await HandleCredentialProcessCreation(requestData.BusinessPartnerNumber, VerifiedCredentialTypeKindId.BPN, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
@@ -362,7 +366,10 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 holderDid,
                 requestData.HolderBpn,
                 requestData.MemberOf
-            )
+            ),
+            new CredentialStatus(
+                _settings.StatusListUrl,
+                StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
         return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
@@ -374,27 +381,27 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId).ConfigureAwait(false);
         if (!result.Exists)
         {
-            throw ControllerArgumentException.Create(CompanyDataErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialExternalTypeDetailId", requestData.UseCaseFrameworkId.ToString()) });
+            throw ControllerArgumentException.Create(CredentialErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialExternalTypeDetailId", requestData.UseCaseFrameworkId.ToString()) });
         }
 
         if (result.Expiry < _dateTimeProvider.OffsetNow)
         {
-            throw ControllerArgumentException.Create(CompanyDataErrors.EXPIRY_DATE_IN_PAST);
+            throw ControllerArgumentException.Create(CredentialErrors.EXPIRY_DATE_IN_PAST);
         }
 
         if (string.IsNullOrWhiteSpace(result.Version))
         {
-            throw ControllerArgumentException.Create(CompanyDataErrors.EMPTY_VERSION);
+            throw ControllerArgumentException.Create(CredentialErrors.EMPTY_VERSION);
         }
 
         if (string.IsNullOrWhiteSpace(result.Template))
         {
-            throw ControllerArgumentException.Create(CompanyDataErrors.EMPTY_TEMPLATE);
+            throw ControllerArgumentException.Create(CredentialErrors.EMPTY_TEMPLATE);
         }
 
         if (result.UseCase.Count() != 1)
         {
-            throw ControllerArgumentException.Create(CompanyDataErrors.MULTIPLE_USE_CASES);
+            throw ControllerArgumentException.Create(CredentialErrors.MULTIPLE_USE_CASES);
         }
 
         var useCase = result.UseCase.Single();
@@ -415,7 +422,10 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 useCase,
                 result.Template!,
                 result.Version!
-            )
+            ),
+            new CredentialStatus(
+                _settings.StatusListUrl,
+                StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
         return await HandleCredentialProcessCreation(_identity.Bpnl, VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
@@ -429,13 +439,21 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var did = await result.Content.ReadFromJsonAsync<DidDocument>(Options, cancellationToken).ConfigureAwait(false);
         if (did == null)
         {
-            throw ConflictException.Create(CompanyDataErrors.DID_NOT_SET);
+            throw ConflictException.Create(CredentialErrors.DID_NOT_SET);
         }
 
         return did.Id;
     }
 
-    private async Task<Guid> HandleCredentialProcessCreation(string bpnl, VerifiedCredentialTypeKindId kindId, VerifiedCredentialTypeId typeId, string schema, TechnicalUserDetails? technicalUserDetails, Guid? detailVersionId, string? callbackUrl, ICompanySsiDetailsRepository companyCredentialDetailsRepository)
+    private async Task<Guid> HandleCredentialProcessCreation(
+        string bpnl,
+        VerifiedCredentialTypeKindId kindId,
+        VerifiedCredentialTypeId typeId,
+        string schema,
+        TechnicalUserDetails? technicalUserDetails,
+        Guid? detailVersionId,
+        string? callbackUrl,
+        ICompanySsiDetailsRepository companyCredentialDetailsRepository)
     {
         var documentContent = System.Text.Encoding.UTF8.GetBytes(schema);
         var hash = SHA512.HashData(documentContent);
@@ -458,8 +476,8 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var ssiDetailId = companyCredentialDetailsRepository.CreateSsiDetails(
             bpnl,
             typeId,
-            docId,
             status,
+            _settings.IssuerBpn,
             _identity.IdentityId,
             c =>
             {

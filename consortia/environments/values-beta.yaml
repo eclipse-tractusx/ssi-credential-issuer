@@ -39,6 +39,8 @@ ingress:
 
 issuer:
   swaggerEnabled: true
+  credential: 
+    issuerBpn: "BPNL00000003CRHK"
 
 issuermigrations:
   logging:

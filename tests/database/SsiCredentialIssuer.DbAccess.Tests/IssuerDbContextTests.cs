@@ -61,7 +61,7 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
 
         var before = now.AddDays(-1);
         var id = Guid.NewGuid();
-        var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"), before);
+        var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, "BPNL0001ISSUER", new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"), before);
 
         var sut = await CreateContext().ConfigureAwait(false);
         using var trans = await sut.Database.BeginTransactionAsync().ConfigureAwait(false);
@@ -89,7 +89,7 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
 
         var before = now.AddDays(-1);
         var id = Guid.NewGuid();
-        var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"), before);
+        var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, "BPNL0001ISSUER", new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"), before);
 
         var sut = await CreateContext().ConfigureAwait(false);
         using var trans = await sut.Database.BeginTransactionAsync().ConfigureAwait(false);

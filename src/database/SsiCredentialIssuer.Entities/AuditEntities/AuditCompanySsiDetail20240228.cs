@@ -32,6 +32,7 @@ public class AuditCompanySsiDetail20240228 : IAuditEntityV1
 
     public Guid Id { get; set; }
     public string Bpnl { get; set; } = null!;
+    public string IssuerBpn { get; set; } = null!;
     public VerifiedCredentialTypeId VerifiedCredentialTypeId { get; set; }
     public CompanySsiDetailStatusId CompanySsiDetailStatusId { get; set; }
     public DateTimeOffset DateCreated { get; private set; }

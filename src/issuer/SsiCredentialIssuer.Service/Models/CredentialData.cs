@@ -30,7 +30,8 @@ public record FrameworkCredential(
     [property: JsonPropertyName("issuanceDate")] DateTimeOffset IssuanceDate,
     [property: JsonPropertyName("expirationDate")] DateTimeOffset ExpirationDate,
     [property: JsonPropertyName("issuer")] string Issuer,
-    [property: JsonPropertyName("credentialSubject")] FrameworkCredentialSubject CredentialSubject);
+    [property: JsonPropertyName("credentialSubject")] FrameworkCredentialSubject CredentialSubject,
+    [property: JsonPropertyName("credentialStatus")] CredentialStatus CredentialStatus);
 
 public record FrameworkCredentialSubject(
     [property: JsonPropertyName("id")] string Did,
@@ -50,7 +51,8 @@ public record MembershipCredential(
     [property: JsonPropertyName("issuanceDate")] DateTimeOffset IssuanceDate,
     [property: JsonPropertyName("expirationDate")] DateTimeOffset ExpirationDate,
     [property: JsonPropertyName("issuer")] string Issuer,
-    [property: JsonPropertyName("credentialSubject")] MembershipCredentialSubject CredentialSubject);
+    [property: JsonPropertyName("credentialSubject")] MembershipCredentialSubject CredentialSubject,
+    [property: JsonPropertyName("credentialStatus")] CredentialStatus CredentialStatus);
 
 public record MembershipCredentialSubject(
     [property: JsonPropertyName("id")] string Did,
@@ -67,7 +69,13 @@ public record BpnCredential(
     [property: JsonPropertyName("issuanceDate")] DateTimeOffset IssuanceDate,
     [property: JsonPropertyName("expirationDate")] DateTimeOffset ExpirationDate,
     [property: JsonPropertyName("issuer")] string Issuer,
-    [property: JsonPropertyName("credentialSubject")] BpnCredentialSubject CredentialSubject);
+    [property: JsonPropertyName("credentialSubject")] BpnCredentialSubject CredentialSubject,
+    [property: JsonPropertyName("credentialStatus")] CredentialStatus CredentialStatus);
+
+public record CredentialStatus(
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("type")] string Type
+);
 
 public record BpnCredentialSubject(
     [property: JsonPropertyName("id")] string Did,

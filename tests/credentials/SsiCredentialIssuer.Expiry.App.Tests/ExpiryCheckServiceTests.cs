@@ -45,6 +45,7 @@ public class ExpiryCheckServiceTests
     private readonly ExpiryCheckServiceSettings _settings;
 
     private readonly string Bpnl = "BPNL00000001TEST";
+    private static readonly string IssuerBpnl = "BPNL000001ISSUER";
 
     public ExpiryCheckServiceTests()
     {
@@ -111,7 +112,7 @@ public class ExpiryCheckServiceTests
         // Arrange
         var now = DateTimeOffset.UtcNow;
         var expiredVcsToDeleteInMonth = now.AddMonths(-_settings.ExpiredVcsToDeleteInMonth);
-        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.PENDING, Guid.NewGuid(), now)
+        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid(), now)
         {
             ExpiryDate = expiredVcsToDeleteInMonth.AddDays(-2),
             CreatorUserId = Guid.NewGuid()
@@ -154,7 +155,7 @@ public class ExpiryCheckServiceTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, Guid.NewGuid(), now)
+        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, Guid.NewGuid(), now)
         {
             ExpiryDate = now.AddDays(-days),
             ExpiryCheckTypeId = currentExpiryCheckTypeId,

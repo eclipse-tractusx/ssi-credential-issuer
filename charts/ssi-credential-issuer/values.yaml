@@ -53,6 +53,8 @@ issuer:
     clientSecret: ""
   credential:
     issuerDid: ""
+    issuerBpn: ""
+    statusListUrl: ""
     encryptionConfigIndex: 0
     encryptionConfigs:
       index0:
