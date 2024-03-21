@@ -228,7 +228,7 @@ centralidp:
     metadataPath: "/auth/realms/CX-Central/.well-known/openid-configuration"
     tokenValidationParameters:
       validIssuerPath: "/auth/realms/CX-Central"
-      validAudience: "Cl24-CX-Ssi-Credential-Issuer"
+      validAudience: "Cl24-CX-SSI-CredentialIssuer"
     refreshInterval: "00:00:30"
   tokenPath: "/auth/realms/CX-Central/protocol/openid-connect/token"
   # -- Flag if the api should be used with an leading /auth path
