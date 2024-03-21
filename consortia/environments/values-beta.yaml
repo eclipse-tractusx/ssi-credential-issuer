@@ -56,7 +56,7 @@ centralidp:
   address: "https://centralidp.beta.demo.catena-x.net"
   jwtBearerOptions:
     tokenValidationParameters:
-      validAudience: "Cl24-CX-Ssi-Credential-Issuer"
+      validAudience: "Cl24-CX-SSI-CredentialIssuer"
 
 postgresql:
   auth:
