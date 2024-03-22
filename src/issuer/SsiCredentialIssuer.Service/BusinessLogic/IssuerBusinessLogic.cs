@@ -38,7 +38,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using ErrorParameter = Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.ErrorParameter;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
@@ -48,7 +47,6 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     private const string StatusList = "StatusList2021";
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private static readonly IEnumerable<string> Context = new[] { "https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0" };
-    private static readonly Regex UrlRegex = new("^https:\\/\\/[a-zA-Z0-9\\-._~:/#\\[\\]@!$&'()*+,;=%]+$", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
     private readonly IIssuerRepositories _repositories;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -434,7 +432,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
     {
-        if (!UrlRegex.IsMatch(didDocumentLocation) || !Uri.TryCreate(didDocumentLocation, UriKind.Absolute, out var uri) || !Uri.IsWellFormedUriString(didDocumentLocation, UriKind.Absolute))
+        if (!Uri.TryCreate(didDocumentLocation, UriKind.Absolute, out var uri) || uri.Scheme != "https" || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment))
         {
             throw ControllerArgumentException.Create(CredentialErrors.INVALID_DID_LOCATION, null, nameof(didDocumentLocation));
         }
