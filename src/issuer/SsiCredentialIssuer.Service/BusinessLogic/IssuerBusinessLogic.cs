@@ -48,7 +48,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     private const string StatusList = "StatusList2021";
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private static readonly IEnumerable<string> Context = new[] { "https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0" };
-    private static readonly Regex UrlRegex = new("(http|https)\\:\\/\\/[0-9a-zA-Z]([-.\\w]*[0-9a-zA-Z])*(:(0-9)*)*(\\/?)([a-zA-Z0-9\\-\\.\\?\\,\\'\\/\\\\\\+&%\\$#_]*)?([a-zA-Z0-9\\-\\?\\,\\'\\/\\+&%\\$#_]+)");
+    private static readonly Regex UrlRegex = new("^https:\\/\\/[a-zA-Z0-9\\-._~:/#\\[\\]@!$&'()*+,;=%]+$", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
     private readonly IIssuerRepositories _repositories;
     private readonly IDateTimeProvider _dateTimeProvider;
