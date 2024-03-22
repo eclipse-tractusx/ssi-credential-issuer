@@ -560,10 +560,10 @@ public class IssuerBusinessLogicTests
     [InlineData("abc://test.com")]
     [InlineData("test.com/example")]
     [InlineData("test")]
-    [InlineData("http://testsite.test/<script>alert(\"TEST\")")]
-    [InlineData("http://testsite.test?test=avd")]
-    [InlineData("http://ab..test")]
-    [InlineData("http://ab.com..test")]
+    [InlineData("https://testsite.test/<script>alert(\"TEST\")")]
+    [InlineData("https://testsite.test?test=avd")]
+    [InlineData("https://ab..test")]
+    [InlineData("https://ab.com..test")]
     public async Task CreateBpnCredential_WithInvalidUri_ReturnsExpected(string holderUrl)
     {
         // Arrange
