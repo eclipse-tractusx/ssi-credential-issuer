@@ -53,6 +53,7 @@ public class CredentialErrorMessageContainer : IErrorMessageContainer
         { CredentialErrors.MULTIPLE_USE_CASES, "There must only be one use case" },
         { CredentialErrors.DID_NOT_SET, "Did must not be null" },
         { CredentialErrors.ALREADY_LINKED_PROCESS, "Credential should not already be linked to a process" },
+        { CredentialErrors.INVALID_DID_LOCATION, "The did url location must be a valid url" },
     }.ToImmutableDictionary(x => (int)x.Key, x => x.Value);
 
     public Type Type { get => typeof(CredentialErrors); }
@@ -86,5 +87,6 @@ public enum CredentialErrors
     KIND_NOT_SUPPORTED,
     MULTIPLE_USE_CASES,
     DID_NOT_SET,
-    ALREADY_LINKED_PROCESS
+    ALREADY_LINKED_PROCESS,
+    INVALID_DID_LOCATION
 }

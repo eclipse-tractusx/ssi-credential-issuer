@@ -533,7 +533,7 @@ public class IssuerBusinessLogicTests
         // Arrange
         var didId = Guid.NewGuid().ToString();
         var didDocument = new DidDocument(didId);
-        var data = new CreateBpnCredentialRequest("https://example.org/holder/BPNL12343546", Bpnl, null, null);
+        var data = new CreateBpnCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, null, null);
         HttpRequestMessage? request = null;
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
@@ -554,6 +554,41 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
     }
 
+    [Theory]
+    [InlineData("htt://test.com")]
+    [InlineData("abc://test.com")]
+    [InlineData("test.com/example")]
+    [InlineData("test")]
+    [InlineData("http://testsite.test/<script>alert(\"TEST\")")]
+    public async Task CreateBpnCredential_WithInvalidUri_ReturnsExpected(string holderUrl)
+    {
+        // Arrange
+        var didId = Guid.NewGuid().ToString();
+        var didDocument = new DidDocument(didId);
+        var data = new CreateBpnCredentialRequest(holderUrl, Bpnl, null, null);
+        HttpRequestMessage? request = null;
+        ConfigureHttpClientFactoryFixture(new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent(JsonSerializer.Serialize(didDocument))
+        }, requestMessage => request = requestMessage);
+        async Task Act() => await _sut.CreateBpnCredential(data, CancellationToken.None).ConfigureAwait(false);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act);
+
+        // Assert
+        ex.Message.Should().Be(CredentialErrors.INVALID_DID_LOCATION.ToString());
+        ex.ParamName.Should().Be("didDocumentLocation");
+        A.CallTo(() => _documentRepository.CreateDocument("schema.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
+            .MustNotHaveHappened();
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+            .MustNotHaveHappened();
+        A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
+            .MustNotHaveHappened();
+        A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
+    }
+
     #endregion
 
     #region CreateMembershipCredential
@@ -564,7 +599,7 @@ public class IssuerBusinessLogicTests
         // Arrange
         var didId = Guid.NewGuid().ToString();
         var didDocument = new DidDocument(didId);
-        var data = new CreateMembershipCredentialRequest("https://example.org/holder/BPNL12343546", Bpnl, "Test", null, null);
+        var data = new CreateMembershipCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, "Test", null, null);
         HttpRequestMessage? request = null;
         A.CallTo(() => _companySsiDetailsRepository.GetCertificateTypes(A<string>._))
             .Returns(Enum.GetValues<VerifiedCredentialTypeId>().ToAsyncEnumerable());
@@ -712,7 +747,7 @@ public class IssuerBusinessLogicTests
         var didDocument = new DidDocument(didId);
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
-        var data = new CreateFrameworkCredentialRequest("https://example.org/holder/BPNL12343546", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
+        var data = new CreateFrameworkCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
         HttpRequestMessage? request = null;
         A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
             .Returns(new ValueTuple<bool, string?, string?, IEnumerable<string>, DateTimeOffset>(true, "1.0.0", "https://example.org/tempalte", Enumerable.Repeat("Test", 1), now.AddDays(5)));

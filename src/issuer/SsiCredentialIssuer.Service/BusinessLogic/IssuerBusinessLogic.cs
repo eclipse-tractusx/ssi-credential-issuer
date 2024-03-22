@@ -38,7 +38,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Web;
+using System.Text.RegularExpressions;
 using ErrorParameter = Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.ErrorParameter;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
@@ -48,6 +48,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     private const string StatusList = "StatusList2021";
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private static readonly IEnumerable<string> Context = new[] { "https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0" };
+    private static readonly Regex UrlRegex = new("(http|https)\\:\\/\\/[0-9a-zA-Z]([-.\\w]*[0-9a-zA-Z])*(:(0-9)*)*(\\/?)([a-zA-Z0-9\\-\\.\\?\\,\\'\\/\\\\\\+&%\\$#_]*)?([a-zA-Z0-9\\-\\?\\,\\'\\/\\+&%\\$#_]+)");
 
     private readonly IIssuerRepositories _repositories;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -433,8 +434,13 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
     {
+        if (!UrlRegex.IsMatch(didDocumentLocation) || !Uri.TryCreate(didDocumentLocation, UriKind.Absolute, out var uri) || !Uri.IsWellFormedUriString(didDocumentLocation, UriKind.Absolute))
+        {
+            throw ControllerArgumentException.Create(CredentialErrors.INVALID_DID_LOCATION, null, nameof(didDocumentLocation));
+        }
+
         var client = _clientFactory.CreateClient("didDocumentDownload");
-        var result = await client.GetAsync(HttpUtility.HtmlEncode(didDocumentLocation), cancellationToken)
+        var result = await client.GetAsync(uri, cancellationToken)
             .CatchingIntoServiceExceptionFor("get-did-document").ConfigureAwait(false);
         var did = await result.Content.ReadFromJsonAsync<DidDocument>(Options, cancellationToken).ConfigureAwait(false);
         if (did == null)
