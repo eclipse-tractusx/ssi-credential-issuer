@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SsiCredentialIssuer.Migrations": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

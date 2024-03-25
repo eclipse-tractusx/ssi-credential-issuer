@@ -65,19 +65,37 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: docker/Dockerfile-migrations
+          file: docker/Dockerfile-credential-issuer-migrations
           push: true
-          tags: kind-registry:5000/migrations:testing
+          tags: kind-registry:5000/credential-issuer-migrations:testing
 
       - name: Build service image
         id: build-service-image
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: docker/Dockerfile-service
+          file: docker/Dockerfile-credential-issuer-service
           push: true
-          tags: kind-registry:5000/service:testing
+          tags: kind-registry:5000/credential-issuer-service:testing
   
+      - name: Build expiry app
+        id: build-expiry-app-image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/Dockerfile-credential-expiry-app
+          push: true
+          tags: kind-registry:5000/credential-expiry-app:testing
+    
+      - name: Build processes worker
+        id: build-processes-worker-image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/Dockerfile-credential-issuer-processes-worker
+          push: true
+          tags: kind-registry:5000/credential-issuer-processes-worker:testing
+      
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:
@@ -102,8 +120,8 @@ jobs:
       - name: Run chart-testing (lint)
         run: ct lint --validate-maintainers=false --check-version-increment=false --target-branch ${{ github.event.repository.default_branch }}
 
-      - name: Run service chart-testing (install)
-        run: ct install --charts charts/ssi-credential-issuer --config charts/chart-testing-config.yaml --helm-extra-set-args "--set=issuer.image=kind-registry:5000/service:testing --set=issuermigrations.image=kind-registry:5000/migrations:testing"
+      - name: Run chart-testing (install)
+        run: ct install --charts charts/ssi-credential-issuer --config charts/chart-testing-config.yaml --helm-extra-set-args "--set issuer.image.name=kind-registry:5000/credential-issuer-service --set issuer.image.tag=testing --set issuermigrations.image.name=kind-registry:5000/credential-issuer-migrations --set issuermigrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-expiry-app --set credentialExpiry.image.tag=testing"
         if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'
 
       # TODO: re-add the step after the first version release  
@@ -115,5 +133,5 @@ jobs:
       #     helm repo add tractusx-dev https://eclipse-tractusx.github.io/charts/dev
       #     helm install ssi-credential-issuer tractusx-dev/ssi-credential-issuer --version ${{ github.event.inputs.upgrade_from || 'tbd' }} --namespace upgrade --create-namespace
       #     helm dependency update charts/ssi-credential-issuer
-      #     helm upgrade ssi-credential-issuer charts/ssi-credential-issuer --set issuer.image=kind-registry:5000/service:testing --set=issuermigrations.image=kind-registry:5000/migrations:testing --namespace upgrade
+      #     helm upgrade ssi-credential-issuer charts/ssi-credential-issuer --set issuer.image.name=kind-registry:5000/credential-issuer-service --set issuer.image.tag=testing --set issuermigrations.image.name=kind-registry:5000/credential-issuer-migrations --set issuermigrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-expiry-app --set credentialExpiry.image.tag=testing --namespace upgrade
       #   if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'

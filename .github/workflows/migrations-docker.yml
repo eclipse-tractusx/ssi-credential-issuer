@@ -17,7 +17,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-name: Migrations
+name: Build Migrations Image
 
 on: 
   push:
@@ -28,7 +28,7 @@ on:
       # workflow file
       - '.github/workflows/migrations-docker.yml'
       # dockerfile
-      - 'docker/Dockerfile-migrations'
+      - 'docker/Dockerfile-credential-issuer-migrations'
 
     branches:
       - 'dev'
@@ -74,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: docker/Dockerfile-migrations
+          file: docker/Dockerfile-credential-issuer-migrations
           platforms: linux/amd64, linux/arm64
           pull: true
           push: ${{ github.event_name != 'pull_request' }}
