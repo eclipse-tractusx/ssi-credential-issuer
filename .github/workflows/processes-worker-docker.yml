@@ -73,7 +73,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: docker/Dockerfile-credential-issuer-process-worker
+          file: docker/Dockerfile-credential-issuer-processes-worker
           platforms: linux/amd64, linux/arm64
           pull: true
           push: ${{ github.event_name != 'pull_request' }}
@@ -88,4 +88,4 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
           repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
-          readme-filepath: "./docker/notice-credential-issuer-process-worker.md"
+          readme-filepath: "./docker/notice-credential-issuer-processes-worker.md"
