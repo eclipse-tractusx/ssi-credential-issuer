@@ -89,7 +89,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         with:
           # Path to Docker image
-          image-ref: "${{ env.IMAGE_NAMESPACE }}/credential-issuer-service:dev"
+          image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-service:dev"
           format: "sarif"
           output: "trivy-results3.sarif"
           vuln-type: "os,library"
@@ -121,7 +121,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         with:
           # Path to Docker image
-          image-ref: "${{ env.IMAGE_NAMESPACE }}/credential-issuer-migrations:dev"
+          image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-migrations:dev"
           format: "sarif"
           output: "trivy-results9.sarif"
           vuln-type: "os,library"
@@ -154,7 +154,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         with:
           # Path to Docker image
-          image-ref: "${{ env.IMAGE_NAMESPACE }}/credential-expiry-app:dev"
+          image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-expiry-app:dev"
           format: "sarif"
           output: "trivy-results9.sarif"
           vuln-type: "os,library"
@@ -187,7 +187,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         with:
           # Path to Docker image
-          image-ref: "${{ env.IMAGE_NAMESPACE }}/credential-issuer-processes-worker:dev"
+          image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-processes-worker:dev"
           format: "sarif"
           output: "trivy-results9.sarif"
           vuln-type: "os,library"
