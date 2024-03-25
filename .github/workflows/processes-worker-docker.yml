@@ -25,7 +25,7 @@ on:
       # service and transitive paths
       - 'src/**'
       # workflow file
-      - '.github/workflows/process-worker-docker.yml'
+      - '.github/workflows/processes-worker-docker.yml'
       # dockerfile
       - 'docker/Dockerfile-credential-issuer-processes-worker'
 
@@ -35,7 +35,7 @@ on:
 
 env:
   IMAGE_NAMESPACE: "tractusx"
-  IMAGE_NAME: "ssi-credential-issuer-process-worker"
+  IMAGE_NAME: "ssi-credential-issuer-processes-worker"
 
 jobs:
   build-and-push-image:
