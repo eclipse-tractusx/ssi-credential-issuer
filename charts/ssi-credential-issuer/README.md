@@ -40,10 +40,10 @@ dependencies:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| issuer.image.name | string | `"docker.io/tractusx/credential-issuer-service"` |  |
+| issuer.image.name | string | `"docker.io/tractusx/ssi-credential-issuer-service"` |  |
 | issuer.image.tag | string | `""` |  |
 | issuer.imagePullPolicy | string | `"IfNotPresent"` |  |
-| issuer.resources | object | `{"limits":{"cpu":"45m","memory":"400M"},"requests":{"cpu":"15m","memory":"300M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| issuer.resources | object | `{"limits":{"cpu":"45m","memory":"400M"},"requests":{"cpu":"15m","memory":"400M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
 | issuer.logging.businessLogic | string | `"Information"` |  |
 | issuer.logging.default | string | `"Information"` |  |
 | issuer.healthChecks.startup.path | string | `"/health/startup"` |  |
@@ -57,21 +57,24 @@ dependencies:
 | issuer.portal.clientId | string | `"portal-client-id"` | Provide portal client-id from CX IAM centralidp. |
 | issuer.portal.clientSecret | string | `""` | Client-secret for portal client-id. Secret-key 'portal-client-secret'. |
 | issuer.credential.issuerDid | string | `""` |  |
+| issuer.credential.issuerBpn | string | `""` |  |
+| issuer.credential.statusListUrl | string | `""` |  |
 | issuer.credential.encryptionConfigIndex | int | `0` |  |
 | issuer.credential.encryptionConfigs.index0.index | int | `0` |  |
 | issuer.credential.encryptionConfigs.index0.cipherMode | string | `"CBC"` |  |
 | issuer.credential.encryptionConfigs.index0.paddingMode | string | `"PKCS7"` |  |
 | issuer.credential.encryptionConfigs.index0.encryptionKey | string | `""` | EncryptionKey for wallet. Secret-key 'credential-encryption-key0'. Expected format is 256 bit (64 digits) hex. |
 | issuermigrations.name | string | `"migrations"` |  |
-| issuermigrations.image.name | string | `"docker.io/tractusx/credential-issuer-migrations"` |  |
+| issuermigrations.image.name | string | `"docker.io/tractusx/ssi-credential-issuer-migrations"` |  |
 | issuermigrations.image.tag | string | `""` |  |
 | issuermigrations.imagePullPolicy | string | `"IfNotPresent"` |  |
 | issuermigrations.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
 | issuermigrations.seeding.testDataEnvironments | string | `""` |  |
 | issuermigrations.seeding.testDataPaths | string | `"Seeder/Data"` |  |
 | issuermigrations.logging.default | string | `"Information"` |  |
+| issuermigrations.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
 | processesworker.name | string | `"processesworker"` |  |
-| processesworker.image.name | string | `"docker.io/tractusx/credential-issuer-processes-worker"` |  |
+| processesworker.image.name | string | `"docker.io/tractusx/ssi-credential-issuer-processes-worker"` |  |
 | processesworker.image.tag | string | `""` |  |
 | processesworker.imagePullPolicy | string | `"IfNotPresent"` |  |
 | processesworker.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
@@ -80,7 +83,7 @@ dependencies:
 | processesworker.portal.grantType | string | `"client_credentials"` |  |
 | processesworker.portal.clientId | string | `"portal-client-id"` | Provide portal client-id from CX IAM centralidp. |
 | processesworker.portal.clientSecret | string | `""` | Client-secret for portal client-id. Secret-key 'portal-client-secret'. |
-| processesworker.processIdentity.identityId | string | `"d21d2e8a-fe35-483c-b2b8-4100ed7f0953"` |  |
+| processesworker.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
 | processesworker.wallet.scope | string | `"openid"` |  |
 | processesworker.wallet.grantType | string | `"client_credentials"` |  |
 | processesworker.wallet.clientId | string | `"wallet-client-id"` | Provide wallet client-id from CX IAM centralidp. |
@@ -91,29 +94,16 @@ dependencies:
 | processesworker.wallet.encryptionConfigs.index0.paddingMode | string | `"PKCS7"` |  |
 | processesworker.wallet.encryptionConfigs.index0.encryptionKey | string | `""` | EncryptionKey for wallet. Secret-key 'process-wallet-encryption-key0'. Expected format is 256 bit (64 digits) hex. |
 | credentialExpiry.name | string | `"expiry"` |  |
-| credentialExpiry.image.name | string | `"docker.io/tractusx/credential-expiry-app"` |  |
+| credentialExpiry.image.name | string | `"docker.io/tractusx/ssi-credential-expiry-app"` |  |
 | credentialExpiry.image.tag | string | `""` |  |
 | credentialExpiry.imagePullPolicy | string | `"IfNotPresent"` |  |
 | credentialExpiry.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
-| credentialExpiry.processIdentity.identityId | string | `"d21d2e8a-fe35-483c-b2b8-4100ed7f0953"` |  |
+| credentialExpiry.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
 | credentialExpiry.logging.default | string | `"Information"` |  |
 | credentialExpiry.expiry.expiredVcsToDeleteInMonth | int | `12` |  |
 | credentialExpiry.expiry.inactiveVcsToDeleteInWeeks | int | `12` |  |
 | existingSecret | string | `""` | Secret containing the client-secrets for the connection to portal and wallet as well as encryptionKeys for issuer.credential and processesworker.wallet |
 | dotnetEnvironment | string | `"Production"` |  |
-| centralidp.address | string | `"https://centralidp.example.org"` | Provide centralidp base address (CX IAM), without trailing '/auth'. |
-| centralidp.authRealm | string | `"CX-Central"` |  |
-| centralidp.jwtBearerOptions.requireHttpsMetadata | string | `"true"` |  |
-| centralidp.jwtBearerOptions.metadataPath | string | `"/auth/realms/CX-Central/.well-known/openid-configuration"` |  |
-| centralidp.jwtBearerOptions.tokenValidationParameters.validIssuerPath | string | `"/auth/realms/CX-Central"` |  |
-| centralidp.jwtBearerOptions.tokenValidationParameters.validAudience | string | `"ClXX-CX-SSI"` | TODO: Add Client |
-| centralidp.jwtBearerOptions.refreshInterval | string | `"00:00:30"` |  |
-| centralidp.tokenPath | string | `"/auth/realms/CX-Central/protocol/openid-connect/token"` |  |
-| centralidp.useAuthTrail | bool | `true` | Flag if the api should be used with an leading /auth path |
-| ingress.enabled | bool | `false` | SSI Credential Issuer ingress parameters, enable ingress record generation for ssi-credential-issuer. |
-| ingress.tls[0] | object | `{"hosts":[""],"secretName":""}` | Provide tls secret. |
-| ingress.tls[0].hosts | list | `[""]` | Provide host for tls secret. |
-| ingress.hosts[0] | object | `{"host":"","paths":[{"backend":{"port":8080},"path":"/api/issuer","pathType":"Prefix"}]}` | Provide default path for the ingress record. |
 | dbConnection.schema | string | `"issuer"` |  |
 | dbConnection.sslMode | string | `"Disable"` |  |
 | postgresql.enabled | bool | `true` | PostgreSQL chart configuration; default configurations: host: "issuer-postgresql-primary", port: 5432; Switch to enable or disable the PostgreSQL helm chart. |
@@ -133,11 +123,18 @@ dependencies:
 | postgresql.readReplicas.extendedConfiguration | string | `""` | Extended PostgreSQL read only replicas configuration (increase of max_connections recommended - default is 100) |
 | externalDatabase.host | string | `"issuer-postgres-ext"` | External PostgreSQL configuration IMPORTANT: non-root db user needs to be created beforehand on external database. And the init script (02-init-db.sql) available in templates/configmap-postgres-init.yaml needs to be executed beforehand. Database host ('-primary' is added as postfix). |
 | externalDatabase.port | int | `5432` | Database port number. |
-| externalDatabase.user | string | `"issuer"` | Non-root username for issuer. |
+| externalDatabase.username | string | `"issuer"` | Non-root username for issuer. |
 | externalDatabase.database | string | `"issuer"` | Database name. |
 | externalDatabase.password | string | `""` | Password for the non-root username (default 'issuer'). Secret-key 'password'. |
 | externalDatabase.existingSecret | string | `"issuer-external-db"` | Secret containing the password non-root username, (default 'issuer'). |
 | externalDatabase.existingSecretPasswordKey | string | `"password"` | Name of an existing secret key containing the database credentials. |
+| centralidp | object | `{"address":"https://centralidp.example.org","authRealm":"CX-Central","jwtBearerOptions":{"metadataPath":"/auth/realms/CX-Central/.well-known/openid-configuration","refreshInterval":"00:00:30","requireHttpsMetadata":"true","tokenValidationParameters":{"validAudience":"Cl24-CX-SSI-CredentialIssuer","validIssuerPath":"/auth/realms/CX-Central"}},"tokenPath":"/auth/realms/CX-Central/protocol/openid-connect/token","useAuthTrail":true}` | Provide details about centralidp (CX IAM) Keycloak instance. |
+| centralidp.address | string | `"https://centralidp.example.org"` | Provide centralidp base address (CX IAM), without trailing '/auth'. |
+| centralidp.useAuthTrail | bool | `true` | Flag if the api should be used with an leading /auth path |
+| ingress.enabled | bool | `false` | SSI Credential Issuer ingress parameters, enable ingress record generation for ssi-credential-issuer. |
+| ingress.tls[0] | object | `{"hosts":[""],"secretName":""}` | Provide tls secret. |
+| ingress.tls[0].hosts | list | `[""]` | Provide host for tls secret. |
+| ingress.hosts[0] | object | `{"host":"","paths":[{"backend":{"port":8080},"path":"/api/issuer","pathType":"Prefix"}]}` | Provide default path for the ingress record. |
 | portContainer | int | `8080` |  |
 | portService | int | `8080` |  |
 | replicaCount | int | `3` |  |
