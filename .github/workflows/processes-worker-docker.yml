@@ -27,7 +27,7 @@ on:
       # workflow file
       - '.github/workflows/process-worker-docker.yml'
       # dockerfile
-      - 'docker/Dockerfile-credential-issuer-process-worker'
+      - 'docker/Dockerfile-credential-issuer-processes-worker'
 
     branches:
       - 'dev'
