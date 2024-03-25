@@ -27,7 +27,7 @@ See Docker notice files for more information:
 
 - [credential-issuer-service](./docker//notice-credential-issuer-service.md)
 - [credential-issuer-processes-worker](./docker/notice-credential-issuer-processes-worker.md)
-- [notice-credential-expiry-app](./docker/notice-credential-expiry-app.md)
+- [credential-expiry-app](./docker/notice-credential-expiry-app.md)
 - [credential-issuer-migrations](./docker/notice-credential-issuer-migrations.md)
 
 ## License
