@@ -19,7 +19,7 @@
 
 issuer:
   image:
-    name: "docker.io/tractusx/credential-issuer-service"
+    name: "docker.io/tractusx/ssi-credential-issuer-service"
     tag: ""
   imagePullPolicy: "IfNotPresent"
   # -- We recommend to review the default resource limits as this should a conscious choice.
@@ -68,7 +68,7 @@ issuer:
 issuermigrations:
   name: "migrations"
   image:
-    name: "docker.io/tractusx/credential-issuer-migrations"
+    name: "docker.io/tractusx/ssi-credential-issuer-migrations"
     tag: ""
   imagePullPolicy: "IfNotPresent"
   # -- We recommend to review the default resource limits as this should a conscious choice.
@@ -90,7 +90,7 @@ issuermigrations:
 processesworker:
   name: "processesworker"
   image:
-    name: "docker.io/tractusx/credential-issuer-processes-worker"
+    name: "docker.io/tractusx/ssi-credential-issuer-processes-worker"
     tag: ""
   imagePullPolicy: "IfNotPresent"
   # -- We recommend to review the default resource limits as this should a conscious choice.
@@ -132,7 +132,7 @@ processesworker:
 credentialExpiry:
   name: "expiry"
   image:
-    name: "docker.io/tractusx/credential-expiry-app"
+    name: "docker.io/tractusx/ssi-credential-expiry-app"
     tag: ""
   imagePullPolicy: "IfNotPresent"
   # -- We recommend to review the default resource limits as this should a conscious choice.

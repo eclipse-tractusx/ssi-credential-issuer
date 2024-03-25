@@ -36,7 +36,7 @@ on:
 
 env:
   IMAGE_NAMESPACE: "tractusx"
-  IMAGE_NAME: "migrations"
+  IMAGE_NAME: "ssi-credential-issuer-migrations"
 
 jobs:
   build-and-push-image:
