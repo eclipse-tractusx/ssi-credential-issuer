@@ -1,6 +1,6 @@
 ## Notice for Docker image
 
-DockerHub: [https://hub.docker.com/r/tractusx/credential-issuer-processes-worker](https://hub.docker.com/r/tractusx/credential-issuer-processes-worker)
+DockerHub: [https://hub.docker.com/r/tractusx/ssi-credential-issuer-processes-worker](https://hub.docker.com/r/tractusx/ssi-credential-issuer-processes-worker)
 
 Eclipse Tractus-X product(s) installed within the image:
 

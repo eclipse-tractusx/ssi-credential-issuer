@@ -27,10 +27,10 @@ on:
 
 env:
   IMAGE_NAMESPACE: "tractusx"
-  IMAGE_NAME_SERVICE: "service"
-  IMAGE_NAME_MIGRATIONS: "migrations"
-  IMAGE_NAME_WORKER: "credential-issuer-processes-worker"
-  IMAGE_NAME_EXPIRY: "credential-expiry-app"
+  IMAGE_NAME_SERVICE: "ssi-credential-issuer-service"
+  IMAGE_NAME_MIGRATIONS: "ssi-credential-issuer-migrations"
+  IMAGE_NAME_WORKER: "ssi-credential-issuer-processes-worker"
+  IMAGE_NAME_EXPIRY: "ssi-credential-expiry-app"
 
 jobs:
   service-release:

@@ -1,6 +1,6 @@
 ## Notice for Docker image
 
-DockerHub: [https://hub.docker.com/r/tractusx/credential-issuer-migrations](https://hub.docker.com/r/tractusx/credential-issuer-migrations)
+DockerHub: [https://hub.docker.com/r/tractusx/ssi-credential-issuer-migrations](https://hub.docker.com/r/tractusx/ssi-credential-issuer-migrations)
 
 Eclipse Tractus-X product(s) installed within the image:
 

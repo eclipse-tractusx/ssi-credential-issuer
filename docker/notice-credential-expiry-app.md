@@ -1,6 +1,6 @@
 ## Notice for Docker image
 
-DockerHub: [https://hub.docker.com/r/tractusx/credential-expiry-app](https://hub.docker.com/r/tractusx/credential-expiry-app)
+DockerHub: [https://hub.docker.com/r/tractusx/ssi-credential-expiry-app](https://hub.docker.com/r/tractusx/ssi-credential-expiry-app)
 
 Eclipse Tractus-X product(s) installed within the image:
 
