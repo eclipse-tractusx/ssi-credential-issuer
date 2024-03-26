@@ -41,6 +41,12 @@ issuer:
   swaggerEnabled: true
   credential:
     issuerBpn: "BPNL00000003CRHK"
+    encryptionConfigs:
+      index0:
+        encryptionKey: "<path:portal/data/ssi-credential-issuer/int/credential#encryptionKey0>"
+  portal:
+    clientId: "<path:portal/data/ssi-credential-issuer/portal#clientId>"
+    clientSecret: "<path:portal/data/ssi-credential-issuer/int/portal#clientSecret>"
 
 issuermigrations:
   logging:
@@ -49,6 +55,15 @@ issuermigrations:
 processesworker:
   logging:
     default: "Debug"
+  portal:
+    clientId: "<path:portal/data/ssi-credential-issuer/portal#clientId>"
+    clientSecret: "<path:portal/data/ssi-credential-issuer/int/portal#clientSecret>"
+  wallet:
+    clientId: "<path:portal/data/ssi-credential-issuer/int/wallet#clientId>"
+    clientSecret: "<path:portal/data/ssi-credential-issuer/int/wallet#clientSecret>"
+    encryptionConfigs:
+      index0:
+        encryptionKey: "<path:portal/data/ssi-credential-issuer/int/wallet#encryptionKey0>"
 
 credentialexpiry:
   logging:
