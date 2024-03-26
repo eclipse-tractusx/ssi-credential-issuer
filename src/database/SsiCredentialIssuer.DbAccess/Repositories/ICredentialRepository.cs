@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.Text.Json;
 
@@ -31,4 +32,7 @@ public interface ICredentialRepository
     Task<(VerifiedCredentialTypeKindId CredentialTypeKindId, JsonDocument Schema)> GetCredentialStorageInformationById(Guid credentialId);
     Task<(Guid? ExternalCredentialId, VerifiedCredentialTypeKindId KindId, bool HasEncryptionInformation, string? CallbackUrl)> GetExternalCredentialAndKindId(Guid credentialId);
     Task<(string Bpn, string? CallbackUrl)> GetCallbackUrl(Guid credentialId);
+    Task<(bool Exists, Guid? ExternalCredentialId, CompanySsiDetailStatusId StatusId, IEnumerable<(Guid DocumentId, DocumentStatusId DocumentStatusId)> Documents)> GetRevocationDataById(Guid credentialId);
+    void AttachAndModifyCredential(Guid credentialId, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> modify);
+    Task<(VerifiedCredentialTypeId TypeId, Guid RequesterId)> GetCredentialNotificationData(Guid credentialId);
 }

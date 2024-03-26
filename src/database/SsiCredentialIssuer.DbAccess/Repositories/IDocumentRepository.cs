@@ -40,4 +40,5 @@ public interface IDocumentRepository
     Document CreateDocument(string documentName, byte[] documentContent, byte[] hash, MediaTypeId mediaTypeId, DocumentTypeId documentTypeId, Action<Document>? setupOptionalFields);
 
     void AssignDocumentToCompanySsiDetails(Guid documentId, Guid companySsiDetailId);
+    void AttachAndModifyDocuments(IEnumerable<(Guid DocumentId, Action<Document>? Initialize, Action<Document> Modify)> documentData);
 }

@@ -18,23 +18,12 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using System.Text.Json;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
 
-public record SsiApprovalData(
-    CompanySsiDetailStatusId Status,
-    VerifiedCredentialTypeId Type,
-    Guid? ProcessId,
-    VerifiedCredentialTypeKindId? Kind,
-    string? Bpn,
-    JsonDocument? Schema,
-    DetailData? DetailData
-);
-
-public record DetailData(
-    VerifiedCredentialExternalTypeId VerifiedCredentialExternalTypeId,
-    string? Template,
-    string? Version,
-    DateTimeOffset ExpiryDate
-);
+public interface ICredentialExpiryProcessHandler
+{
+    Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RevokeCredential(Guid credentialId, CancellationToken cancellationToken);
+    Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerNotification(Guid credentialId, CancellationToken cancellationToken);
+    Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerMail(Guid credentialId, CancellationToken cancellationToken);
+}

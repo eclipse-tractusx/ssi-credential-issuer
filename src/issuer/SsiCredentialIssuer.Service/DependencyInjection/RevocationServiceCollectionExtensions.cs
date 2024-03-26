@@ -17,24 +17,13 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using System.Text.Json;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.DependencyInjection;
 
-public record SsiApprovalData(
-    CompanySsiDetailStatusId Status,
-    VerifiedCredentialTypeId Type,
-    Guid? ProcessId,
-    VerifiedCredentialTypeKindId? Kind,
-    string? Bpn,
-    JsonDocument? Schema,
-    DetailData? DetailData
-);
-
-public record DetailData(
-    VerifiedCredentialExternalTypeId VerifiedCredentialExternalTypeId,
-    string? Template,
-    string? Version,
-    DateTimeOffset ExpiryDate
-);
+public static class RevocationServiceCollectionExtensions
+{
+    public static IServiceCollection AddRevocationService(this IServiceCollection services) =>
+        services
+            .AddTransient<IRevocationBusinessLogic, RevocationBusinessLogic>();
+}

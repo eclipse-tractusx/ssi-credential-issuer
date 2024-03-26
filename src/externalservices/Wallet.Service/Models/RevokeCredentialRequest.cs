@@ -17,24 +17,14 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 
-public record SsiApprovalData(
-    CompanySsiDetailStatusId Status,
-    VerifiedCredentialTypeId Type,
-    Guid? ProcessId,
-    VerifiedCredentialTypeKindId? Kind,
-    string? Bpn,
-    JsonDocument? Schema,
-    DetailData? DetailData
+public record RevokeCredentialRequest(
+    [property: JsonPropertyName("payload")] RevokePayload Payload
 );
 
-public record DetailData(
-    VerifiedCredentialExternalTypeId VerifiedCredentialExternalTypeId,
-    string? Template,
-    string? Version,
-    DateTimeOffset ExpiryDate
+public record RevokePayload(
+    [property: JsonPropertyName("revoke")] bool Revoke
 );

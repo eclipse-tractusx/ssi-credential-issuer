@@ -54,6 +54,9 @@ public class CredentialErrorMessageContainer : IErrorMessageContainer
         { CredentialErrors.DID_NOT_SET, "Did must not be null" },
         { CredentialErrors.ALREADY_LINKED_PROCESS, "Credential should not already be linked to a process" },
         { CredentialErrors.INVALID_DID_LOCATION, "The did url location must be a valid url" },
+        { CredentialErrors.EMPTY_EXTERNAL_TYPE_ID, "External Type ID must be set" },
+        { CredentialErrors.SCHEMA_NOT_SET, "The json schema must be set when approving a credential" },
+        { CredentialErrors.SCHEMA_NOT_FRAMEWORK, "The schema must be a framework credential" }
     }.ToImmutableDictionary(x => (int)x.Key, x => x.Value);
 
     public Type Type { get => typeof(CredentialErrors); }
@@ -88,5 +91,8 @@ public enum CredentialErrors
     MULTIPLE_USE_CASES,
     DID_NOT_SET,
     ALREADY_LINKED_PROCESS,
-    INVALID_DID_LOCATION
+    INVALID_DID_LOCATION,
+    EMPTY_EXTERNAL_TYPE_ID,
+    SCHEMA_NOT_SET,
+    SCHEMA_NOT_FRAMEWORK
 }

@@ -26,15 +26,15 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 
-public class CredentialProcessHandler : ICredentialProcessHandler
+public class CredentialCreationProcessHandler : ICredentialCreationProcessHandler
 {
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly IWalletBusinessLogic _walletBusinessLogic;
     private readonly ICallbackService _callbackService;
 
-    public CredentialProcessHandler(IIssuerRepositories issuerRepositories, IWalletBusinessLogic walletBusinessLogic, ICallbackService callbackService)
+    public CredentialCreationProcessHandler(IIssuerRepositories issuerRepositories, IWalletBusinessLogic walletBusinessLogic, ICallbackService callbackService)
     {
         _issuerRepositories = issuerRepositories;
         _walletBusinessLogic = walletBusinessLogic;
