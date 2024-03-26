@@ -20,8 +20,11 @@
 using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Xunit;
 using Xunit.Extensions.AssemblyFixture;
@@ -135,6 +138,29 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     #endregion
 
+    #region AttachAndModifyCredential
+
+    [Fact]
+    public async Task AttachAndModifyCredential_ReturnsExpectedResult()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext().ConfigureAwait(false);
+
+        // Act
+        sut.AttachAndModifyCredential(Guid.NewGuid(), x => x.CompanySsiDetailStatusId = CompanySsiDetailStatusId.ACTIVE, x => x.CompanySsiDetailStatusId = CompanySsiDetailStatusId.PENDING);
+
+        // Assert
+        var changeTracker = context.ChangeTracker;
+        var changedEntries = changeTracker.Entries().ToList();
+        changeTracker.HasChanges().Should().BeTrue();
+        changedEntries.Should().ContainSingle();
+        var entity = changedEntries.Single();
+        entity.State.Should().Be(EntityState.Modified);
+        ((CompanySsiDetail)entity.Entity).CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.PENDING);
+    }
+
+    #endregion
+
     #region Setup
 
     private async Task<CredentialRepository> CreateSut()
@@ -142,6 +168,13 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
         var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
         var sut = new CredentialRepository(context);
         return sut;
+    }
+
+    private async Task<(CredentialRepository Sut, IssuerDbContext Context)> CreateSutWithContext()
+    {
+        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var sut = new CredentialRepository(context);
+        return (sut, context);
     }
 
     #endregion

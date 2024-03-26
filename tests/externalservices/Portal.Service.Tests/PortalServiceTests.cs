@@ -137,7 +137,7 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        await sut.TriggerMail("Test", requesterId, new Dictionary<string, string>(), CancellationToken.None).ConfigureAwait(false);
+        await sut.TriggerMail("Test", requesterId, Enumerable.Empty<MailParameter>(), CancellationToken.None).ConfigureAwait(false);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -166,7 +166,7 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        async Task Act() => await sut.TriggerMail("Test", requesterId, new Dictionary<string, string>(), CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await sut.TriggerMail("Test", requesterId, Enumerable.Empty<MailParameter>(), CancellationToken.None).ConfigureAwait(false);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);

@@ -22,4 +22,5 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 public enum ProcessTypeId
 {
     CREATE_CREDENTIAL = 1,
+    DECLINE_CREDENTIAL = 2
 }

@@ -20,6 +20,7 @@
 using Microsoft.EntityFrameworkCore;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.Text.Json;
 
@@ -75,5 +76,29 @@ public class CredentialRepository : ICredentialRepository
         _dbContext.CompanySsiProcessData
             .Where(x => x.CompanySsiDetailId == credentialId)
             .Select(x => new ValueTuple<string, string?>(x.CompanySsiDetail!.Bpnl, x.CallbackUrl))
+            .SingleOrDefaultAsync();
+
+    public Task<(bool Exists, Guid? ExternalCredentialId, CompanySsiDetailStatusId StatusId, IEnumerable<(Guid DocumentId, DocumentStatusId DocumentStatusId)> Documents)> GetRevocationDataById(Guid credentialId) =>
+        _dbContext.CompanySsiDetails
+            .Where(x => x.Id == credentialId)
+            .Select(x => new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<(Guid, DocumentStatusId)>>(
+                true,
+                x.ExternalCredentialId,
+                x.CompanySsiDetailStatusId,
+                x.Documents.Select(d => new ValueTuple<Guid, DocumentStatusId>(d.Id, d.DocumentStatusId))))
+            .SingleOrDefaultAsync();
+
+    public void AttachAndModifyCredential(Guid credentialId, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> modify)
+    {
+        var entity = new CompanySsiDetail(credentialId, string.Empty, default!, default!, null!, null!, default!);
+        initialize?.Invoke(entity);
+        _dbContext.CompanySsiDetails.Attach(entity);
+        modify(entity);
+    }
+
+    public Task<(VerifiedCredentialTypeId TypeId, string RequesterId)> GetCredentialNotificationData(Guid credentialId) =>
+        _dbContext.CompanySsiDetails
+            .Where(x => x.Id == credentialId)
+            .Select(x => new ValueTuple<VerifiedCredentialTypeId, string>(x.VerifiedCredentialTypeId, x.CreatorUserId))
             .SingleOrDefaultAsync();
 }

@@ -24,5 +24,10 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 public record MailData(
     [property: JsonPropertyName("requester")] Guid Requester,
     [property: JsonPropertyName("template")] string Template,
-    [property: JsonPropertyName("mailParameters")] IDictionary<string, string> MailParameters
+    [property: JsonPropertyName("mailParameters")] IEnumerable<MailParameter> MailParameters
+);
+
+public record MailParameter(
+    [property: JsonPropertyName("key")] string Key,
+    [property: JsonPropertyName("value")] string Value
 );
