@@ -49,7 +49,7 @@ public class PortalService : IPortalService
             .ConfigureAwait(false);
     }
 
-    public async Task TriggerMail(string template, Guid requester, IDictionary<string, string> mailParameters, CancellationToken cancellationToken)
+    public async Task TriggerMail(string template, Guid requester, IEnumerable<MailParameter> mailParameters, CancellationToken cancellationToken)
     {
         var client = await _tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(false);
         var data = new MailData(requester, template, mailParameters);

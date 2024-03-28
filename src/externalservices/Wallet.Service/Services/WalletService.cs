@@ -113,4 +113,30 @@ public class WalletService : IWalletService
 
         return response.Id;
     }
+
+    public async Task RevokeCredentialForIssuer(Guid externalCredentialId, CancellationToken cancellationToken)
+    {
+        var client = await _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        var data = new RevokeCredentialRequest(new RevokePayload(true));
+        await client.PatchAsJsonAsync($"/api/v2.0.0/credentials/{externalCredentialId}", data, Options, cancellationToken)
+            .CatchingIntoServiceExceptionFor("revoke-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(false)))
+            .ConfigureAwait(false);
+    }
+
+    public async Task RevokeCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, Guid externalCredentialId, CancellationToken cancellationToken)
+    {
+        var authSettings = new BasicAuthSettings
+        {
+            ClientId = clientId,
+            ClientSecret = clientSecret,
+            TokenAddress = $"{holderWalletUrl}/oauth/token"
+        };
+        var client = await _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(authSettings, cancellationToken);
+        var data = new RevokeCredentialRequest(new RevokePayload(true));
+        await client.PatchAsJsonAsync($"/api/v2.0.0/credentials/{externalCredentialId}", data, Options, cancellationToken)
+            .CatchingIntoServiceExceptionFor("revoke-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(false)))
+            .ConfigureAwait(false);
+    }
 }

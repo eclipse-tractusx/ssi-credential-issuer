@@ -29,6 +29,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Controllers;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using System.Text.Json.Serialization;
 
 const string VERSION = "v1";
@@ -52,13 +53,17 @@ WebApplicationBuildRunner
                         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     })
                 .AddCredentialService(builder.Configuration.GetSection("Credential"))
+                .AddRevocationService()
+                .AddWalletService(builder.Configuration)
                 .AddPortalService(builder.Configuration.GetSection("Portal"))
                 .AddSingleton<IErrorMessageService, ErrorMessageService>()
-                .AddSingleton<IErrorMessageContainer, CredentialErrorMessageContainer>();
+                .AddSingleton<IErrorMessageContainer, CredentialErrorMessageContainer>()
+                .AddSingleton<IErrorMessageContainer, RevocationErrorMessageContainer>();
         },
     (app, _) =>
     {
         app.MapGroup("/api")
             .WithOpenApi()
-            .MapIssuerApi();
+            .MapIssuerApi()
+            .MapRevocationApi();
     });

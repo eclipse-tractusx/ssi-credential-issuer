@@ -22,21 +22,22 @@ using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Creation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Xunit;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Tests;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Tests;
 
-public class CredentialProcessTypeExecutorTests
+public class CredentialCreationProcessTypeExecutorTests
 {
-    private readonly CredentialProcessTypeExecutor _sut;
-    private readonly ICredentialProcessHandler _credentialProcessHandler;
+    private readonly CredentialCreationProcessTypeExecutor _sut;
+    private readonly ICredentialCreationProcessHandler _credentialCreationProcessHandler;
     private readonly ICredentialRepository _credentialRepository;
 
-    public CredentialProcessTypeExecutorTests()
+    public CredentialCreationProcessTypeExecutorTests()
     {
         var fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -44,13 +45,13 @@ public class CredentialProcessTypeExecutorTests
         fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
         var issuerRepositories = A.Fake<IIssuerRepositories>();
-        _credentialProcessHandler = A.Fake<ICredentialProcessHandler>();
+        _credentialCreationProcessHandler = A.Fake<ICredentialCreationProcessHandler>();
 
         _credentialRepository = A.Fake<ICredentialRepository>();
 
         A.CallTo(() => issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
 
-        _sut = new CredentialProcessTypeExecutor(issuerRepositories, _credentialProcessHandler);
+        _sut = new CredentialCreationProcessTypeExecutor(issuerRepositories, _credentialCreationProcessHandler);
     }
 
     [Fact]
@@ -155,7 +156,7 @@ public class CredentialProcessTypeExecutorTests
         initializeResult.ScheduleStepTypeIds.Should().BeNull();
 
         // Arrange
-        A.CallTo(() => _credentialProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialCreationProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
             .Returns(new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(null, ProcessStepStatusId.DONE, false, null));
 
         // Act
@@ -186,7 +187,7 @@ public class CredentialProcessTypeExecutorTests
         initializeResult.ScheduleStepTypeIds.Should().BeNull();
 
         // Arrange
-        A.CallTo(() => _credentialProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialCreationProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test", true));
 
         // Act
@@ -217,7 +218,7 @@ public class CredentialProcessTypeExecutorTests
         initializeResult.ScheduleStepTypeIds.Should().BeNull();
 
         // Arrange
-        A.CallTo(() => _credentialProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialCreationProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
 
         // Act

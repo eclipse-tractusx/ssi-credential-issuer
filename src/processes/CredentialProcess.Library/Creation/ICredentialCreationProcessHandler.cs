@@ -19,9 +19,9 @@
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 
-public interface ICredentialProcessHandler
+public interface ICredentialCreationProcessHandler
 {
     Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CreateCredential(Guid credentialId, CancellationToken cancellationToken);
     Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> SignCredential(Guid credentialId, CancellationToken cancellationToken);

@@ -24,6 +24,7 @@ using FluentAssertions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -35,7 +36,7 @@ using Xunit;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Tests;
 
-public class CredentialProcessHandlerTests
+public class CredentialCreationProcessHandlerTests
 {
     private readonly Guid _credentialId = Guid.NewGuid();
 
@@ -43,11 +44,11 @@ public class CredentialProcessHandlerTests
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly ICredentialRepository _credentialRepository;
 
-    private readonly CredentialProcessHandler _sut;
+    private readonly CredentialCreationProcessHandler _sut;
     private readonly IFixture _fixture;
     private readonly ICallbackService _callbackService;
 
-    public CredentialProcessHandlerTests()
+    public CredentialCreationProcessHandlerTests()
     {
         _fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -62,7 +63,7 @@ public class CredentialProcessHandlerTests
         _walletBusinessLogic = A.Fake<IWalletBusinessLogic>();
         _callbackService = A.Fake<ICallbackService>();
 
-        _sut = new CredentialProcessHandler(_issuerRepositories, _walletBusinessLogic, _callbackService);
+        _sut = new CredentialCreationProcessHandler(_issuerRepositories, _walletBusinessLogic, _callbackService);
     }
 
     #region CreateCredential

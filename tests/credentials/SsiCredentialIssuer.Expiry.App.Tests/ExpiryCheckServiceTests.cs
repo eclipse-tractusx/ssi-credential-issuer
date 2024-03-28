@@ -30,6 +30,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.Tests;
 
@@ -40,6 +41,7 @@ public class ExpiryCheckServiceTests
 
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IIssuerRepositories _issuerRepositories;
+    private readonly IProcessStepRepository _processStepRepository;
     private readonly IPortalService _portalService;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
     private readonly ExpiryCheckServiceSettings _settings;
@@ -56,9 +58,12 @@ public class ExpiryCheckServiceTests
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         _issuerRepositories = A.Fake<IIssuerRepositories>();
         _companySsiDetailsRepository = A.Fake<ICompanySsiDetailsRepository>();
+        _processStepRepository = A.Fake<IProcessStepRepository>();
 
         A.CallTo(() => _issuerRepositories.GetInstance<ICompanySsiDetailsRepository>())
             .Returns(_companySsiDetailsRepository);
+        A.CallTo(() => _issuerRepositories.GetInstance<IProcessStepRepository>())
+            .Returns(_processStepRepository);
 
         _dateTimeProvider = A.Fake<IDateTimeProvider>();
         _portalService = A.Fake<IPortalService>();
@@ -127,13 +132,6 @@ public class ExpiryCheckServiceTests
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
             .Returns(data.ToAsyncEnumerable());
-        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(A<Guid>._,
-                A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
-            .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields) =>
-            {
-                initialize?.Invoke(ssiDetail);
-                updateFields.Invoke(ssiDetail);
-            });
 
         // Act
         await _sut.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -141,10 +139,8 @@ public class ExpiryCheckServiceTests
         // Assert
         A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.AddNotification(A<string>._, ssiDetail.CreatorUserId, NotificationTypeId.CREDENTIAL_REJECTED, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", ssiDetail.CreatorUserId, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-
-        ssiDetail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.INACTIVE);
+        A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, A<Guid>._)).MustHaveHappenedOnceExactly();
     }
 
     [Theory]
@@ -189,7 +185,7 @@ public class ExpiryCheckServiceTests
         A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portalService.AddNotification(A<string>._, ssiDetail.CreatorUserId, NotificationTypeId.CREDENTIAL_EXPIRY, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.TriggerMail("CredentialExpiry", ssiDetail.CreatorUserId, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.TriggerMail("CredentialExpiry", ssiDetail.CreatorUserId, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
         ssiDetail.ExpiryCheckTypeId.Should().Be(expiryCheckTypeId);
     }

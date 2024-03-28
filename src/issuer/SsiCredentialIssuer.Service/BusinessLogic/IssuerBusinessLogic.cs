@@ -183,6 +183,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var processId = CreateProcess();
 
         var expiry = GetExpiryDate(data.DetailData?.ExpiryDate);
+        UpdateIssuanceDate(credentialId, data, companySsiRepository);
         companySsiRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
                 c.CompanySsiDetailStatusId = data.Status;
@@ -197,16 +198,29 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 c.ProcessId = processId;
             });
         var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
-        var content = JsonSerializer.Serialize(new { data.Type, CredentialId = credentialId }, Options);
-        await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
-        var mailParameters = new Dictionary<string, string>
+        var mailParameters = new MailParameter[]
         {
-            { "requestName", typeValue },
-            { "credentialType", typeValue },
-            { "expiryDate", expiry.ToString("o", CultureInfo.InvariantCulture) }
+            new("requestName", typeValue),
+            new("credentialType", typeValue),
+            new("expiryDate", expiry.ToString("o", CultureInfo.InvariantCulture))
         };
         await _portalService.TriggerMail("CredentialApproval", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
+        var content = JsonSerializer.Serialize(new { data.Type, CredentialId = credentialId }, Options);
+        await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
         await _repositories.SaveAsync().ConfigureAwait(false);
+    }
+
+    private void UpdateIssuanceDate(Guid credentialId, SsiApprovalData data,
+        ICompanySsiDetailsRepository companySsiRepository)
+    {
+        var frameworkCredential = data.Schema!.Deserialize<FrameworkCredential>();
+        if (frameworkCredential == null)
+        {
+            throw UnexpectedConditionException.Create(CredentialErrors.SCHEMA_NOT_FRAMEWORK);
+        }
+
+        var newCredential = frameworkCredential with { IssuanceDate = _dateTimeProvider.OffsetNow };
+        companySsiRepository.AttachAndModifyProcessData(credentialId, c => c.Schema = JsonDocument.Parse(JsonSerializer.Serialize(frameworkCredential, Options)), c => c.Schema = JsonDocument.Parse(JsonSerializer.Serialize(newCredential, Options)));
     }
 
     private Guid CreateProcess()
@@ -253,6 +267,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         {
             throw UnexpectedConditionException.Create(CredentialErrors.ALREADY_LINKED_PROCESS);
         }
+
+        if (data.Schema is null)
+        {
+            throw UnexpectedConditionException.Create(CredentialErrors.SCHEMA_NOT_SET);
+        }
     }
 
     private DateTimeOffset GetExpiryDate(DateTimeOffset? expiryDate)
@@ -288,10 +307,10 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var content = JsonSerializer.Serialize(new { Type = type, CredentialId = credentialId }, Options);
         await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
 
-        var mailParameters = new Dictionary<string, string>
+        var mailParameters = new MailParameter[]
         {
-            { "requestName", typeValue },
-            { "reason", "Declined by the Operator" }
+            new("requestName", typeValue),
+            new("reason", "Declined by the Operator")
         };
 
         await _portalService.TriggerMail("CredentialRejected", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
@@ -400,19 +419,24 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             throw ControllerArgumentException.Create(CredentialErrors.EMPTY_TEMPLATE);
         }
 
-        if (result.UseCase.Count() != 1)
+        if (result.ExternalTypeIds.Count() != 1)
         {
             throw ControllerArgumentException.Create(CredentialErrors.MULTIPLE_USE_CASES);
         }
 
-        var useCase = result.UseCase.Single();
+        var externalTypeId = result.ExternalTypeIds.Single().GetEnumValue();
+        if (externalTypeId is null)
+        {
+            throw ControllerArgumentException.Create(CredentialErrors.EMPTY_EXTERNAL_TYPE_ID);
+        }
+
         var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(false);
         var schemaData = new FrameworkCredential(
             Guid.NewGuid(),
             Context,
-            new[] { "VerifiableCredential", $"{useCase}Credential" },
-            $"{useCase}Credential",
-            $"Framework Credential for UseCase {useCase}",
+            new[] { "VerifiableCredential", externalTypeId },
+            externalTypeId,
+            $"Framework Credential for UseCase {externalTypeId}",
             DateTimeOffset.UtcNow,
             result.Expiry,
             _settings.IssuerDid,
@@ -420,7 +444,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 holderDid,
                 requestData.HolderBpn,
                 "UseCaseFramework",
-                useCase,
+                externalTypeId,
                 result.Template!,
                 result.Version!
             ),
@@ -505,8 +529,9 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
                 c.ClientId = technicalUserDetails.ClientId;
                 c.ClientSecret = secret;
-                c.InitializationVector = initializationVector;
                 c.HolderWalletUrl = technicalUserDetails.WalletUrl;
+                c.EncryptionMode = cryptoConfig.Index;
+                c.InitializationVector = initializationVector;
                 c.CallbackUrl = callbackUrl;
             });
 

@@ -80,6 +80,7 @@ public class ExpiryCheckService
 
                 var now = dateTimeProvider.OffsetNow;
                 var companySsiDetailsRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
+                var processStepRepository = repositories.GetInstance<IProcessStepRepository>();
                 var inactiveVcsToDelete = now.AddDays(-(_settings.InactiveVcsToDeleteInWeeks * 7));
                 var expiredVcsToDelete = now.AddMonths(-_settings.ExpiredVcsToDeleteInMonth);
 
@@ -87,8 +88,7 @@ public class ExpiryCheckService
                     .GetExpiryData(now, inactiveVcsToDelete, expiredVcsToDelete);
                 await foreach (var credential in credentials.WithCancellation(stoppingToken).ConfigureAwait(false))
                 {
-                    await ProcessCredentials(credential, companySsiDetailsRepository, repositories, portalService,
-                        stoppingToken);
+                    await ProcessCredentials(credential, companySsiDetailsRepository, repositories, portalService, processStepRepository, stoppingToken);
                 }
             }
             catch (Exception ex)
@@ -104,6 +104,7 @@ public class ExpiryCheckService
         ICompanySsiDetailsRepository companySsiDetailsRepository,
         IIssuerRepositories repositories,
         IPortalService portalService,
+        IProcessStepRepository processStepRepository,
         CancellationToken cancellationToken)
     {
         if (data.ScheduleData.IsVcToDelete)
@@ -112,7 +113,7 @@ public class ExpiryCheckService
         }
         else if (data.ScheduleData.IsVcToDecline)
         {
-            await HandleDecline(data, companySsiDetailsRepository, portalService, cancellationToken).ConfigureAwait(false);
+            HandleDecline(data.Id, companySsiDetailsRepository, processStepRepository);
         }
         else
         {
@@ -123,30 +124,21 @@ public class ExpiryCheckService
         await repositories.SaveAsync().ConfigureAwait(false);
     }
 
-    private static async ValueTask HandleDecline(
-        CredentialExpiryData data,
+    private static void HandleDecline(
+        Guid credentialId,
         ICompanySsiDetailsRepository companySsiDetailsRepository,
-        IPortalService portalService,
-        CancellationToken cancellationToken)
+        IProcessStepRepository processStepRepository)
     {
-        var content = JsonSerializer.Serialize(new { Type = data.VerifiedCredentialTypeId, CredentialId = data.Id }, Options);
-        await portalService.AddNotification(content, data.RequesterId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
-        companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(data.Id, c =>
+        var processId = processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL).Id;
+        processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, processId);
+        companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
-                c.CompanySsiDetailStatusId = data.CompanySsiDetailStatusId;
+                c.ProcessId = null;
             },
             c =>
             {
-                c.CompanySsiDetailStatusId = CompanySsiDetailStatusId.INACTIVE;
+                c.ProcessId = processId;
             });
-
-        var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
-        var mailParameters = new Dictionary<string, string>
-        {
-            { "requestName", typeValue },
-            { "reason", "The credential is already expired" }
-        };
-        await portalService.TriggerMail("CredentialRejected", data.RequesterId, mailParameters, cancellationToken);
     }
 
     private static async ValueTask HandleNotification(
@@ -184,11 +176,11 @@ public class ExpiryCheckService
         }, Options);
         await portalService.AddNotification(content, data.RequesterId, NotificationTypeId.CREDENTIAL_EXPIRY, cancellationToken);
         var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
-        var mailParameters = new Dictionary<string, string>
+        var mailParameters = new MailParameter[]
         {
-            { "typeId", typeValue },
-            { "version", data.DetailVersion ?? "no version" },
-            { "expiryDate", data.ExpiryDate?.ToString("dd MMMM yyyy") ?? throw new ConflictException("Expiry Date must be set here") }
+            new("typeId", typeValue),
+            new("version", data.DetailVersion ?? "no version"),
+            new("expiryDate", data.ExpiryDate?.ToString("dd MMMM yyyy") ?? throw new ConflictException("Expiry Date must be set here"))
         };
 
         await portalService.TriggerMail("CredentialExpiry", data.RequesterId, mailParameters, cancellationToken);

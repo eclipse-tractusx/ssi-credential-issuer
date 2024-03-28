@@ -20,14 +20,20 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Expiry;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.DependencyInjection;
 
 public static class CredentialProcessCollectionExtensions
 {
-    public static IServiceCollection AddCredentialProcessExecutor(this IServiceCollection services, IConfiguration config) =>
+    public static IServiceCollection AddCredentialCreationProcessExecutor(this IServiceCollection services, IConfiguration config) =>
         services
-            .AddTransient<IProcessTypeExecutor, CredentialProcessTypeExecutor>()
-            .AddCredentialProcessHandler(config);
+            .AddTransient<IProcessTypeExecutor, Creation.CredentialCreationProcessTypeExecutor>()
+            .AddCredentialCreationProcessHandler(config);
+
+    public static IServiceCollection AddCredentialExpiryProcessExecutor(this IServiceCollection services, IConfiguration config) =>
+        services
+            .AddTransient<IProcessTypeExecutor, CredentialExpiryProcessTypeExecutor>()
+            .AddCredentialExpiryProcessHandler(config);
 }
