@@ -217,8 +217,6 @@ externalDatabase:
   password: ""
   # -- Secret containing the password non-root username, (default 'issuer').
   existingSecret: "issuer-external-db"
-  # -- Name of an existing secret key containing the database credentials.
-  existingSecretPasswordKey: "password"
 
 # -- Provide details about centralidp (CX IAM) Keycloak instance.
 centralidp:
