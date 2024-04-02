@@ -57,7 +57,10 @@ public class CredentialErrorMessageContainer : IErrorMessageContainer
         { CredentialErrors.USER_MUST_NOT_BE_TECHNICAL_USER, "The endpoint can not be called by a technical user" },
         { CredentialErrors.EMPTY_EXTERNAL_TYPE_ID, "External Type ID must be set" },
         { CredentialErrors.SCHEMA_NOT_SET, "The json schema must be set when approving a credential" },
-        { CredentialErrors.SCHEMA_NOT_FRAMEWORK, "The schema must be a framework credential" }
+        { CredentialErrors.SCHEMA_NOT_FRAMEWORK, "The schema must be a framework credential" },
+        { CredentialErrors.CREDENTIAL_NOT_FOUND, "Credential {credentialId} does not exist" },
+        { CredentialErrors.COMPANY_NOT_ALLOWED, "Not allowed to display the credential" },
+        { CredentialErrors.SIGNED_CREDENTIAL_NOT_FOUND, "There must be exactly one signed credential" }
     }.ToImmutableDictionary(x => (int)x.Key, x => x.Value);
 
     public Type Type { get => typeof(CredentialErrors); }
@@ -96,5 +99,8 @@ public enum CredentialErrors
     USER_MUST_NOT_BE_TECHNICAL_USER,
     EMPTY_EXTERNAL_TYPE_ID,
     SCHEMA_NOT_SET,
-    SCHEMA_NOT_FRAMEWORK
+    SCHEMA_NOT_FRAMEWORK,
+    CREDENTIAL_NOT_FOUND,
+    COMPANY_NOT_ALLOWED,
+    SIGNED_CREDENTIAL_NOT_FOUND
 }

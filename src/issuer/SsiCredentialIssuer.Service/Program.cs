@@ -52,18 +52,20 @@ WebApplicationBuildRunner
                     {
                         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     })
-                .AddCredentialService(builder.Configuration.GetSection("Credential"))
-                .AddRevocationService()
+                .AddServices(builder.Configuration)
                 .AddWalletService(builder.Configuration)
                 .AddPortalService(builder.Configuration.GetSection("Portal"))
                 .AddSingleton<IErrorMessageService, ErrorMessageService>()
-                .AddSingleton<IErrorMessageContainer, CredentialErrorMessageContainer>()
-                .AddSingleton<IErrorMessageContainer, RevocationErrorMessageContainer>();
+                .AddSingleton<IErrorMessageContainer, IssuerErrorMessageContainer>()
+                .AddSingleton<IErrorMessageContainer, RevocationErrorMessageContainer>()
+                .AddSingleton<IErrorMessageContainer, CredentialErrorMessageContainer>();
+            ;
         },
     (app, _) =>
     {
         app.MapGroup("/api")
             .WithOpenApi()
             .MapIssuerApi()
-            .MapRevocationApi();
+            .MapRevocationApi()
+            .MapCredentialApi();
     });

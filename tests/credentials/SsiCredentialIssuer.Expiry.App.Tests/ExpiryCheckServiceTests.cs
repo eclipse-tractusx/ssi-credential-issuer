@@ -30,7 +30,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.Tests;
 

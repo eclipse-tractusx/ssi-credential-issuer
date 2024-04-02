@@ -21,9 +21,25 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.DependencyInjection;
 
-public static class RevocationServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddRevocationService(this IServiceCollection services) =>
+    internal static IServiceCollection AddServices(this IServiceCollection services, IConfiguration config) =>
+        services
+            .AddIssuerService(config.GetSection("Credential"))
+            .AddRevocationService()
+            .AddRevocationService()
+            .AddCredentialService();
+
+    private static IServiceCollection AddIssuerService(this IServiceCollection services, IConfigurationSection section) =>
+        services
+            .ConfigureCredentialSettings(section)
+            .AddTransient<IIssuerBusinessLogic, IssuerBusinessLogic>();
+
+    private static IServiceCollection AddRevocationService(this IServiceCollection services) =>
         services
             .AddTransient<IRevocationBusinessLogic, RevocationBusinessLogic>();
+
+    private static IServiceCollection AddCredentialService(this IServiceCollection services) =>
+        services
+            .AddTransient<ICredentialBusinessLogic, CredentialBusinessLogic>();
 }

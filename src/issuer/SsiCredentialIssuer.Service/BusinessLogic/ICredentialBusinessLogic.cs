@@ -17,14 +17,11 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
+using System.Text.Json;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.DependencyInjection;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
-public static class CredentialServiceCollectionExtensions
+public interface ICredentialBusinessLogic
 {
-    public static IServiceCollection AddCredentialService(this IServiceCollection services, IConfigurationSection section) =>
-        services
-            .ConfigureCredentialSettings(section)
-            .AddTransient<IIssuerBusinessLogic, IssuerBusinessLogic>();
+    Task<JsonDocument> GetCredentialDocument(Guid credentialId);
 }

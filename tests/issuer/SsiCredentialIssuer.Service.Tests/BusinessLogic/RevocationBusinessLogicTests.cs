@@ -1,14 +1,11 @@
-using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 using System.Collections.Immutable;
 

@@ -35,4 +35,5 @@ public interface ICredentialRepository
     Task<(bool Exists, Guid? ExternalCredentialId, CompanySsiDetailStatusId StatusId, IEnumerable<(Guid DocumentId, DocumentStatusId DocumentStatusId)> Documents)> GetRevocationDataById(Guid credentialId);
     void AttachAndModifyCredential(Guid credentialId, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> modify);
     Task<(VerifiedCredentialTypeId TypeId, string RequesterId)> GetCredentialNotificationData(Guid credentialId);
+    Task<(bool Exists, bool IsSameCompany, IEnumerable<(DocumentStatusId StatusId, byte[] Content)> Documents)> GetSignedCredentialForCredentialId(Guid credentialId, string bpnl);
 }
