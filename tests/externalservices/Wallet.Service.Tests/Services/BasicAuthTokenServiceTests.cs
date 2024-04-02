@@ -22,7 +22,6 @@ using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Web;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared.Extensions;

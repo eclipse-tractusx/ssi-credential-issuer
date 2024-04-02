@@ -30,7 +30,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Xunit;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Tests;

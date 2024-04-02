@@ -32,7 +32,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.Setup;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -156,7 +155,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.SSI_DETAILS_NOT_FOUND.ToString());
+        ex.Message.Should().Be(IssuerErrors.SSI_DETAILS_NOT_FOUND.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -179,7 +178,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.CREDENTIAL_NOT_PENDING.ToString());
+        ex.Message.Should().Be(IssuerErrors.CREDENTIAL_NOT_PENDING.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -201,7 +200,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.BPN_NOT_SET.ToString());
+        ex.Message.Should().Be(IssuerErrors.BPN_NOT_SET.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -239,7 +238,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.EXPIRY_DATE_IN_PAST.ToString());
+        ex.Message.Should().Be(IssuerErrors.EXPIRY_DATE_IN_PAST.ToString());
 
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, A<NotificationTypeId>._, A<CancellationToken>._)).MustNotHaveHappened();
@@ -278,7 +277,7 @@ public class IssuerBusinessLogicTests
 
         // Assert
         var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(Act).ConfigureAwait(false);
-        ex.Message.Should().Be(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND.ToString());
+        ex.Message.Should().Be(IssuerErrors.CREDENTIAL_TYPE_NOT_FOUND.ToString());
     }
 
     [Fact]
@@ -310,7 +309,7 @@ public class IssuerBusinessLogicTests
 
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
             .MustNotHaveHappened();
-        ex.Message.Should().Be(CredentialErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET.ToString());
+        ex.Message.Should().Be(IssuerErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET.ToString());
     }
 
     [Fact]
@@ -347,7 +346,7 @@ public class IssuerBusinessLogicTests
 
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
             .MustNotHaveHappened();
-        ex.Message.Should().Be(CredentialErrors.ALREADY_LINKED_PROCESS.ToString());
+        ex.Message.Should().Be(IssuerErrors.ALREADY_LINKED_PROCESS.ToString());
     }
 
     [Theory]
@@ -452,7 +451,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.SSI_DETAILS_NOT_FOUND.ToString());
+        ex.Message.Should().Be(IssuerErrors.SSI_DETAILS_NOT_FOUND.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -478,7 +477,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.CREDENTIAL_NOT_PENDING.ToString());
+        ex.Message.Should().Be(IssuerErrors.CREDENTIAL_NOT_PENDING.ToString());
         A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
     }
@@ -627,7 +626,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.INVALID_DID_LOCATION.ToString());
+        ex.Message.Should().Be(IssuerErrors.INVALID_DID_LOCATION.ToString());
         ex.ParamName.Should().Be("didDocumentLocation");
         A.CallTo(() => _documentRepository.CreateDocument("schema.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
             .MustNotHaveHappened();
@@ -689,7 +688,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND.ToString());
+        ex.Message.Should().Be(IssuerErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND.ToString());
     }
 
     [Fact]
@@ -708,7 +707,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.EXPIRY_DATE_IN_PAST.ToString());
+        ex.Message.Should().Be(IssuerErrors.EXPIRY_DATE_IN_PAST.ToString());
     }
 
     [Fact]
@@ -727,7 +726,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.EMPTY_VERSION.ToString());
+        ex.Message.Should().Be(IssuerErrors.EMPTY_VERSION.ToString());
     }
 
     [Fact]
@@ -746,7 +745,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.EMPTY_TEMPLATE.ToString());
+        ex.Message.Should().Be(IssuerErrors.EMPTY_TEMPLATE.ToString());
     }
 
     [Fact]
@@ -765,7 +764,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.MULTIPLE_USE_CASES.ToString());
+        ex.Message.Should().Be(IssuerErrors.MULTIPLE_USE_CASES.ToString());
     }
 
     [Fact]
@@ -784,7 +783,7 @@ public class IssuerBusinessLogicTests
         var ex = await Assert.ThrowsAsync<ControllerArgumentException>(Act).ConfigureAwait(false);
 
         // Assert
-        ex.Message.Should().Be(CredentialErrors.MULTIPLE_USE_CASES.ToString());
+        ex.Message.Should().Be(IssuerErrors.MULTIPLE_USE_CASES.ToString());
     }
 
     [Fact]

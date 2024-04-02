@@ -20,7 +20,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;

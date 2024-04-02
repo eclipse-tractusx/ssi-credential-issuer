@@ -24,7 +24,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.Collections.Immutable;
-using System.Linq.Expressions;
 using ProcessTypeId = Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums.ProcessTypeId;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.Tests;

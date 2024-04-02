@@ -101,4 +101,13 @@ public class CredentialRepository : ICredentialRepository
             .Where(x => x.Id == credentialId)
             .Select(x => new ValueTuple<VerifiedCredentialTypeId, Guid>(x.VerifiedCredentialTypeId, x.CreatorUserId))
             .SingleOrDefaultAsync();
+
+    public Task<(bool Exists, bool IsSameCompany, IEnumerable<(DocumentStatusId StatusId, byte[] Content)> Documents)> GetSignedCredentialForCredentialId(Guid credentialId, string bpnl) =>
+        _dbContext.CompanySsiDetails
+            .Where(x => x.Id == credentialId)
+            .Select(x => new ValueTuple<bool, bool, IEnumerable<ValueTuple<DocumentStatusId, byte[]>>>(
+                true,
+                x.Bpnl == bpnl,
+                x.Documents.Where(d => d.DocumentTypeId == DocumentTypeId.VERIFIED_CREDENTIAL).Select(d => new ValueTuple<DocumentStatusId, byte[]>(d.DocumentStatusId, d.DocumentContent))))
+            .SingleOrDefaultAsync();
 }

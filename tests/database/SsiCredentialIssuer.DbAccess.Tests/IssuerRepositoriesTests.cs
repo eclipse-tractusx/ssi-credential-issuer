@@ -27,7 +27,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using System.Collections.Immutable;
 using Xunit;
 using Xunit.Extensions.AssemblyFixture;
 
