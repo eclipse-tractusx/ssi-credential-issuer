@@ -82,6 +82,7 @@ jobs:
             dockernotice: ./docker/notice-credential-expiry-app.md
     outputs:
       app-version: ${{ steps.app-version.outputs.current }}
+      version-check: ${{ steps.version-check.outputs.exists }}
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -174,3 +175,4 @@ jobs:
         run: |
           git tag v${{ needs.release-images.outputs.app-version }}
           git push origin v${{ needs.release-images.outputs.app-version }}
+        if: needs.release-images.outputs.version-check == 'false'
