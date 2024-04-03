@@ -65,7 +65,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: docker/Dockerfile-credential-issuer-migrations
+          file: ./docker/Dockerfile-credential-issuer-migrations
           push: true
           tags: kind-registry:5000/credential-issuer-migrations:testing
 
@@ -74,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: docker/Dockerfile-credential-issuer-service
+          file: ./docker/Dockerfile-credential-issuer-service
           push: true
           tags: kind-registry:5000/credential-issuer-service:testing
   
@@ -83,7 +83,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: docker/Dockerfile-credential-expiry-app
+          file: ./docker/Dockerfile-credential-expiry-app
           push: true
           tags: kind-registry:5000/credential-expiry-app:testing
     
@@ -92,7 +92,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: docker/Dockerfile-credential-issuer-processes-worker
+          file: ./docker/Dockerfile-credential-issuer-processes-worker
           push: true
           tags: kind-registry:5000/credential-issuer-processes-worker:testing
       
