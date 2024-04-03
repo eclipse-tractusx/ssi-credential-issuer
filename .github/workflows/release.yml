@@ -20,255 +20,157 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
-
-env:
-  IMAGE_NAMESPACE: "tractusx"
-  IMAGE_NAME_SERVICE: "ssi-credential-issuer-service"
-  IMAGE_NAME_MIGRATIONS: "ssi-credential-issuer-migrations"
-  IMAGE_NAME_WORKER: "ssi-credential-issuer-processes-worker"
-  IMAGE_NAME_EXPIRY: "ssi-credential-expiry-app"
+  push:
+    paths:
+      - 'charts/**'
+    branches:
+      - main
 
 jobs:
-  service-release:
-    runs-on: ubuntu-latest
+  release-helm-chart:
+    # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
+    # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
     permissions:
-      packages: write
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
 
-    steps:actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
+      - name: Install Helm
+        uses: azure/setup-helm@b7246b12e77f7134dc2d460a3d5bad15bbe29390 # v4
+
+      - name: Update helm dependencies for ssi-credential-issuer
+        run: |
+          cd charts/ssi-credential-issuer
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm dependency update
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.4.1
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_SKIP_EXISTING: "true"
+
+  release-images:
+    needs: release-helm-chart
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - image: tractusx/ssi-credential-issuer-service
+            dockerfile: ./docker/Dockerfile-credential-issuer-service
+            dockernotice: ./docker/notice-credential-issuer-service.md
+          - image: tractusx/ssi-credential-issuer-migrations
+            dockerfile: ./docker/Dockerfile-credential-issuer-migrations
+            dockernotice: ./docker/notice-credential-issuer-migrations.md
+          - image: tractusx/ssi-credential-issuer-processes-worker
+            dockerfile: ./docker/Dockerfile-credential-issuer-processes-worker
+            dockernotice: ./docker/notice-credential-issuer-processes-worker.md
+          - image: tractusx/ssi-credential-expiry-app
+            dockerfile: ./docker/Dockerfile-credential-expiry-app
+            dockernotice: ./docker/notice-credential-expiry-app.md
+    outputs:
+      app-version: ${{ steps.app-version.outputs.current }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Get current appVersion
+        id: app-version
+        run: |
+          current=$(cat ./charts/ssi-credential-issuer/Chart.yaml | grep "appVersion:" | head -1 | cut -d ":" -d " " -f2)
+          echo "current=$current" >> $GITHUB_OUTPUT
+          echo "Exported $current appVersion"
+
+      - name: Check for previous version
+        id: version-check
+        run: |
+          exists=$(git tag -l "v${{ steps.app-version.outputs.current }}")
+          if [[ -n "$exists" ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        if: steps.version-check.outputs.exists == 'false'
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@2b51285047da1547ffb1b2203d8be4c0af6b1f20 # v3.2.0
+        if: steps.version-check.outputs.exists == 'false'
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
+        if: steps.version-check.outputs.exists == 'false'
 
       # Create SemVer or ref tags dependent of trigger event
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
         with:
-           images: |
-              ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_SERVICE }}
+          images: ${{ matrix.image }}
            # Automatically prepare image tags; See action docs for more examples. 
            # semver patter will generate tags like these for example :1 :1.2 :1.2.3
-           tags: |
-              type=ref,event=branch
-              type=ref,event=pr
-              type=raw,value=latest
-              type=semver,pattern={{version}}
-              type=semver,pattern={{major}}
-              type=semver,pattern={{major}}.{{minor}}
+          tags: |
+             type=ref,event=branch
+             type=ref,event=pr
+             type=raw,value=latest
+             type=semver,pattern={{version}},value=${{ steps.app-version.outputs.current }}
+             type=semver,pattern={{major}},value=${{ steps.app-version.outputs.current }}
+             type=semver,pattern={{major}}.{{minor}},value=${{ steps.app-version.outputs.current }}
+        if: steps.version-check.outputs.exists == 'false'
 
-      - name: Build and push Docker image
+      - name: Build and push Docker images
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           context: .
-          file: docker/Dockerfile-credential-issuer-service
+          file: ${{ matrix.dockerfile }}
           platforms: linux/amd64, linux/arm64
           pull: true
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+        if: steps.version-check.outputs.exists == 'false'
 
       # https://github.com/peter-evans/dockerhub-description
       - name: Update Docker Hub description
-        if: github.event_name != 'pull_request'
         uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_SERVICE }}
-          readme-filepath: "./docker/notice-credential-issuer-service.md"
+          repository: ${{ matrix.image }}
+          readme-filepath: ${{ matrix.dockernotice }}
+        if: steps.version-check.outputs.exists == 'false'
 
-  migrations-release:
-    runs-on: ubuntu-latest
+  create-tag:
+    needs: release-images
     permissions:
-      contents: read
-
-    steps:actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@2b51285047da1547ffb1b2203d8be4c0af6b1f20 # v3.2.0
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
-
-      # Create SemVer or ref tags dependent of trigger event
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
-        with:
-           images: |
-              ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_MIGRATIONS }}
-           # Automatically prepare image tags; See action docs for more examples. 
-           # semver patter will generate tags like these for example :1 :1.2 :1.2.3
-           tags: |
-              type=ref,event=branch
-              type=ref,event=pr
-              type=raw,value=latest
-              type=semver,pattern={{version}}
-              type=semver,pattern={{major}}
-              type=semver,pattern={{major}}.{{minor}}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
-        with:
-          context: .
-          file: docker/Dockerfile-credential-issuer-migrations
-          platforms: linux/amd64, linux/arm64
-          pull: true
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      # https://github.com/peter-evans/dockerhub-description
-      - name: Update Docker Hub description
-        if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_MIGRATIONS }}
-          readme-filepath: "./docker/notice-credential-issuer-migrations.md"
-
-  expiry-release:
+      contents: write
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@2b51285047da1547ffb1b2203d8be4c0af6b1f20 # v3.2.0
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
-
-      # Create SemVer or ref tags dependent of trigger event
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
-        with:
-            images: |
-              ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_EXPIRY }}
-            # Automatically prepare image tags; See action docs for more examples. 
-            # semver patter will generate tags like these for example :1 :1.2 :1.2.3
-            tags: |
-              type=ref,event=branch
-              type=ref,event=pr
-              type=raw,value=latest
-              type=semver,pattern={{version}}
-              type=semver,pattern={{major}}
-              type=semver,pattern={{major}}.{{minor}}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
-        with:
-          context: .
-          file: docker/Dockerfile-credential-expiry-app
-          platforms: linux/amd64, linux/arm64
-          pull: true
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      # https://github.com/peter-evans/dockerhub-description
-      - name: Update Docker Hub description
-        if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_EXPIRY }}
-          readme-filepath: "./docker/notice-credential-expiry-app.md"
-
-  worker-release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@2b51285047da1547ffb1b2203d8be4c0af6b1f20 # v3.2.0
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
-
-      # Create SemVer or ref tags dependent of trigger event
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
-        with:
-            images: |
-              ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_WORKER }}
-            # Automatically prepare image tags; See action docs for more examples. 
-            # semver patter will generate tags like these for example :1 :1.2 :1.2.3
-            tags: |
-              type=ref,event=branch
-              type=ref,event=pr
-              type=raw,value=latest
-              type=semver,pattern={{version}}
-              type=semver,pattern={{major}}
-              type=semver,pattern={{major}}.{{minor}}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
-        with:
-          context: .
-          file: docker/Dockerfile-credential-issuer-processes-worker
-          platforms: linux/amd64, linux/arm64
-          pull: true
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      # https://github.com/peter-evans/dockerhub-description
-      - name: Update Docker Hub description
-        if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_WORKER }}
-          readme-filepath: "./docker/notice-credential-issuer-processes-worker.md"
+      - name: Create and push git tag
+        run: |
+          git tag v${{ needs.release-images.outputs.app-version }}
+          git push origin v${{ needs.release-images.outputs.app-version }}
