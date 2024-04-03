@@ -59,7 +59,6 @@ WebApplicationBuildRunner
                 .AddSingleton<IErrorMessageContainer, IssuerErrorMessageContainer>()
                 .AddSingleton<IErrorMessageContainer, RevocationErrorMessageContainer>()
                 .AddSingleton<IErrorMessageContainer, CredentialErrorMessageContainer>();
-            ;
         },
     (app, _) =>
     {
