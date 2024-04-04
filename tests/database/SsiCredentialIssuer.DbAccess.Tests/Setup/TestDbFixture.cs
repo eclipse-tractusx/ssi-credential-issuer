@@ -62,13 +62,13 @@ public class TestDbFixture : IAsyncLifetime
                 .MigrationsHistoryTable("__efmigrations_history_issuer")
         );
         var context = new IssuerDbContext(optionsBuilder.Options, new AuditHandlerV1(new FakeIdentityIdService(), dateTimeProvider ?? new UtcDateTimeProvider()));
-        await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
+        await context.Database.EnsureCreatedAsync();
         foreach (var seedAction in seedActions)
         {
             seedAction.Invoke(context);
         }
 
-        await context.SaveChangesAsync().ConfigureAwait(false);
+        await context.SaveChangesAsync();
         return context;
     }
 
@@ -77,8 +77,7 @@ public class TestDbFixture : IAsyncLifetime
     /// </summary>
     public async Task InitializeAsync()
     {
-        await _container.StartAsync()
-            .ConfigureAwait(false);
+        await _container.StartAsync();
 
         var optionsBuilder = new DbContextOptionsBuilder<IssuerDbContext>();
 
@@ -108,7 +107,6 @@ public class TestDbFixture : IAsyncLifetime
     /// <inheritdoc />
     public async Task DisposeAsync()
     {
-        await _container.DisposeAsync()
-            .ConfigureAwait(false);
+        await _container.DisposeAsync();
     }
 }

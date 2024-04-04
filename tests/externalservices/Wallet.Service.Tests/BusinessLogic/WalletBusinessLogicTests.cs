@@ -85,7 +85,7 @@ public class WalletBusinessLogicTests
             .Returns(externalId);
 
         // Act
-        await _sut.CreateCredential(id, schema, CancellationToken.None).ConfigureAwait(false);
+        await _sut.CreateCredential(id, schema, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(id, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
@@ -116,7 +116,7 @@ public class WalletBusinessLogicTests
             .Returns("cred");
 
         // Act
-        await _sut.SignCredential(id, credentialId, CancellationToken.None).ConfigureAwait(false);
+        await _sut.SignCredential(id, credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(id, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
@@ -145,7 +145,7 @@ public class WalletBusinessLogicTests
             });
 
         // Act
-        await _sut.CreateCredentialForHolder(id, "https://example.org/wallet", "test1", new EncryptionInformation(secret, vector, 0), "thisisatestsecret", CancellationToken.None).ConfigureAwait(false);
+        await _sut.CreateCredentialForHolder(id, "https://example.org/wallet", "test1", new EncryptionInformation(secret, vector, 0), "thisisatestsecret", CancellationToken.None);
 
         // Assert
         A.CallTo(() => _companySsiDetailRepository.AttachAndModifyProcessData(id, A<Action<CompanySsiProcessData>>._, A<Action<CompanySsiProcessData>>._))
@@ -192,7 +192,7 @@ public class WalletBusinessLogicTests
             .Returns(jsonDocument);
 
         // Act
-        await _sut.GetCredential(id, credentialId, VerifiedCredentialTypeKindId.BPN, CancellationToken.None).ConfigureAwait(false);
+        await _sut.GetCredential(id, credentialId, VerifiedCredentialTypeKindId.BPN, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _documentRepository.CreateDocument(A<string>._, A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.VERIFIED_CREDENTIAL, A<Action<Document>>._))
@@ -225,10 +225,10 @@ public class WalletBusinessLogicTests
         var jsonDocument = JsonDocument.Parse(data);
         A.CallTo(() => _walletService.GetCredential(credentialId, A<CancellationToken>._))
             .Returns(jsonDocument);
-        async Task Act() => await _sut.GetCredential(id, credentialId, VerifiedCredentialTypeKindId.BPN, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.GetCredential(id, credentialId, VerifiedCredentialTypeKindId.BPN, CancellationToken.None);
 
         // Act
-        var ex = await Assert.ThrowsAsync<ServiceException>(Act).ConfigureAwait(false);
+        var ex = await Assert.ThrowsAsync<ServiceException>(Act);
 
         // Assert
         ex.Message.Should().Be("Invalid schema for type BPN");

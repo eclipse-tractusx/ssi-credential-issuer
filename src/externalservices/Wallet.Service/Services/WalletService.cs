@@ -20,6 +20,7 @@
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 using System.Net.Http.Json;

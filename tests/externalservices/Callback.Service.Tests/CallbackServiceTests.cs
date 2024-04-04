@@ -80,7 +80,7 @@ public class CallbackServiceTests
         var sut = new CallbackService(_tokenService, _options);
 
         // Act
-        await sut.TriggerCallback("https://example.org/callback", data, CancellationToken.None).ConfigureAwait(false);
+        await sut.TriggerCallback("https://example.org/callback", data, CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -106,7 +106,7 @@ public class CallbackServiceTests
         httpClient.BaseAddress = new Uri("https://base.address.com");
         A.CallTo(() => _tokenService.GetAuthorizedClient<CallbackService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
         var sut = new CallbackService(_tokenService, _options);
-        async Task Act() => await sut.TriggerCallback("https://example.org/callback", _fixture.Create<IssuerResponseData>(), CancellationToken.None).ConfigureAwait(false);
+        Task Act() => sut.TriggerCallback("https://example.org/callback", _fixture.Create<IssuerResponseData>(), CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);

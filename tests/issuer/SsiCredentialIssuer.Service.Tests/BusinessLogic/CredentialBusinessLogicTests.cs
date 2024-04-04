@@ -69,7 +69,7 @@ public class CredentialBusinessLogicTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetSignedCredentialForCredentialId(CredentialId, Bpnl))
             .Returns(new ValueTuple<bool, bool, IEnumerable<ValueTuple<DocumentStatusId, byte[]>>>());
-        async Task Act() => await _sut.GetCredentialDocument(CredentialId);
+        Task Act() => _sut.GetCredentialDocument(CredentialId);
 
         // Act
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act);
@@ -84,7 +84,7 @@ public class CredentialBusinessLogicTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetSignedCredentialForCredentialId(CredentialId, Bpnl))
             .Returns(new ValueTuple<bool, bool, IEnumerable<ValueTuple<DocumentStatusId, byte[]>>>(true, false, Enumerable.Empty<ValueTuple<DocumentStatusId, byte[]>>()));
-        async Task Act() => await _sut.GetCredentialDocument(CredentialId);
+        Task Act() => _sut.GetCredentialDocument(CredentialId);
 
         // Act
         var ex = await Assert.ThrowsAsync<ForbiddenException>(Act);
@@ -99,7 +99,7 @@ public class CredentialBusinessLogicTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetSignedCredentialForCredentialId(CredentialId, Bpnl))
             .Returns(new ValueTuple<bool, bool, IEnumerable<ValueTuple<DocumentStatusId, byte[]>>>(true, true, Enumerable.Empty<ValueTuple<DocumentStatusId, byte[]>>()));
-        async Task Act() => await _sut.GetCredentialDocument(CredentialId);
+        Task Act() => _sut.GetCredentialDocument(CredentialId);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);

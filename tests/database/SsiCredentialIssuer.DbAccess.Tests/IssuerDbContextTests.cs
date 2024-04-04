@@ -39,7 +39,9 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
     private readonly TestDbFixture _dbTestDbFixture;
     private readonly IDateTimeProvider _dateTimeProvider;
 
+#pragma warning disable xUnit1041
     public IssuerDbContextTests(TestDbFixture testDbFixture)
+#pragma warning restore xUnit1041
     {
         var fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -63,12 +65,12 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
         var id = Guid.NewGuid();
         var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, "BPNL0001ISSUER", new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"), before);
 
-        var sut = await CreateContext().ConfigureAwait(false);
-        using var trans = await sut.Database.BeginTransactionAsync().ConfigureAwait(false);
+        var sut = await CreateContext();
+        using var trans = await sut.Database.BeginTransactionAsync();
 
         // Act
         sut.Add(ca);
-        await sut.SaveChangesAsync().ConfigureAwait(false);
+        await sut.SaveChangesAsync();
 
         // Assert
         ca.LastEditorId.Should().NotBeNull().And.Be(new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"));
@@ -76,7 +78,7 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
         var auditEntries = await sut.AuditCompanySsiDetail20240228.Where(x => x.Id == id).ToListAsync();
         auditEntries.Should().ContainSingle().Which.Should().Match<AuditCompanySsiDetail20240228>(
             x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV1OperationId == AuditOperationId.INSERT && (x.AuditV1DateLastChanged - now) < TimeSpan.FromSeconds(1) && x.LastEditorId == new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"));
-        await trans.RollbackAsync().ConfigureAwait(false);
+        await trans.RollbackAsync();
     }
 
     [Fact]
@@ -91,14 +93,14 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
         var id = Guid.NewGuid();
         var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, "BPNL0001ISSUER", new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"), before);
 
-        var sut = await CreateContext().ConfigureAwait(false);
-        using var trans = await sut.Database.BeginTransactionAsync().ConfigureAwait(false);
+        var sut = await CreateContext();
+        using var trans = await sut.Database.BeginTransactionAsync();
 
         // Act
         sut.Add(ca);
-        await sut.SaveChangesAsync().ConfigureAwait(false);
+        await sut.SaveChangesAsync();
         sut.Remove(ca);
-        await sut.SaveChangesAsync().ConfigureAwait(false);
+        await sut.SaveChangesAsync();
 
         // Assert
         ca.LastEditorId.Should().NotBeNull().And.Be(new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"));
@@ -107,11 +109,11 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
         auditEntries.Should().HaveCount(2).And.Satisfy(
             x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV1OperationId == AuditOperationId.INSERT && x.LastEditorId == new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"),
             x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV1OperationId == AuditOperationId.DELETE && (x.AuditV1DateLastChanged - later) < TimeSpan.FromSeconds(1) && x.LastEditorId == new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"));
-        await trans.RollbackAsync().ConfigureAwait(false);
+        await trans.RollbackAsync();
     }
 
     #endregion
 
     private async Task<IssuerDbContext> CreateContext() =>
-        await _dbTestDbFixture.GetDbContext(_dateTimeProvider).ConfigureAwait(false);
+        await _dbTestDbFixture.GetDbContext(_dateTimeProvider);
 }

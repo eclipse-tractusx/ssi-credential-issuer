@@ -5,6 +5,7 @@ using FluentAssertions;
 using Json.More;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
@@ -60,7 +61,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.CreateCredential(payload, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.CreateCredential(payload, CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -90,7 +91,7 @@ public class WalletServiceTests
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.CreateCredential(payload, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.CreateCredential(payload, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -118,7 +119,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.SignCredential(credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.SignCredential(credentialId, CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -149,7 +150,7 @@ public class WalletServiceTests
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.SignCredential(credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.SignCredential(credentialId, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -181,7 +182,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.GetCredential(credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.GetCredential(credentialId, CancellationToken.None);
 
         // Assert
         result.RootElement.ToJsonString().Should().Be("{\"root\":\"123\"}");
@@ -206,7 +207,7 @@ public class WalletServiceTests
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.GetCredential(credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.GetCredential(credentialId, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -233,7 +234,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -262,7 +263,7 @@ public class WalletServiceTests
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(A<BasicAuthSettings>._, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -289,7 +290,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        await _sut.RevokeCredentialForIssuer(Guid.NewGuid(), CancellationToken.None).ConfigureAwait(false);
+        await _sut.RevokeCredentialForIssuer(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -316,7 +317,7 @@ public class WalletServiceTests
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(A<BasicAuthSettings>._, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.RevokeCredentialForIssuer(Guid.NewGuid(), CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.RevokeCredentialForIssuer(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -343,7 +344,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        await _sut.RevokeCredentialForHolder("https://test.de", "test123", "cl1", Guid.NewGuid(), CancellationToken.None).ConfigureAwait(false);
+        await _sut.RevokeCredentialForHolder("https://test.de", "test123", "cl1", Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -370,7 +371,7 @@ public class WalletServiceTests
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(A<BasicAuthSettings>._, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.RevokeCredentialForHolder("https://test.de", "test123", "cl1", Guid.NewGuid(), CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.RevokeCredentialForHolder("https://test.de", "test123", "cl1", Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);

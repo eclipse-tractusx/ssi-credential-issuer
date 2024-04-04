@@ -103,7 +103,7 @@ public class ExpiryCheckServiceTests
             .Returns(data.ToAsyncEnumerable());
 
         // Act
-        await _sut.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        await _sut.ExecuteAsync(CancellationToken.None);
 
         // Assert
         A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(credentialId)).MustHaveHappenedOnceExactly();
@@ -133,7 +133,7 @@ public class ExpiryCheckServiceTests
             .Returns(data.ToAsyncEnumerable());
 
         // Act
-        await _sut.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        await _sut.ExecuteAsync(CancellationToken.None);
 
         // Assert
         A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id)).MustNotHaveHappened();
@@ -178,7 +178,7 @@ public class ExpiryCheckServiceTests
             });
 
         // Act
-        await _sut.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        await _sut.ExecuteAsync(CancellationToken.None);
 
         // Assert
         A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id)).MustNotHaveHappened();

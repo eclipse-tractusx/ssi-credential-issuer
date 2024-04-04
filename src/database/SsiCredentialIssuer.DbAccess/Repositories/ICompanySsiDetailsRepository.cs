@@ -84,8 +84,9 @@ public interface ICompanySsiDetailsRepository
     /// </summary>
     /// <param name="companySsiDetailStatusId">The status of the details</param>
     /// <param name="credentialTypeId">OPTIONAL: The type of the credential that should be returned</param>
+    /// <param name="bpnl">The bpnl of the company to search the credentials for</param>
     /// <returns>Returns data to create the pagination</returns>
-    IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId);
+    IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, string? bpnl);
 
     Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId);
     Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId);

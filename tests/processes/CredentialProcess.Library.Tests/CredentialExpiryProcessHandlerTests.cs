@@ -107,7 +107,7 @@ public class CredentialExpiryProcessHandlerTests
             });
 
         // Act
-        var result = await _sut.RevokeCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.RevokeCredential(_credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletService.RevokeCredentialForIssuer(externalCredentialId, A<CancellationToken>._))
@@ -128,7 +128,7 @@ public class CredentialExpiryProcessHandlerTests
         var externalCredentialId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetRevocationDataById(_credentialId))
             .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(false, null, default, Enumerable.Empty<ValueTuple<Guid, DocumentStatusId>>()));
-        async Task Act() => await _sut.RevokeCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.RevokeCredential(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act);
@@ -146,7 +146,7 @@ public class CredentialExpiryProcessHandlerTests
         var externalCredentialId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetRevocationDataById(_credentialId))
             .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, null, default, Enumerable.Empty<ValueTuple<Guid, DocumentStatusId>>()));
-        async Task Act() => await _sut.RevokeCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.RevokeCredential(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -170,7 +170,7 @@ public class CredentialExpiryProcessHandlerTests
             .Returns(new ValueTuple<VerifiedCredentialTypeId, Guid>(VerifiedCredentialTypeId.PCF_FRAMEWORK, requesterId));
 
         // Act
-        var result = await _sut.TriggerNotification(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.TriggerNotification(_credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _portalService.AddNotification(A<string>._, requesterId, NotificationTypeId.CREDENTIAL_REJECTED, A<CancellationToken>._))
@@ -194,7 +194,7 @@ public class CredentialExpiryProcessHandlerTests
             .Returns(new ValueTuple<VerifiedCredentialTypeId, Guid>(VerifiedCredentialTypeId.PCF_FRAMEWORK, requesterId));
 
         // Act
-        var result = await _sut.TriggerMail(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.TriggerMail(_credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _portalService.TriggerMail("CredentialRejected", requesterId, A<IEnumerable<MailParameter>>._, A<CancellationToken>._))

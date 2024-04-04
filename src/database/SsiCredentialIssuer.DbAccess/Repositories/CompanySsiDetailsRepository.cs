@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Microsoft.EntityFrameworkCore;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -170,11 +171,12 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
             .SingleOrDefaultAsync();
 
     /// <inheritdoc />
-    public IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId) =>
+    public IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, string? bpnl) =>
         _context.CompanySsiDetails.AsNoTracking()
             .Where(c =>
                 (!companySsiDetailStatusId.HasValue || c.CompanySsiDetailStatusId == companySsiDetailStatusId.Value) &&
-                (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId));
+                (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId) &&
+                (bpnl == null || EF.Functions.ILike(c.Bpnl, $"%{bpnl.EscapeForILike()}%")));
 
     /// <inheritdoc />
     public Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId) =>

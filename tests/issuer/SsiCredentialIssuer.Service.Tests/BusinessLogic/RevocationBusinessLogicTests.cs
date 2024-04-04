@@ -48,7 +48,7 @@ public class RevocationBusinessLogicTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId))
             .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>());
-        async Task Act() => await _sut.RevokeIssuerCredential(CredentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.RevokeIssuerCredential(CredentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act);
@@ -63,7 +63,7 @@ public class RevocationBusinessLogicTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId))
             .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, null, default, null!));
-        async Task Act() => await _sut.RevokeIssuerCredential(CredentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.RevokeIssuerCredential(CredentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -83,7 +83,7 @@ public class RevocationBusinessLogicTests
             .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, Guid.NewGuid(), statusId, null!));
 
         // Act
-        await _sut.RevokeIssuerCredential(CredentialId, CancellationToken.None).ConfigureAwait(false);
+        await _sut.RevokeIssuerCredential(CredentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletService.RevokeCredentialForIssuer(A<Guid>._, A<CancellationToken>._)).MustNotHaveHappened();
@@ -127,7 +127,7 @@ public class RevocationBusinessLogicTests
             });
 
         // Act
-        await _sut.RevokeIssuerCredential(CredentialId, CancellationToken.None).ConfigureAwait(false);
+        await _sut.RevokeIssuerCredential(CredentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletService.RevokeCredentialForIssuer(A<Guid>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
@@ -145,7 +145,7 @@ public class RevocationBusinessLogicTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId))
             .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>());
-        async Task Act() => await _sut.RevokeHolderCredential(CredentialId, _fixture.Create<TechnicalUserDetails>(), CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.RevokeHolderCredential(CredentialId, _fixture.Create<TechnicalUserDetails>(), CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act);
@@ -160,7 +160,7 @@ public class RevocationBusinessLogicTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId))
             .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, null, default, null!));
-        async Task Act() => await _sut.RevokeHolderCredential(CredentialId, _fixture.Create<TechnicalUserDetails>(), CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.RevokeHolderCredential(CredentialId, _fixture.Create<TechnicalUserDetails>(), CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -180,7 +180,7 @@ public class RevocationBusinessLogicTests
             .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, Guid.NewGuid(), statusId, null!));
 
         // Act
-        await _sut.RevokeHolderCredential(CredentialId, _fixture.Create<TechnicalUserDetails>(), CancellationToken.None).ConfigureAwait(false);
+        await _sut.RevokeHolderCredential(CredentialId, _fixture.Create<TechnicalUserDetails>(), CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletService.RevokeCredentialForHolder(A<string>._, A<string>._, A<string>._, A<Guid>._, A<CancellationToken>._)).MustNotHaveHappened();
@@ -224,7 +224,7 @@ public class RevocationBusinessLogicTests
             });
 
         // Act
-        await _sut.RevokeHolderCredential(CredentialId, _fixture.Create<TechnicalUserDetails>(), CancellationToken.None).ConfigureAwait(false);
+        await _sut.RevokeHolderCredential(CredentialId, _fixture.Create<TechnicalUserDetails>(), CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletService.RevokeCredentialForHolder(A<string>._, A<string>._, A<string>._, A<Guid>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();

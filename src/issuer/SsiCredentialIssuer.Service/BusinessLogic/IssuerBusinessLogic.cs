@@ -133,11 +133,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             .ConfigureAwait(false);
 
     /// <inheritdoc />
-    public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailSorting? sorting)
+    public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, string? bpnl, CompanySsiDetailSorting? sorting)
     {
         var query = _repositories
             .GetInstance<ICompanySsiDetailsRepository>()
-            .GetAllCredentialDetails(companySsiDetailStatusId, credentialTypeId);
+            .GetAllCredentialDetails(companySsiDetailStatusId, credentialTypeId, bpnl);
         var sortedQuery = sorting switch
         {
             CompanySsiDetailSorting.BpnlAsc or null => query.OrderBy(c => c.Bpnl),

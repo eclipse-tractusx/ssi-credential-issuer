@@ -30,7 +30,7 @@ public interface IIssuerBusinessLogic
 
     Task<IEnumerable<CertificateParticipationData>> GetSsiCertificatesAsync();
 
-    Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailSorting? sorting);
+    Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, string? bpnl, CompanySsiDetailSorting? sorting);
 
     Task ApproveCredential(Guid credentialId, CancellationToken cancellationToken);
 

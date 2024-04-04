@@ -76,7 +76,7 @@ public class CredentialCreationProcessHandlerTests
             .Returns(new ValueTuple<VerifiedCredentialTypeKindId, JsonDocument>());
 
         // Act
-        var result = await _sut.CreateCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.CreateCredential(_credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletBusinessLogic.CreateCredential(_credentialId, A<JsonDocument>._, A<CancellationToken>._))
@@ -98,7 +98,7 @@ public class CredentialCreationProcessHandlerTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetWalletCredentialId(_credentialId))
             .Returns<Guid?>(null);
-        async Task Act() => await _sut.SignCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.SignCredential(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -116,7 +116,7 @@ public class CredentialCreationProcessHandlerTests
             .Returns(externalCredentialId);
 
         // Act
-        var result = await _sut.SignCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.SignCredential(_credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletBusinessLogic.SignCredential(_credentialId, externalCredentialId, A<CancellationToken>._))
@@ -138,7 +138,7 @@ public class CredentialCreationProcessHandlerTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetExternalCredentialAndKindId(_credentialId))
             .Returns(default((Guid?, VerifiedCredentialTypeKindId, bool, string?)));
-        async Task Act() => await _sut.SaveCredentialDocument(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.SaveCredentialDocument(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -156,7 +156,7 @@ public class CredentialCreationProcessHandlerTests
             .Returns((externalCredentialId, VerifiedCredentialTypeKindId.BPN, true, "https://example.org"));
 
         // Act
-        var result = await _sut.SaveCredentialDocument(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.SaveCredentialDocument(_credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletBusinessLogic.GetCredential(_credentialId, externalCredentialId, VerifiedCredentialTypeKindId.BPN, A<CancellationToken>._))
@@ -178,7 +178,7 @@ public class CredentialCreationProcessHandlerTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
             .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>());
-        async Task Act() => await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -193,7 +193,7 @@ public class CredentialCreationProcessHandlerTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
             .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>(new HolderWalletData(null, null), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
-        async Task Act() => await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -208,7 +208,7 @@ public class CredentialCreationProcessHandlerTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
             .Returns(new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>(new HolderWalletData(null, "c1"), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
-        async Task Act() => await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -229,7 +229,7 @@ public class CredentialCreationProcessHandlerTests
                 "https://example.org"));
 
         // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
         result.modified.Should().BeFalse();
@@ -250,7 +250,7 @@ public class CredentialCreationProcessHandlerTests
                 "https://example.org"));
 
         // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletBusinessLogic.CreateCredentialForHolder(_credentialId, "https://example.org", "c1", A<EncryptionInformation>._, "test", A<CancellationToken>._))
@@ -272,7 +272,7 @@ public class CredentialCreationProcessHandlerTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetCallbackUrl(_credentialId))
             .Returns(new ValueTuple<string, string?>("BPNL000001234", null));
-        async Task Act() => await _sut.TriggerCallback(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        Task Act() => _sut.TriggerCallback(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -289,7 +289,7 @@ public class CredentialCreationProcessHandlerTests
             .Returns(new ValueTuple<string, string?>("BPNL00000123456", "https://example.org"));
 
         // Act
-        var result = await _sut.TriggerCallback(_credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.TriggerCallback(_credentialId, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _callbackService.TriggerCallback("https://example.org", A<IssuerResponseData>._, A<CancellationToken>._))

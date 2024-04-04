@@ -41,7 +41,8 @@ public class BasicAuthTokenService : IBasicAuthTokenService
             $"{typeof(T).Name}Auth",
             settings.ClientId,
             settings.ClientSecret,
-            settings.TokenAddress);
+            settings.TokenAddress,
+            settings.GrantType);
 
         var token = await this.GetBasicTokenAsync(tokenParameters, cancellationToken).ConfigureAwait(false);
 
@@ -54,7 +55,7 @@ public class BasicAuthTokenService : IBasicAuthTokenService
     {
         var formParameters = new Dictionary<string, string>
         {
-            { "grant_type", "client_credentials" }
+            { "grant_type", settings.GrantType }
         };
         using var content = new FormUrlEncodedContent(formParameters);
         var authClient = _httpClientFactory.CreateClient(settings.HttpClientName);

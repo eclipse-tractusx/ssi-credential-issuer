@@ -54,7 +54,7 @@ public static class IssuerController
             .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
 
         issuer.MapGet("certificates", (IIssuerBusinessLogic logic) => logic.GetSsiCertificatesAsync())
-            .WithSwaggerDescription("Gets all company certificate requests and their status",
+            .WithSwaggerDescription("Gets all company certificate requests and their status of the acting company",
                 "Example: GET: api/issuer/certificates")
             .RequireAuthorization(r =>
             {
@@ -75,21 +75,22 @@ public static class IssuerController
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<VerifiedCredentialTypeId>), Constants.JsonContentType);
 
-        issuer.MapGet(string.Empty, (IIssuerBusinessLogic logic, [FromQuery] int? page,
+        issuer.MapGet("credentialRequests", (IIssuerBusinessLogic logic,
+                [FromQuery] int? page,
                 [FromQuery] int? size,
                 [FromQuery] CompanySsiDetailStatusId? companySsiDetailStatusId,
                 [FromQuery] VerifiedCredentialTypeId? credentialTypeId,
-                [FromQuery] CompanySsiDetailSorting? sorting) => logic.GetCredentials(page ?? 0, size ?? 15,
-                companySsiDetailStatusId, credentialTypeId, sorting))
+                [FromQuery] string? bpnl,
+                [FromQuery] CompanySsiDetailSorting? sorting) => logic.GetCredentials(page ?? 0, size ?? 15, companySsiDetailStatusId, credentialTypeId, bpnl, sorting))
             .WithSwaggerDescription("Gets all outstanding, existing and inactive credentials",
-                "Example: GET: /api/issuer",
+                "Example: GET: /api/issuer/credentialRequests",
                 "The page to get",
                 "Amount of entries",
                 "OPTIONAL: Filter for the status",
                 "OPTIONAL: The type of the credential that should be returned",
-                "OPTIONAL: Search string for the company name",
+                "OPTIONAL: Search string for the bpnl",
                 "Defines the sorting of the list")
-            .RequireAuthorization(r => r.RequireRole(DecisionSsiRole))
+            .RequireAuthorization(r => r.RequireRole("view_credential_requests"))
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<CredentialDetailData>), Constants.JsonContentType);
 

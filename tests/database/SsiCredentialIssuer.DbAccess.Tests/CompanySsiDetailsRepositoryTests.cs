@@ -37,7 +37,9 @@ public class CompanySsiDetailsRepositoryTests
     private readonly TestDbFixture _dbTestDbFixture;
     private readonly Guid _userId = new("ac1cf001-7fbc-1f2f-817f-bce058020006");
 
+#pragma warning disable xUnit1041
     public CompanySsiDetailsRepositoryTests(TestDbFixture testDbFixture)
+#pragma warning restore xUnit1041
     {
         var fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -56,7 +58,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.MinValue).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.MinValue).ToListAsync();
 
         // Assert
         result.Should().HaveCount(8);
@@ -83,7 +85,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, dt).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, dt).ToListAsync();
 
         // Assert
         result.Should().HaveCount(8);
@@ -113,7 +115,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(null, null).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetAllCredentialDetails(null, null, null).ToListAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -138,7 +140,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(CompanySsiDetailStatusId.PENDING, null).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetAllCredentialDetails(CompanySsiDetailStatusId.PENDING, null, null).ToListAsync();
 
         // Assert
         result.Should().NotBeNull().And.HaveCount(4);
@@ -153,13 +155,36 @@ public class CompanySsiDetailsRepositoryTests
     }
 
     [Fact]
+    public async Task GetAllCredentialDetails_WithBpnl_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetAllCredentialDetails(null, null, ValidBpnl).ToListAsync();
+
+        // Assert
+        result.Should().NotBeNull().And.HaveCount(6);
+        result.Count.Should().Be(6);
+        result.Should().HaveCount(6)
+            .And.Satisfy(
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE);
+        result.Should().NotContain(x => x.Bpnl != ValidBpnl);
+    }
+
+    [Fact]
     public async Task GetAllCredentialDetails_WithWithCredentialType_ReturnsExpected()
     {
         // Arrange
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(null, VerifiedCredentialTypeId.PCF_FRAMEWORK).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetAllCredentialDetails(null, VerifiedCredentialTypeId.PCF_FRAMEWORK, null).ToListAsync();
 
         // Assert
         result.Should().NotBeNull().And.ContainSingle().Which.Bpnl.Should().Be(ValidBpnl);
@@ -177,7 +202,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetSsiCertificates(ValidBpnl, new DateTimeOffset(2023, 01, 01, 01, 01, 01, TimeSpan.Zero)).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetSsiCertificates(ValidBpnl, new DateTimeOffset(2023, 01, 01, 01, 01, 01, TimeSpan.Zero)).ToListAsync();
 
         // Assert
         result.Should().HaveCount(2)
@@ -220,7 +245,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.CheckSsiDetailsExistsForCompany(ValidBpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, VerifiedCredentialTypeKindId.FRAMEWORK, new Guid("1268a76a-ca19-4dd8-b932-01f24071d560")).ConfigureAwait(false);
+        var result = await sut.CheckSsiDetailsExistsForCompany(ValidBpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, VerifiedCredentialTypeKindId.FRAMEWORK, new Guid("1268a76a-ca19-4dd8-b932-01f24071d560"));
 
         // Assert
         result.Should().BeTrue();
@@ -233,7 +258,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.CheckSsiDetailsExistsForCompany("BPNL000000001TEST", VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, VerifiedCredentialTypeKindId.FRAMEWORK, new Guid("1268a76a-ca19-4dd8-b932-01f24071d560")).ConfigureAwait(false);
+        var result = await sut.CheckSsiDetailsExistsForCompany("BPNL000000001TEST", VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, VerifiedCredentialTypeKindId.FRAMEWORK, new Guid("1268a76a-ca19-4dd8-b932-01f24071d560"));
 
         // Assert
         result.Should().BeFalse();
@@ -246,7 +271,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.CheckSsiDetailsExistsForCompany("BPNL000000001TEST", VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, VerifiedCredentialTypeKindId.MEMBERSHIP, new Guid("1268a76a-ca19-4dd8-b932-01f24071d560")).ConfigureAwait(false);
+        var result = await sut.CheckSsiDetailsExistsForCompany("BPNL000000001TEST", VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, VerifiedCredentialTypeKindId.MEMBERSHIP, new Guid("1268a76a-ca19-4dd8-b932-01f24071d560"));
 
         // Assert
         result.Should().BeFalse();
@@ -259,7 +284,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.CheckSsiDetailsExistsForCompany(ValidBpnl, VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK, VerifiedCredentialTypeKindId.FRAMEWORK, new Guid("1268a76a-ca19-4dd8-b932-01f24071d562")).ConfigureAwait(false);
+        var result = await sut.CheckSsiDetailsExistsForCompany(ValidBpnl, VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK, VerifiedCredentialTypeKindId.FRAMEWORK, new Guid("1268a76a-ca19-4dd8-b932-01f24071d562"));
 
         // Assert
         result.Should().BeFalse();
@@ -281,7 +306,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(detailId, typeId).ConfigureAwait(false);
+        var result = await sut.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(detailId, typeId);
 
         // Assert
         result.Expiry.Should().Be(expiry);
@@ -302,7 +327,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.CheckSsiCertificateType(typeId).ConfigureAwait(false);
+        var result = await sut.CheckSsiCertificateType(typeId);
 
         // Assert
         result.Exists.Should().Be(expectedResult);
@@ -319,7 +344,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetSsiApprovalData(new("9f5b9934-4014-4099-91e9-7b1aee696b03")).ConfigureAwait(false);
+        var result = await sut.GetSsiApprovalData(new("9f5b9934-4014-4099-91e9-7b1aee696b03"));
 
         // Assert
         result.exists.Should().BeTrue();
@@ -335,7 +360,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetSsiApprovalData(Guid.NewGuid()).ConfigureAwait(false);
+        var result = await sut.GetSsiApprovalData(Guid.NewGuid());
 
         // Assert
         result.exists.Should().BeFalse();
@@ -352,7 +377,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetSsiRejectionData(new("9f5b9934-4014-4099-91e9-7b1aee696b03")).ConfigureAwait(false);
+        var result = await sut.GetSsiRejectionData(new("9f5b9934-4014-4099-91e9-7b1aee696b03"));
 
         // Assert
         result.Exists.Should().BeTrue();
@@ -367,7 +392,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetSsiRejectionData(Guid.NewGuid()).ConfigureAwait(false);
+        var result = await sut.GetSsiRejectionData(Guid.NewGuid());
 
         // Assert
         result.Should().Be(default);
@@ -433,7 +458,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetCertificateTypes(ValidBpnl).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetCertificateTypes(ValidBpnl).ToListAsync();
 
         // Assert
         result.Should().ContainSingle().Which.Should().Be(VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER);
@@ -446,7 +471,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetCertificateTypes("BPNL0000001TEST").ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetCertificateTypes("BPNL0000001TEST").ToListAsync();
 
         // Assert
         result.Should().HaveCount(2).And.Satisfy(
@@ -468,7 +493,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetExpiryData(now, inactiveVcsToDelete, expiredVcsToDelete).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetExpiryData(now, inactiveVcsToDelete, expiredVcsToDelete).ToListAsync();
 
         // Assert
         result.Should().HaveCount(6);
@@ -578,13 +603,13 @@ public class CompanySsiDetailsRepositoryTests
 
     private async Task<CompanySsiDetailsRepository> CreateSut()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         return new CompanySsiDetailsRepository(context);
     }
 
     private async Task<(CompanySsiDetailsRepository sut, IssuerDbContext context)> CreateSutWithContext()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         return (new CompanySsiDetailsRepository(context), context);
     }
 

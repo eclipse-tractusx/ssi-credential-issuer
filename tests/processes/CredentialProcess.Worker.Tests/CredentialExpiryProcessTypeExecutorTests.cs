@@ -27,6 +27,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Expiry;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
 using Xunit;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Tests;
@@ -82,7 +83,7 @@ public class CredentialExpiryProcessTypeExecutorTests
     public async Task IsLockRequested_ReturnsExpected()
     {
         // Act
-        var result = await _sut.IsLockRequested(ProcessStepTypeId.REVOKE_CREDENTIAL).ConfigureAwait(false);
+        var result = await _sut.IsLockRequested(ProcessStepTypeId.REVOKE_CREDENTIAL);
 
         // Assert
         result.Should().BeFalse();
@@ -99,7 +100,7 @@ public class CredentialExpiryProcessTypeExecutorTests
             .Returns(new ValueTuple<bool, Guid>(true, Guid.NewGuid()));
 
         // Act
-        var result = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>()).ConfigureAwait(false);
+        var result = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>());
 
         // Assert
         result.Modified.Should().BeFalse();
@@ -115,10 +116,10 @@ public class CredentialExpiryProcessTypeExecutorTests
             .Returns(new ValueTuple<bool, Guid>(false, Guid.Empty));
 
         // Act
-        async Task Act() => await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>()).ConfigureAwait(false);
+        ValueTask<IProcessTypeExecutor.InitializationResult> Act() => _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>());
 
         // Assert
-        var ex = await Assert.ThrowsAsync<NotFoundException>(Act);
+        var ex = await Assert.ThrowsAsync<NotFoundException>(async () => await Act());
         ex.Message.Should().Be($"process {validProcessId} does not exist or is not associated with an credential");
     }
 
@@ -130,10 +131,10 @@ public class CredentialExpiryProcessTypeExecutorTests
     public async Task ExecuteProcessStep_WithoutRegistrationId_ThrowsUnexpectedConditionException()
     {
         // Act
-        async Task Act() => await _sut.ExecuteProcessStep(ProcessStepTypeId.SIGN_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None).ConfigureAwait(false);
+        ValueTask<IProcessTypeExecutor.StepExecutionResult> Act() => _sut.ExecuteProcessStep(ProcessStepTypeId.SIGN_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
-        var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(Act);
+        var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(async () => await Act());
         ex.Message.Should().Be("credentialId should never be empty here");
     }
 
@@ -147,7 +148,7 @@ public class CredentialExpiryProcessTypeExecutorTests
             .Returns(new ValueTuple<bool, Guid>(true, credentialId));
 
         // Act InitializeProcess
-        var initializeResult = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>()).ConfigureAwait(false);
+        var initializeResult = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>());
 
         // Assert InitializeProcess
         initializeResult.Modified.Should().BeFalse();
@@ -158,7 +159,7 @@ public class CredentialExpiryProcessTypeExecutorTests
             .Returns(new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(null, ProcessStepStatusId.DONE, false, null));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeFalse();
@@ -178,7 +179,7 @@ public class CredentialExpiryProcessTypeExecutorTests
             .Returns(new ValueTuple<bool, Guid>(true, credentialId));
 
         // Act InitializeProcess
-        var initializeResult = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>()).ConfigureAwait(false);
+        var initializeResult = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>());
 
         // Assert InitializeProcess
         initializeResult.Modified.Should().BeFalse();
@@ -189,7 +190,7 @@ public class CredentialExpiryProcessTypeExecutorTests
             .Throws(new ServiceException("this is a test", true));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeTrue();
@@ -209,7 +210,7 @@ public class CredentialExpiryProcessTypeExecutorTests
             .Returns(new ValueTuple<bool, Guid>(true, credentialId));
 
         // Act InitializeProcess
-        var initializeResult = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>()).ConfigureAwait(false);
+        var initializeResult = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>());
 
         // Assert InitializeProcess
         initializeResult.Modified.Should().BeFalse();
@@ -220,7 +221,7 @@ public class CredentialExpiryProcessTypeExecutorTests
             .Throws(new ServiceException("this is a test"));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeTrue();

@@ -38,7 +38,9 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
 {
     private readonly TestDbFixture _dbTestDbFixture;
 
+#pragma warning disable xUnit1041
     public CredentialRepositoryTests(TestDbFixture testDbFixture)
+#pragma warning restore xUnit1041
     {
         var fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -54,7 +56,7 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task GetDataForProcessId_ReturnsExpectedDocument()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = await sut.GetDataForProcessId(new Guid("dd371565-9489-4907-a2e4-b8cbfe7a8cd2"));
@@ -72,7 +74,7 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task GetCredentialData_ReturnsExpectedDocument()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = await sut.GetCredentialData(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"));
@@ -91,7 +93,7 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task GetWalletCredentialId_ReturnsExpectedDocument()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = await sut.GetWalletCredentialId(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"));
@@ -108,7 +110,7 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task GetCredentialStorageInformationById_ReturnsExpectedDocument()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = await sut.GetCredentialStorageInformationById(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"));
@@ -126,7 +128,7 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task GetExternalCredentialAndKindId_ReturnsExpectedDocument()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = await sut.GetExternalCredentialAndKindId(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"));
@@ -144,7 +146,7 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task AttachAndModifyCredential_ReturnsExpectedResult()
     {
         // Arrange
-        var (sut, context) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, context) = await CreateSutWithContext();
 
         // Act
         sut.AttachAndModifyCredential(Guid.NewGuid(), x => x.CompanySsiDetailStatusId = CompanySsiDetailStatusId.ACTIVE, x => x.CompanySsiDetailStatusId = CompanySsiDetailStatusId.PENDING);
@@ -165,14 +167,14 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     private async Task<CredentialRepository> CreateSut()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         var sut = new CredentialRepository(context);
         return sut;
     }
 
     private async Task<(CredentialRepository Sut, IssuerDbContext Context)> CreateSutWithContext()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         var sut = new CredentialRepository(context);
         return (sut, context);
     }

@@ -67,7 +67,7 @@ public class BasicAuthTokenServiceTests
 
         var sut = new BasicAuthTokenService(_httpClientFactory);
 
-        var result = await sut.GetBasicAuthorizedClient<BasicAuthTokenService>(settings, _cancellationToken).ConfigureAwait(false);
+        var result = await sut.GetBasicAuthorizedClient<BasicAuthTokenService>(settings, _cancellationToken);
 
         result.Should().NotBeNull();
         result.BaseAddress.Should().Be(_validBaseAddress);
@@ -83,7 +83,7 @@ public class BasicAuthTokenServiceTests
 
         var act = () => sut.GetBasicAuthorizedClient<BasicAuthTokenService>(settings, _cancellationToken);
 
-        var error = await Assert.ThrowsAsync<ServiceException>(act).ConfigureAwait(false);
+        var error = await Assert.ThrowsAsync<ServiceException>(act);
 
         error.Should().NotBeNull();
         error.InnerException.Should().Be(_testException);
@@ -118,9 +118,5 @@ public class BasicAuthTokenServiceTests
         public TestException() { }
         public TestException(string message) : base(message) { }
         public TestException(string message, Exception inner) : base(message, inner) { }
-
-        protected TestException(
-            System.Runtime.Serialization.SerializationInfo info,
-            System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 }
