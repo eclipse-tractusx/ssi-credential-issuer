@@ -65,7 +65,7 @@ processesworker:
       index0:
         encryptionKey: "<path:portal/data/ssi-credential-issuer/int/wallet#encryptionKey0>"
 
-credentialexpiry:
+credentialExpiry:
   logging:
     default: "Debug"
 
