@@ -17,12 +17,9 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
-
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
 public interface IRevocationBusinessLogic
 {
-    Task RevokeIssuerCredential(Guid credentialId, CancellationToken cancellationToken);
-    Task RevokeHolderCredential(Guid credentialId, TechnicalUserDetails walletInformation, CancellationToken cancellationToken);
+    Task RevokeCredential(Guid credentialId, bool revokeForIssuer, CancellationToken cancellationToken);
 }

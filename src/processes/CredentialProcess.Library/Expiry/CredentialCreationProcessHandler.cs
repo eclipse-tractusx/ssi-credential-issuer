@@ -47,7 +47,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RevokeCredential(Guid credentialId, CancellationToken cancellationToken)
     {
         var credentialRepository = _repositories.GetInstance<ICredentialRepository>();
-        var data = await credentialRepository.GetRevocationDataById(credentialId)
+        var data = await credentialRepository.GetRevocationDataById(credentialId, string.Empty)
             .ConfigureAwait(false);
         if (!data.Exists)
         {

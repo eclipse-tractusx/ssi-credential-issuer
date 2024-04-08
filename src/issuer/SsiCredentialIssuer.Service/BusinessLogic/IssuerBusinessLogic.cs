@@ -253,19 +253,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             throw UnexpectedConditionException.Create(IssuerErrors.BPN_NOT_SET);
         }
 
-        if (data.DetailData == null && data.Kind == VerifiedCredentialTypeKindId.FRAMEWORK)
-        {
-            throw ConflictException.Create(IssuerErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET);
-        }
+        ValidateFrameworkCredential(data);
 
-        if (data.Kind != VerifiedCredentialTypeKindId.FRAMEWORK && data.Kind != VerifiedCredentialTypeKindId.MEMBERSHIP && data.Kind != VerifiedCredentialTypeKindId.BPN)
+        if (Enum.GetValues<VerifiedCredentialTypeKindId>().All(x => x != data.Kind))
         {
             throw ConflictException.Create(IssuerErrors.KIND_NOT_SUPPORTED, new ErrorParameter[] { new("kind", data.Kind != null ? data.Kind.Value.ToString() : "empty kind") });
-        }
-
-        if (data.Kind == VerifiedCredentialTypeKindId.FRAMEWORK && string.IsNullOrWhiteSpace(data.DetailData!.Version))
-        {
-            throw ConflictException.Create(IssuerErrors.EMPTY_VERSION);
         }
 
         if (data.ProcessId is not null)
@@ -276,6 +268,24 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         if (data.Schema is null)
         {
             throw UnexpectedConditionException.Create(IssuerErrors.SCHEMA_NOT_SET);
+        }
+    }
+
+    private static void ValidateFrameworkCredential(SsiApprovalData data)
+    {
+        if (data.Kind != VerifiedCredentialTypeKindId.FRAMEWORK)
+        {
+            return;
+        }
+
+        if (data.DetailData == null)
+        {
+            throw ConflictException.Create(IssuerErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET);
+        }
+
+        if (string.IsNullOrWhiteSpace(data.DetailData!.Version))
+        {
+            throw ConflictException.Create(IssuerErrors.EMPTY_VERSION);
         }
     }
 

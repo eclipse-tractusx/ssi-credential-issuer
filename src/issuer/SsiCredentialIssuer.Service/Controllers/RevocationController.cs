@@ -35,19 +35,19 @@ public static class RevocationController
     {
         var revocation = group.MapGroup("/revocation");
 
-        revocation.MapPost("issuer/credentials/{credentialId}", ([FromRoute] Guid credentialId, CancellationToken cancellationToken, [FromServices] IRevocationBusinessLogic logic) => logic.RevokeIssuerCredential(credentialId, cancellationToken))
+        revocation.MapPost("issuer/credentials/{credentialId}", ([FromRoute] Guid credentialId, CancellationToken cancellationToken, [FromServices] IRevocationBusinessLogic logic) => logic.RevokeCredential(credentialId, true, cancellationToken))
             .WithSwaggerDescription("Revokes an credential which was issued by the given issuer",
                 "POST: api/revocation/issuer/credentials/{credentialId}",
                 "Id of the credential that should be revoked")
             .RequireAuthorization(r =>
             {
-                r.RequireRole("revoke_credentials_issuer");
+                // r.RequireRole("revoke_credentials_issuer");
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
             })
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(Guid));
-        revocation.MapPost("credentials/{credentialId}", ([FromRoute] Guid credentialId, [FromBody] TechnicalUserDetails data, CancellationToken cancellationToken, [FromServices] IRevocationBusinessLogic logic) => logic.RevokeHolderCredential(credentialId, data, cancellationToken))
+        revocation.MapPost("credentials/{credentialId}", ([FromRoute] Guid credentialId, CancellationToken cancellationToken, [FromServices] IRevocationBusinessLogic logic) => logic.RevokeCredential(credentialId, false, cancellationToken))
             .WithSwaggerDescription("Revokes an credential of an holder",
                 "POST: api/revocation/credentials/{credentialId}",
                 "Id of the credential that should be revoked",

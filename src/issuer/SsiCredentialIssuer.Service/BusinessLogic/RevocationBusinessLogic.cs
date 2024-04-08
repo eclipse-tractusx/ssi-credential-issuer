@@ -24,6 +24,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
@@ -32,50 +33,28 @@ public class RevocationBusinessLogic : IRevocationBusinessLogic
 {
     private readonly IIssuerRepositories _repositories;
     private readonly IWalletService _walletService;
+    private readonly IIdentityData _identityData;
 
-    public RevocationBusinessLogic(IIssuerRepositories repositories, IWalletService walletService)
+    public RevocationBusinessLogic(IIssuerRepositories repositories, IWalletService walletService, IIdentityService identityService)
     {
         _repositories = repositories;
         _walletService = walletService;
+        _identityData = identityService.IdentityData;
     }
 
-    public async Task RevokeIssuerCredential(Guid credentialId, CancellationToken cancellationToken)
+    public async Task RevokeCredential(Guid credentialId, bool revokeForIssuer, CancellationToken cancellationToken)
     {
-        // check for is issuer
         var credentialRepository = _repositories.GetInstance<ICredentialRepository>();
-        var data = await RevokeCredentialInternal(credentialId, credentialRepository).ConfigureAwait(false);
-        if (data.StatusId != CompanySsiDetailStatusId.ACTIVE)
-        {
-            return;
-        }
-
-        // call walletService
-        await _walletService.RevokeCredentialForIssuer(data.ExternalCredentialId, cancellationToken).ConfigureAwait(false);
-        UpdateData(credentialId, data.StatusId, data.Documents, credentialRepository);
-    }
-
-    public async Task RevokeHolderCredential(Guid credentialId, TechnicalUserDetails walletInformation, CancellationToken cancellationToken)
-    {
-        // check for is holder
-        var credentialRepository = _repositories.GetInstance<ICredentialRepository>();
-        var data = await RevokeCredentialInternal(credentialId, credentialRepository).ConfigureAwait(false);
-        if (data.StatusId != CompanySsiDetailStatusId.ACTIVE)
-        {
-            return;
-        }
-
-        // call walletService
-        await _walletService.RevokeCredentialForHolder(walletInformation.WalletUrl, walletInformation.ClientId, walletInformation.ClientSecret, data.ExternalCredentialId, cancellationToken).ConfigureAwait(false);
-        UpdateData(credentialId, data.StatusId, data.Documents, credentialRepository);
-    }
-
-    private static async Task<(Guid ExternalCredentialId, CompanySsiDetailStatusId StatusId, IEnumerable<(Guid DocumentId, DocumentStatusId DocumentStatusId)> Documents)> RevokeCredentialInternal(Guid credentialId, ICredentialRepository credentialRepository)
-    {
-        var data = await credentialRepository.GetRevocationDataById(credentialId)
+        var data = await credentialRepository.GetRevocationDataById(credentialId, _identityData.Bpnl)
             .ConfigureAwait(false);
         if (!data.Exists)
         {
             throw NotFoundException.Create(RevocationDataErrors.CREDENTIAL_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
+        }
+
+        if (!revokeForIssuer && !data.IsSameBpnl)
+        {
+            throw ForbiddenException.Create(RevocationDataErrors.NOT_ALLOWED_TO_REVOKE_CREDENTIAL);
         }
 
         if (data.ExternalCredentialId is null)
@@ -83,20 +62,22 @@ public class RevocationBusinessLogic : IRevocationBusinessLogic
             throw ConflictException.Create(RevocationDataErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
         }
 
-        return (data.ExternalCredentialId.Value, data.StatusId, data.Documents);
-    }
+        if (data.StatusId != CompanySsiDetailStatusId.ACTIVE)
+        {
+            return;
+        }
 
-    private void UpdateData(Guid credentialId, CompanySsiDetailStatusId statusId, IEnumerable<(Guid DocumentId, DocumentStatusId DocumentStatusId)> documentData, ICredentialRepository credentialRepository)
-    {
+        // call walletService
+        await _walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(false);
         _repositories.GetInstance<IDocumentRepository>().AttachAndModifyDocuments(
-            documentData.Select(d => new ValueTuple<Guid, Action<Document>?, Action<Document>>(
+            data.Documents.Select(d => new ValueTuple<Guid, Action<Document>?, Action<Document>>(
                 d.DocumentId,
                 document => document.DocumentStatusId = d.DocumentStatusId,
                 document => document.DocumentStatusId = DocumentStatusId.INACTIVE
             )));
 
         credentialRepository.AttachAndModifyCredential(credentialId,
-            x => x.CompanySsiDetailStatusId = statusId,
+            x => x.CompanySsiDetailStatusId = data.StatusId,
             x => x.CompanySsiDetailStatusId = CompanySsiDetailStatusId.REVOKED);
     }
 }

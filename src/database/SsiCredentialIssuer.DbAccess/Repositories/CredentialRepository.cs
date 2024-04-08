@@ -78,11 +78,13 @@ public class CredentialRepository : ICredentialRepository
             .Select(x => new ValueTuple<string, string?>(x.CompanySsiDetail!.Bpnl, x.CallbackUrl))
             .SingleOrDefaultAsync();
 
-    public Task<(bool Exists, Guid? ExternalCredentialId, CompanySsiDetailStatusId StatusId, IEnumerable<(Guid DocumentId, DocumentStatusId DocumentStatusId)> Documents)> GetRevocationDataById(Guid credentialId) =>
+    public Task<(bool Exists, bool IsSameBpnl, Guid? ExternalCredentialId, CompanySsiDetailStatusId StatusId, IEnumerable<(Guid DocumentId, DocumentStatusId DocumentStatusId)> Documents)> GetRevocationDataById(Guid credentialId, string bpnl) =>
         _dbContext.CompanySsiDetails
-            .Where(x => x.Id == credentialId)
-            .Select(x => new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<(Guid, DocumentStatusId)>>(
+            .Where(x =>
+                x.Id == credentialId)
+            .Select(x => new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<(Guid, DocumentStatusId)>>(
                 true,
+                x.Bpnl == bpnl,
                 x.ExternalCredentialId,
                 x.CompanySsiDetailStatusId,
                 x.Documents.Select(d => new ValueTuple<Guid, DocumentStatusId>(d.Id, d.DocumentStatusId))))

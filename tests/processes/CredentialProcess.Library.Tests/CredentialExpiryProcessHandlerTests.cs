@@ -80,8 +80,8 @@ public class CredentialExpiryProcessHandlerTests
             .Build<Document>()
             .With(x => x.DocumentStatusId, DocumentStatusId.ACTIVE)
             .Create();
-        A.CallTo(() => _credentialRepository.GetRevocationDataById(_credentialId))
-            .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, externalCredentialId, credential.CompanySsiDetailStatusId, Enumerable.Repeat(new ValueTuple<Guid, DocumentStatusId>(document.Id, document.DocumentStatusId), 1)));
+        A.CallTo(() => _credentialRepository.GetRevocationDataById(_credentialId, string.Empty))
+            .Returns(new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, false, externalCredentialId, credential.CompanySsiDetailStatusId, Enumerable.Repeat(new ValueTuple<Guid, DocumentStatusId>(document.Id, document.DocumentStatusId), 1)));
         A.CallTo(() => _credentialRepository.AttachAndModifyCredential(credential.Id, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
             .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> modify) =>
             {
@@ -126,8 +126,8 @@ public class CredentialExpiryProcessHandlerTests
     {
         // Arrange
         var externalCredentialId = Guid.NewGuid();
-        A.CallTo(() => _credentialRepository.GetRevocationDataById(_credentialId))
-            .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(false, null, default, Enumerable.Empty<ValueTuple<Guid, DocumentStatusId>>()));
+        A.CallTo(() => _credentialRepository.GetRevocationDataById(_credentialId, string.Empty))
+            .Returns(new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(false, false, null, default, Enumerable.Empty<ValueTuple<Guid, DocumentStatusId>>()));
         async Task Act() => await _sut.RevokeCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Act
@@ -144,8 +144,8 @@ public class CredentialExpiryProcessHandlerTests
     {
         // Arrange
         var externalCredentialId = Guid.NewGuid();
-        A.CallTo(() => _credentialRepository.GetRevocationDataById(_credentialId))
-            .Returns(new ValueTuple<bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, null, default, Enumerable.Empty<ValueTuple<Guid, DocumentStatusId>>()));
+        A.CallTo(() => _credentialRepository.GetRevocationDataById(_credentialId, string.Empty))
+            .Returns(new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, true, null, default, Enumerable.Empty<ValueTuple<Guid, DocumentStatusId>>()));
         async Task Act() => await _sut.RevokeCredential(_credentialId, CancellationToken.None).ConfigureAwait(false);
 
         // Act

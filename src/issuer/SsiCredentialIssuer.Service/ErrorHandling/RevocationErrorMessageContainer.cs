@@ -28,7 +28,8 @@ public class RevocationErrorMessageContainer : IErrorMessageContainer
 {
     private static readonly IReadOnlyDictionary<int, string> _messageContainer = new Dictionary<RevocationDataErrors, string> {
         { RevocationDataErrors.CREDENTIAL_NOT_FOUND, "Credential {credentialId} does not exist" },
-        { RevocationDataErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET, "External Credential Id must be set for {credentialId}" }
+        { RevocationDataErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET, "External Credential Id must be set for {credentialId}" },
+        { RevocationDataErrors.NOT_ALLOWED_TO_REVOKE_CREDENTIAL, "Not allowed to revoke credential" }
     }.ToImmutableDictionary(x => (int)x.Key, x => x.Value);
 
     public Type Type { get => typeof(RevocationDataErrors); }
@@ -38,5 +39,6 @@ public class RevocationErrorMessageContainer : IErrorMessageContainer
 public enum RevocationDataErrors
 {
     CREDENTIAL_NOT_FOUND,
-    EXTERNAL_CREDENTIAL_ID_NOT_SET
+    EXTERNAL_CREDENTIAL_ID_NOT_SET,
+    NOT_ALLOWED_TO_REVOKE_CREDENTIAL
 }
