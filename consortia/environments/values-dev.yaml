@@ -74,7 +74,7 @@ processesworker:
       index0:
         encryptionKey: "<path:portal/data/ssi-credential-issuer/dev/wallet#encryptionKey0>"
 
-credentialexpiry:
+credentialExpiry:
   image:
     tag: "dev"
   imagePullPolicy: "Always"
