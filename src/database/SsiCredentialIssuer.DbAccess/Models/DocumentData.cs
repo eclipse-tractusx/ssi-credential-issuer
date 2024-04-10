@@ -21,8 +21,8 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
-public record DocumentData
-(
+public record DocumentData(
     Guid DocumentId,
     string DocumentName,
-    DocumentTypeId argDocumentTypeId);
+    DocumentTypeId DocumentTypeId
+);
