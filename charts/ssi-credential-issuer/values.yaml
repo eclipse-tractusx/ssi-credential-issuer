@@ -1,0 +1,317 @@
+###############################################################
+# Copyright (c) 2024 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License, Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+###############################################################
+
+issuer:
+  image:
+    name: "docker.io/tractusx/ssi-credential-issuer-service"
+    tag: ""
+  imagePullPolicy: "IfNotPresent"
+  # -- We recommend to review the default resource limits as this should a conscious choice.
+  resources:
+    requests:
+      cpu: 15m
+      memory: 400M
+    limits:
+      cpu: 45m
+      memory: 400M
+  logging:
+    businessLogic: "Information"
+    default: "Information"
+  healthChecks:
+    startup:
+      path: "/health/startup"
+      tags:
+      - name: "HEALTHCHECKS__0__TAGS__1"
+        value: "issuerdb"
+    liveness:
+      path: "/healthz"
+    readyness:
+      path: "/ready"
+  swaggerEnabled: false
+  portal:
+    scope: "openid"
+    grantType: "client_credentials"
+    # -- Provide portal client-id from CX IAM centralidp.
+    clientId: "portal-client-id"
+    # -- Client-secret for portal client-id. Secret-key 'portal-client-secret'.
+    clientSecret: ""
+  credential:
+    issuerDid: ""
+    issuerBpn: ""
+    statusListUrl: ""
+    encryptionConfigIndex: 0
+    encryptionConfigs:
+      index0:
+        index: 0
+        cipherMode: "CBC"
+        paddingMode: "PKCS7"
+        # -- EncryptionKey for wallet. Secret-key 'credential-encryption-key0'.
+        # Expected format is 256 bit (64 digits) hex.
+        encryptionKey: ""
+
+issuermigrations:
+  name: "migrations"
+  image:
+    name: "docker.io/tractusx/ssi-credential-issuer-migrations"
+    tag: ""
+  imagePullPolicy: "IfNotPresent"
+  # -- We recommend to review the default resource limits as this should a conscious choice.
+  resources:
+    requests:
+      cpu: 15m
+      memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
+  seeding:
+    testDataEnvironments: ""
+    testDataPaths: "Seeder/Data"
+  logging:
+    default: "Information"
+  processIdentity:
+    identityId: ac1cf001-7fbc-1f2f-817f-bce058020006
+
+processesworker:
+  name: "processesworker"
+  image:
+    name: "docker.io/tractusx/ssi-credential-issuer-processes-worker"
+    tag: ""
+  imagePullPolicy: "IfNotPresent"
+  # -- We recommend to review the default resource limits as this should a conscious choice.
+  resources:
+    requests:
+      cpu: 15m
+      memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
+  logging:
+    default: "Information"
+  portal:
+    scope: "openid"
+    grantType: "client_credentials"
+    # -- Provide portal client-id from CX IAM centralidp.
+    clientId: "portal-client-id"
+    # -- Client-secret for portal client-id. Secret-key 'portal-client-secret'.
+    clientSecret: ""
+  processIdentity:
+    identityId: ac1cf001-7fbc-1f2f-817f-bce058020006
+  wallet:
+    scope: "openid"
+    grantType: "client_credentials"
+    # -- Provide wallet client-id from CX IAM centralidp.
+    clientId: "wallet-client-id"
+    # -- Client-secret for wallet client-id. Secret-key 'wallet-client-secret'.
+    clientSecret: ""
+    encryptionConfigIndex: 0
+    encryptionConfigs:
+      index0:
+        index: 0
+        cipherMode: "CBC"
+        paddingMode: "PKCS7"
+        # -- EncryptionKey for wallet. Secret-key 'process-wallet-encryption-key0'.
+        # Expected format is 256 bit (64 digits) hex.
+        encryptionKey: ""
+
+credentialExpiry:
+  name: "expiry"
+  image:
+    name: "docker.io/tractusx/ssi-credential-expiry-app"
+    tag: ""
+  imagePullPolicy: "IfNotPresent"
+  # -- We recommend to review the default resource limits as this should a conscious choice.
+  resources:
+    requests:
+      cpu: 15m
+      memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
+  processIdentity:
+    identityId: ac1cf001-7fbc-1f2f-817f-bce058020006
+  logging:
+    default: "Information"
+  expiry:
+    expiredVcsToDeleteInMonth: 12
+    inactiveVcsToDeleteInWeeks: 12
+
+# -- Secret containing the client-secrets for the connection to portal and wallet
+# as well as encryptionKeys for issuer.credential and processesworker.wallet
+existingSecret: ""
+
+dotnetEnvironment: "Production"
+
+dbConnection:
+  schema: "issuer"
+  sslMode: "Disable"
+
+postgresql:
+  # -- PostgreSQL chart configuration;
+  # default configurations:
+  # host: "issuer-postgresql-primary",
+  # port: 5432;
+  # Switch to enable or disable the PostgreSQL helm chart.
+  enabled: true
+  # -- Setting image tag to major to get latest minor updates
+  image:
+    tag: "15-debian-12"
+  commonLabels:
+    app.kubernetes.io/version: "15"
+  auth:
+    # -- Non-root username.
+    username: issuer
+    # -- Database name.
+    database: issuer
+    # -- Secret containing the passwords for root usernames postgres and non-root username issuer.
+    # Should not be changed without changing the "issuer-postgresSecretName" template as well.
+    existingSecret: "{{ .Release.Name }}-issuer-postgres"
+    # -- Password for the root username 'postgres'. Secret-key 'postgres-password'.
+    postgrespassword: ""
+    # -- Password for the non-root username 'issuer'. Secret-key 'password'.
+    password: ""
+    # -- Password for the non-root username 'repl_user'. Secret-key 'replication-password'.
+    replicationPassword: ""
+  architecture: replication
+  audit:
+    pgAuditLog: "write, ddl"
+    logLinePrefix: "%m %u %d "
+  primary:
+    # -- Extended PostgreSQL Primary configuration (increase of max_connections recommended - default is 100)
+    extendedConfiguration: ""
+    initdb:
+      scriptsConfigMap: "{{ .Release.Name }}-issuer-cm-postgres"
+  readReplicas:
+  # -- Extended PostgreSQL read only replicas configuration (increase of max_connections recommended - default is 100)
+    extendedConfiguration: ""
+
+externalDatabase:
+  # -- External PostgreSQL configuration
+  # IMPORTANT: non-root db user needs to be created beforehand on external database.
+  # And the init script (02-init-db.sql) available in templates/configmap-postgres-init.yaml
+  # needs to be executed beforehand.
+  # Database host ('-primary' is added as postfix).
+  host: "issuer-postgres-ext"
+  # -- Database port number.
+  port: 5432
+  # -- Non-root username for issuer.
+  username: "issuer"
+  # -- Database name.
+  database: "issuer"
+  # -- Password for the non-root username (default 'issuer'). Secret-key 'password'.
+  password: ""
+  # -- Secret containing the password non-root username, (default 'issuer').
+  existingSecret: "issuer-external-db"
+
+# -- Provide details about centralidp (CX IAM) Keycloak instance.
+centralidp:
+  # -- Provide centralidp base address (CX IAM), without trailing '/auth'.
+  address: "https://centralidp.example.org"
+  authRealm: "CX-Central"
+  jwtBearerOptions:
+    requireHttpsMetadata: "true"
+    metadataPath: "/auth/realms/CX-Central/.well-known/openid-configuration"
+    tokenValidationParameters:
+      validIssuerPath: "/auth/realms/CX-Central"
+      validAudience: "Cl24-CX-SSI-CredentialIssuer"
+    refreshInterval: "00:00:30"
+  tokenPath: "/auth/realms/CX-Central/protocol/openid-connect/token"
+  # -- Flag if the api should be used with an leading /auth path
+  useAuthTrail: true
+
+ingress:
+  # -- SSI Credential Issuer ingress parameters,
+  # enable ingress record generation for ssi-credential-issuer.
+  enabled: false
+  # className: "nginx"
+  ## Optional annotations when using the nginx ingress class
+  # annotations:
+  #   nginx.ingress.kubernetes.io/use-regex: "true"
+  #   nginx.ingress.kubernetes.io/enable-cors: "true"
+  #   nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+  #   # -- Provide CORS allowed origin.
+  #   nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
+  tls:
+    # -- Provide tls secret.
+    - secretName: ""
+      # -- Provide host for tls secret.
+      hosts:
+        - ""
+  hosts:
+    # -- Provide default path for the ingress record.
+    - host: ""
+      paths:
+        - path: "/api/issuer"
+          pathType: "Prefix"
+          backend:
+            port: 8080
+
+portContainer: 8080
+
+portService: 8080
+
+replicaCount: 3
+
+# -- Node labels for pod assignment
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []
+
+affinity:
+# -- Following Catena-X Helm Best Practices,
+# [reference](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity).
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: DoesNotExist
+          topologyKey: kubernetes.io/hostname
+
+updateStrategy:
+# -- Update strategy type,
+# rolling update configuration parameters,
+# [reference](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies).
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+# -- Following Catena-X Helm Best Practices,
+# [reference](https://github.com/helm/charts/blob/master/stable/nginx-ingress/values.yaml#L210).
+startupProbe:
+  failureThreshold: 30
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+livenessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 10
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1

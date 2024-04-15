@@ -4,7 +4,7 @@ This repository contains the backend code for the SSI Credential Issuer written 
 
 ## How to build and run
 
-Install [the .NET 8.0 SDK](https://www.microsoft.com/net/download).
+Install the [.NET 7.0 SDK](https://www.microsoft.com/net/download).
 
 Run the following command from the CLI:
 
@@ -18,6 +18,17 @@ Run the following command from the CLI in the directory of the service you want 
 ```console
 dotnet run
 ```
+
+## Notice for Docker image
+
+This application provides container images for demonstration purposes.
+
+See Docker notice files for more information:
+
+- [credential-issuer-service](./docker//notice-credential-issuer-service.md)
+- [credential-issuer-processes-worker](./docker/notice-credential-issuer-processes-worker.md)
+- [credential-expiry-app](./docker/notice-credential-expiry-app.md)
+- [credential-issuer-migrations](./docker/notice-credential-issuer-migrations.md)
 
 ## License
 

@@ -25,48 +25,59 @@ on:
       - 'release/v*.*.*-rc*'
   workflow_dispatch:
 
-env:
-  IMAGE_NAMESPACE: "tractusx"
-  IMAGE_NAME_SERVICE: "service"
-  IMAGE_NAME_MIGRATIONS: "migrations"
-
 jobs:
-  service-release:
+  release-images:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+    strategy:
+      matrix:
+        include:
+          - image: tractusx/ssi-credential-issuer-service
+            dockerfile: ./docker/Dockerfile-credential-issuer-service
+            dockernotice: ./docker/notice-credential-issuer-service.md
+          - image: tractusx/ssi-credential-issuer-migrations
+            dockerfile: ./docker/Dockerfile-credential-issuer-migrations
+            dockernotice: ./docker/notice-credential-issuer-migrations.md
+          - image: tractusx/ssi-credential-issuer-processes-worker
+            dockerfile: ./docker/Dockerfile-credential-issuer-processes-worker
+            dockernotice: ./docker/notice-credential-issuer-processes-worker.md
+          - image: tractusx/ssi-credential-expiry-app
+            dockerfile: ./docker/Dockerfile-credential-expiry-app
+            dockernotice: ./docker/notice-credential-expiry-app.md
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
 
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@2b51285047da1547ffb1b2203d8be4c0af6b1f20 # v3.2.0
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
         with:
-          images: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_SERVICE }}
+          images: ${{ matrix.image }}
           tags: |
             type=raw,value=rc
             type=raw,value=${{ github.sha }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+      - name: Build and push Docker images
+        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
         with:
           context: .
-          file: docker/Dockerfile-service
+          file: ${{ matrix.dockerfile }}
           platforms: linux/amd64, linux/arm64
           pull: true
           push: ${{ github.event_name != 'pull_request' }}
@@ -76,61 +87,9 @@ jobs:
       # https://github.com/peter-evans/dockerhub-description
       - name: Update Docker Hub description
         if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v3
+        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
         with:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_SERVICE }}
-          readme-filepath: "./docker/notice-ervice.md"
-
-  migrations-release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_MIGRATIONS }}
-          tags: |
-            type=raw,value=rc
-            type=raw,value=${{ github.sha }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: docker/Dockerfile-migrations
-          platforms: linux/amd64, linux/arm64
-          pull: true
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      # https://github.com/peter-evans/dockerhub-description
-      - name: Update Docker Hub description
-        if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME_MIGRATIONS }}
-          readme-filepath: "./docker/notice-migrations.md"
+          repository: ${{ matrix.image }}
+          readme-filepath: ${{ matrix.dockernotice }}
