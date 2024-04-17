@@ -44,7 +44,7 @@ public class PortalService : IPortalService
     {
         var client = await _tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(false);
         var data = new NotificationRequest(requester, content, notificationTypeId);
-        await client.PostAsJsonAsync("api/notifications/management", data, Options, cancellationToken)
+        await client.PostAsJsonAsync("api/notifications/ssi-credentials", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("notification", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
             .ConfigureAwait(false);
     }
@@ -53,7 +53,7 @@ public class PortalService : IPortalService
     {
         var client = await _tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(false);
         var data = new MailData(requester, template, mailParameters);
-        await client.PostAsJsonAsync("api/administration/mail", data, Options, cancellationToken)
+        await client.PostAsJsonAsync("api/administration/mail/ssi-credentials", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("mail", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
             .ConfigureAwait(false);
     }

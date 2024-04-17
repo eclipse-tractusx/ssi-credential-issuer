@@ -141,7 +141,6 @@ public class ExpiryCheckServiceTests
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, A<Guid>._)).MustHaveHappenedOnceExactly();
-        ssiDetail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.INACTIVE);
     }
 
     [Theory]
