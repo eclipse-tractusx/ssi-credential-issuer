@@ -77,23 +77,21 @@ public class MandatoryIdentityClaimHandler : AuthorizationHandler<MandatoryIdent
     private void InitializeClaims(ClaimsPrincipal principal)
     {
         var preferredUserName = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.PreferredUserName)?.Value;
-        if (!Guid.TryParse(preferredUserName, out var identityId))
+        var sub = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Sub)?.Value;
+        if (!Guid.TryParse(preferredUserName, out var identityId) && !Guid.TryParse(sub, out identityId))
         {
-            _logger.LogInformation("Preferred user name {PreferredUserName} couldn't be parsed to uuid", preferredUserName);
+            _logger.LogInformation("Preferred user name {PreferredUserName} and sub {Sub} couldn't be parsed to uuid", preferredUserName, sub);
             _identityDataBuilder.Status = IClaimsIdentityDataBuilderStatus.Empty;
             return;
         }
 
         var bpnl = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Bpn)?.Value;
-        if (string.IsNullOrWhiteSpace(bpnl))
+        if (!string.IsNullOrWhiteSpace(bpnl)) // we only set the bpn if available, technical users don't have the bpn in the claims
         {
-            _logger.LogInformation("Bpn must be set for user {PreferredUserName}", preferredUserName);
-            _identityDataBuilder.Status = IClaimsIdentityDataBuilderStatus.Empty;
-            return;
+            _identityDataBuilder.AddBpnl(bpnl);
         }
 
         _identityDataBuilder.AddIdentityId(identityId);
-        _identityDataBuilder.AddBpnl(bpnl);
         _identityDataBuilder.Status = IClaimsIdentityDataBuilderStatus.Complete;
     }
 }

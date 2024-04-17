@@ -429,7 +429,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(_identity.Bpnl, VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
