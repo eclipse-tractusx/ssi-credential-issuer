@@ -27,7 +27,7 @@ using System.Reflection;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Extensions;
 
-public static class AuditExtensions
+public static class AuditV1Extensions
 {
     public record AuditPropertyInformation
     (
@@ -46,29 +46,29 @@ public static class AuditExtensions
             _ => throw new ConflictException($"Entries with state {state} should not be audited")
         };
 
-    public static AuditPropertyInformation? GetAuditPropertyInformation(this Type auditableEntityType)
+    public static AuditPropertyInformation? GetAuditV2PropertyInformation(this Type auditableEntityType)
     {
         var auditEntityAttribute =
-            (AuditEntityV1Attribute?)Attribute.GetCustomAttribute(auditableEntityType, typeof(AuditEntityV1Attribute));
+            (AuditEntityV2Attribute?)Attribute.GetCustomAttribute(auditableEntityType, typeof(AuditEntityV2Attribute));
         if (auditEntityAttribute == null)
         {
             return null;
         }
 
         var auditEntityType = auditEntityAttribute.AuditEntityType;
-        if (!typeof(IAuditEntityV1).IsAssignableFrom(auditEntityType))
+        if (!typeof(IAuditEntityV2).IsAssignableFrom(auditEntityType))
         {
-            throw new ConflictException($"{auditEntityType} must inherit from {nameof(IAuditEntityV1)}");
+            throw new ConflictException($"{auditEntityType} must inherit from {nameof(IAuditEntityV2)}");
         }
 
         var sourceProperties = (typeof(IBaseEntity).IsAssignableFrom(auditableEntityType)
-            ? typeof(IBaseEntity).GetProperties()
-            : Enumerable.Empty<PropertyInfo>())
-                .Concat(auditableEntityType
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                    .Where(p => !(p.GetGetMethod()?.IsVirtual ?? false)))
+                ? typeof(IBaseEntity).GetProperties()
+                : Enumerable.Empty<PropertyInfo>())
+            .Concat(auditableEntityType
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(p => !(p.GetGetMethod()?.IsVirtual ?? false)))
             .ToImmutableList();
-        var auditProperties = typeof(IAuditEntityV1).GetProperties();
+        var auditProperties = typeof(IAuditEntityV2).GetProperties();
         var targetProperties = auditEntityType.GetProperties().ExceptBy(auditProperties.Select(x => x.Name), p => p.Name).ToImmutableList();
 
         targetProperties

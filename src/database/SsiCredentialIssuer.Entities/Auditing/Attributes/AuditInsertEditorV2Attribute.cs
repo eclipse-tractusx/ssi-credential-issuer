@@ -20,13 +20,15 @@
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Attributes;
 
 /// <summary>
-/// Attribute to mark the last editor id in the base class
+/// Attribute to mark the creators id in the base class.
+/// The usage is optional. If not set <see cref="LastEditorV2Attribute"/>
+/// is being used to determine the creators id.
 /// </summary>
 /// <remarks>
 /// The implementation of this Attribute must not be changed.
-/// When changes are needed create a V2 of it.
+/// When changes are needed create a V3 of it.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Property)]
-public class LastChangedV1Attribute : Attribute
+public class AuditInsertEditorV2Attribute : Attribute
 {
 }

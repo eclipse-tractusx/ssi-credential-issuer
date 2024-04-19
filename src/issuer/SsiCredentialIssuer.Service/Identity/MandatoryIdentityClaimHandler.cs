@@ -59,7 +59,7 @@ public class MandatoryIdentityClaimHandler : AuthorizationHandler<MandatoryIdent
 
         if (requirement.PolicyTypeId switch
         {
-            PolicyTypeId.ValidIdentity => _identityDataBuilder.IdentityId != Guid.Empty,
+            PolicyTypeId.ValidIdentity => _identityDataBuilder.IdentityId != string.Empty,
             PolicyTypeId.ValidBpn => !string.IsNullOrWhiteSpace(_identityDataBuilder.Bpnl),
             _ => throw new UnexpectedConditionException($"unexpected PolicyTypeId {requirement.PolicyTypeId}")
         })
@@ -77,10 +77,10 @@ public class MandatoryIdentityClaimHandler : AuthorizationHandler<MandatoryIdent
     private void InitializeClaims(ClaimsPrincipal principal)
     {
         var preferredUserName = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.PreferredUserName)?.Value;
-        var sub = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Sub)?.Value;
-        if (!Guid.TryParse(preferredUserName, out var identityId) && !Guid.TryParse(sub, out identityId))
+        var clientId = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.ClientId)?.Value;
+        if (preferredUserName == null && clientId == null)
         {
-            _logger.LogInformation("Preferred user name {PreferredUserName} and sub {Sub} couldn't be parsed to uuid", preferredUserName, sub);
+            _logger.LogInformation("Preferred user name {PreferredUserName} and clientId {ClientId} couldn't be parsed to uuid", preferredUserName, clientId);
             _identityDataBuilder.Status = IClaimsIdentityDataBuilderStatus.Empty;
             return;
         }
@@ -91,7 +91,8 @@ public class MandatoryIdentityClaimHandler : AuthorizationHandler<MandatoryIdent
             _identityDataBuilder.AddBpnl(bpnl);
         }
 
-        _identityDataBuilder.AddIdentityId(identityId);
+        _identityDataBuilder.AddIdentityId(preferredUserName ?? clientId!);
+        _identityDataBuilder.AddIsServiceAccount(preferredUserName == null);
         _identityDataBuilder.Status = IClaimsIdentityDataBuilderStatus.Complete;
     }
 }

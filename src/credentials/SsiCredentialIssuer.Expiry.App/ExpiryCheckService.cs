@@ -129,8 +129,6 @@ public class ExpiryCheckService
         IPortalService portalService,
         CancellationToken cancellationToken)
     {
-        var content = JsonSerializer.Serialize(new { Type = data.VerifiedCredentialTypeId, CredentialId = data.Id }, Options);
-        await portalService.AddNotification(content, data.RequesterId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
         companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(data.Id, c =>
             {
                 c.CompanySsiDetailStatusId = data.CompanySsiDetailStatusId;
@@ -140,13 +138,19 @@ public class ExpiryCheckService
                 c.CompanySsiDetailStatusId = CompanySsiDetailStatusId.INACTIVE;
             });
 
-        var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
-        var mailParameters = new Dictionary<string, string>
+        if (Guid.TryParse(data.RequesterId, out var requesterId))
         {
-            { "requestName", typeValue },
-            { "reason", "The credential is already expired" }
-        };
-        await portalService.TriggerMail("CredentialRejected", data.RequesterId, mailParameters, cancellationToken);
+            var content = JsonSerializer.Serialize(new { Type = data.VerifiedCredentialTypeId, CredentialId = data.Id }, Options);
+            await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
+
+            var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
+            var mailParameters = new Dictionary<string, string>
+            {
+                { "requestName", typeValue },
+                { "reason", "The credential is already expired" }
+            };
+            await portalService.TriggerMail("CredentialRejected", requesterId, mailParameters, cancellationToken);
+        }
     }
 
     private static async ValueTask HandleNotification(
@@ -182,15 +186,19 @@ public class ExpiryCheckService
             CredentialId = data.Id,
             ExpiryCheckTypeId = newExpiryCheckTypeId
         }, Options);
-        await portalService.AddNotification(content, data.RequesterId, NotificationTypeId.CREDENTIAL_EXPIRY, cancellationToken);
-        var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
-        var mailParameters = new Dictionary<string, string>
-        {
-            { "typeId", typeValue },
-            { "version", data.DetailVersion ?? "no version" },
-            { "expiryDate", data.ExpiryDate?.ToString("dd MMMM yyyy") ?? throw new ConflictException("Expiry Date must be set here") }
-        };
 
-        await portalService.TriggerMail("CredentialExpiry", data.RequesterId, mailParameters, cancellationToken);
+        if (Guid.TryParse(data.RequesterId, out var requesterId))
+        {
+            await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_EXPIRY, cancellationToken);
+            var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
+            var mailParameters = new Dictionary<string, string>
+            {
+                { "typeId", typeValue },
+                { "version", data.DetailVersion ?? "no version" },
+                { "expiryDate", data.ExpiryDate?.ToString("dd MMMM yyyy") ?? throw new ConflictException("Expiry Date must be set here") }
+            };
+
+            await portalService.TriggerMail("CredentialExpiry", requesterId, mailParameters, cancellationToken);
+        }
     }
 }

@@ -24,16 +24,16 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Attributes;
 /// </summary>
 /// <remarks>
 /// The implementation of this Attribute must not be changed.
-/// When changes are needed create a V2 of it.
+/// When changes are needed create a V3 of it.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class)]
-public class AuditEntityV1Attribute : Attribute
+public class AuditEntityV2Attribute : Attribute
 {
-    public AuditEntityV1Attribute(Type auditEntityType)
+    public AuditEntityV2Attribute(Type auditEntityType)
     {
-        if (!typeof(IAuditEntityV1).IsAssignableFrom(auditEntityType))
+        if (!typeof(IAuditEntityV2).IsAssignableFrom(auditEntityType))
         {
-            throw new ArgumentException($"Entity must derive from {nameof(IAuditEntityV1)}", nameof(auditEntityType));
+            throw new ArgumentException($"Entity must derive from {nameof(IAuditEntityV2)}", nameof(auditEntityType));
         }
 
         AuditEntityType = auditEntityType;

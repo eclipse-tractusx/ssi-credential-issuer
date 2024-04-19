@@ -17,15 +17,12 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Enums;
 
-/// <summary>
-/// Marker interface to define that a entity is auditable
-/// </summary>
-/// <remarks>
-/// The implementation of this Attribute must not be changed.
-/// When changes are needed create a V2 of it.
-/// </remarks>
-public interface IAuditableV1
+public enum AuditPropertyV2Names
 {
+    AuditV2Id,
+    AuditV2OperationId,
+    AuditV2DateLastChanged,
+    AuditV2LastEditorId
 }

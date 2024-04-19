@@ -17,15 +17,15 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using System.ComponentModel.DataAnnotations;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
-
-public class ProcessExecutionServiceSettings
+/// <summary>
+/// Marker interface to define that a entity is auditable
+/// </summary>
+/// <remarks>
+/// The implementation of this Attribute must not be changed.
+/// When changes are needed create a V3 of it.
+/// </remarks>
+public interface IAuditableV2
 {
-    [Required]
-    public int LockExpirySeconds { get; set; }
-
-    [Required]
-    public string IdentityId { get; set; }
 }

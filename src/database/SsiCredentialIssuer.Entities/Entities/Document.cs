@@ -25,8 +25,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 
-[AuditEntityV1(typeof(AuditDocument20240305))]
-public class Document : IAuditableV1, IBaseEntity
+[AuditEntityV2(typeof(AuditDocument20240419))]
+public class Document : IAuditableV2, IBaseEntity
 {
     private Document()
     {
@@ -66,13 +66,13 @@ public class Document : IAuditableV1, IBaseEntity
 
     public DocumentStatusId DocumentStatusId { get; set; }
 
-    public Guid? CompanyUserId { get; set; }
+    public string? CompanyUserId { get; set; }
 
-    [LastChangedV1]
+    [LastChangedV2]
     public DateTimeOffset? DateLastChanged { get; set; }
 
-    [LastEditorV1]
-    public Guid? LastEditorId { get; private set; }
+    [LastEditorV2]
+    public string? LastEditorId { get; private set; }
 
     // Navigation properties
     public virtual DocumentType? DocumentType { get; set; }

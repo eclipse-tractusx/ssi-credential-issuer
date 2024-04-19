@@ -45,6 +45,8 @@ public class IssuerDbContext : DbContext
 
     public virtual DbSet<AuditCompanySsiDetail20240228> AuditCompanySsiDetail20240228 { get; set; } = default!;
     public virtual DbSet<AuditDocument20240305> AuditDocument20240305 { get; set; } = default!;
+    public virtual DbSet<AuditCompanySsiDetail20240419> AuditCompanySsiDetail20240419 { get; set; } = default!;
+    public virtual DbSet<AuditDocument20240419> AuditDocument20240419 { get; set; } = default!;
     public virtual DbSet<CompanySsiDetail> CompanySsiDetails { get; set; } = default!;
     public virtual DbSet<CompanySsiDetailAssignedDocument> CompanySsiDetailAssignedDocuments { get; set; } = default!;
     public virtual DbSet<CompanySsiDetailStatus> CompanySsiDetailStatuses { get; set; } = default!;
@@ -118,7 +120,7 @@ public class IssuerDbContext : DbContext
                         j.HasKey(e => new { e.DocumentId, e.CompanySsiDetailId });
                     });
 
-            entity.HasAuditV1Triggers<CompanySsiDetail, AuditCompanySsiDetail20240228>();
+            entity.HasAuditV2Triggers<CompanySsiDetail, AuditCompanySsiDetail20240419>();
         });
 
         modelBuilder.Entity<CompanySsiDetailStatus>()
@@ -143,7 +145,7 @@ public class IssuerDbContext : DbContext
 
         modelBuilder.Entity<Document>(entity =>
         {
-            entity.HasAuditV1Triggers<Document, AuditDocument20240305>();
+            entity.HasAuditV2Triggers<Document, AuditDocument20240419>();
         });
 
         modelBuilder.Entity<DocumentStatus>()
@@ -312,7 +314,7 @@ public class IssuerDbContext : DbContext
         _auditHandler.HandleAuditForChangedEntries(
             ChangeTracker.Entries().Where(entry =>
                 entry.State != EntityState.Unchanged && entry.State != EntityState.Detached &&
-                entry.Entity is IAuditableV1).ToImmutableList(),
+                entry.Entity is IAuditableV2).ToImmutableList(),
             ChangeTracker.Context);
     }
 }

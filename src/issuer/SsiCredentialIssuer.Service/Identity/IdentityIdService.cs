@@ -31,15 +31,15 @@ public class IdentityIdService : IIdentityIdService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Guid IdentityId => GetIdentityId();
+    public string IdentityId => GetIdentityId();
 
-    private Guid GetIdentityId()
+    private string GetIdentityId()
     {
         var preferredUserName = _httpContextAccessor?.HttpContext?.User.Claims.SingleOrDefault(x => x.Type == ClaimTypes.PreferredUserName)?.Value ??
             throw new UnexpectedConditionException("Username must be set here");
         if (Guid.TryParse(preferredUserName, out var identityId))
         {
-            return identityId;
+            return identityId.ToString();
         }
 
         throw new UnexpectedConditionException("Username must be a uuid");

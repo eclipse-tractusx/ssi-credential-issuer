@@ -80,7 +80,7 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<IProcessStepRepository>()).Returns(_processStepRepository);
 
-        A.CallTo(() => _identity.IdentityId).Returns(Guid.NewGuid());
+        A.CallTo(() => _identity.IdentityId).Returns(Guid.NewGuid().ToString());
         A.CallTo(() => _identity.Bpnl).Returns(Bpnl);
         A.CallTo(() => _identityService.IdentityData).Returns(_identity);
 
@@ -365,7 +365,7 @@ public class IssuerBusinessLogicTests
             detailData
         );
 
-        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, typeId, CompanySsiDetailStatusId.PENDING, "", Guid.NewGuid(), DateTimeOffset.Now);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, typeId, CompanySsiDetailStatusId.PENDING, "", Guid.NewGuid().ToString(), DateTimeOffset.Now);
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetSsiApprovalData(CredentialId))
             .Returns(new ValueTuple<bool, SsiApprovalData>(true, data));
@@ -443,7 +443,7 @@ public class IssuerBusinessLogicTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid(), DateTimeOffset.Now);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid().ToString(), DateTimeOffset.Now);
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetSsiRejectionData(CredentialId))
             .Returns(new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, Guid?, IEnumerable<Guid>>(
@@ -476,7 +476,7 @@ public class IssuerBusinessLogicTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid(), DateTimeOffset.Now);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid().ToString(), DateTimeOffset.Now);
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetSsiRejectionData(CredentialId))
             .Returns(new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, Guid?, IEnumerable<Guid>>(

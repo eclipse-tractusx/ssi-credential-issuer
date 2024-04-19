@@ -22,6 +22,6 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 public static class ClaimTypes
 {
     public const string PreferredUserName = "preferred_username";
-    public const string Sub = "sub";
+    public const string ClientId = "client_id";
     public const string Bpn = "bpn";
 }

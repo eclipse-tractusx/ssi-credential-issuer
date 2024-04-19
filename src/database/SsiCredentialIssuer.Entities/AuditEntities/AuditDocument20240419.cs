@@ -18,39 +18,44 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Attributes;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.AuditEntities;
 
-public class ProcessStep : IBaseEntity
+public class AuditDocument20240419 : IAuditEntityV2
 {
-    public ProcessStep(Guid id, ProcessStepTypeId processStepTypeId, ProcessStepStatusId processStepStatusId, Guid processId, DateTimeOffset dateCreated)
-    {
-        Id = id;
-        ProcessStepTypeId = processStepTypeId;
-        ProcessStepStatusId = processStepStatusId;
-        ProcessId = processId;
-        DateCreated = dateCreated;
-    }
+    /// <inheritdoc />
+    [Key]
+    public Guid AuditV2Id { get; set; }
 
     public Guid Id { get; private set; }
 
-    public ProcessStepTypeId ProcessStepTypeId { get; private set; }
+    public DateTimeOffset? DateCreated { get; private set; }
 
-    public ProcessStepStatusId ProcessStepStatusId { get; set; }
+    public byte[]? DocumentHash { get; set; }
 
-    public Guid ProcessId { get; private set; }
+    public byte[]? DocumentContent { get; set; }
 
-    public DateTimeOffset DateCreated { get; private set; }
+    public string? DocumentName { get; set; }
 
-    [LastChangedV2]
+    public MediaTypeId? MediaTypeId { get; set; }
+
+    public DocumentTypeId? DocumentTypeId { get; set; }
+
+    public DocumentStatusId? DocumentStatusId { get; set; }
+
+    public string? CompanyUserId { get; set; }
     public DateTimeOffset? DateLastChanged { get; set; }
+    public string? LastEditorId { get; private set; }
 
-    public string? Message { get; set; }
+    /// <inheritdoc />
+    public DateTimeOffset AuditV2DateLastChanged { get; set; }
 
-    // Navigation properties
-    public virtual ProcessStepType? ProcessStepType { get; private set; }
-    public virtual ProcessStepStatus? ProcessStepStatus { get; set; }
-    public virtual Process? Process { get; private set; }
+    /// <inheritdoc />
+    public string? AuditV2LastEditorId { get; set; }
+
+    /// <inheritdoc />
+    public AuditOperationId AuditV2OperationId { get; set; }
 }

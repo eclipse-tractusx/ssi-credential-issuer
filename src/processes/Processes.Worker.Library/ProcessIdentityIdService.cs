@@ -12,5 +12,5 @@ public class ProcessIdentityIdService : IIdentityIdService
         _settings = options.Value;
     }
 
-    public Guid IdentityId => _settings.IdentityId;
+    public string IdentityId => _settings.IdentityId;
 }

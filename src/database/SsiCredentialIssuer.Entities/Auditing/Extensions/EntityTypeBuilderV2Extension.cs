@@ -30,14 +30,14 @@ using System.Reflection;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Extensions;
 
-public static class EntityTypeBuilderV1Extension
+public static class EntityTypeBuilderV2Extension
 {
-    public static EntityTypeBuilder<TEntity> HasAuditV1Triggers<TEntity, TAuditEntity>(this EntityTypeBuilder<TEntity> builder) where TEntity : class, IAuditableV1 where TAuditEntity : class, IAuditEntityV1
+    public static EntityTypeBuilder<TEntity> HasAuditV2Triggers<TEntity, TAuditEntity>(this EntityTypeBuilder<TEntity> builder) where TEntity : class, IAuditableV2 where TAuditEntity : class, IAuditEntityV2
     {
-        var (auditEntityType, sourceProperties, auditProperties, targetProperties) = typeof(TEntity).GetAuditPropertyInformation() ?? throw new ConfigurationException($"{typeof(TEntity)} must be annotated with {nameof(AuditEntityV1Attribute)}");
+        var (auditEntityType, sourceProperties, auditProperties, targetProperties) = typeof(TEntity).GetAuditV2PropertyInformation() ?? throw new ConfigurationException($"{typeof(TEntity)} must be annotated with {nameof(AuditEntityV2Attribute)}");
         if (typeof(TAuditEntity) != auditEntityType)
         {
-            throw new ConfigurationException($"{typeof(TEntity).Name} is annotated with {nameof(AuditEntityV1Attribute)} referring to a different audit entity type {auditEntityType.Name} then {typeof(TAuditEntity).Name}");
+            throw new ConfigurationException($"{typeof(TEntity).Name} is annotated with {nameof(AuditEntityV2Attribute)} referring to a different audit entity type {auditEntityType.Name} then {typeof(TAuditEntity).Name}");
         }
 
         sourceProperties.IntersectBy(auditProperties.Select(x => x.Name), p => p.Name).IfAny(
@@ -48,13 +48,13 @@ public static class EntityTypeBuilderV1Extension
 
         if (!Array.Exists(
             typeof(TAuditEntity).GetProperties(),
-            p => p.Name == AuditPropertyV1Names.AuditV1Id.ToString() && p.CustomAttributes.Any(a => a.AttributeType == typeof(KeyAttribute))))
+            p => p.Name == AuditPropertyV2Names.AuditV2Id.ToString() && p.CustomAttributes.Any(a => a.AttributeType == typeof(KeyAttribute))))
         {
-            throw new ConfigurationException($"{typeof(TAuditEntity).Name}.{AuditPropertyV1Names.AuditV1Id} must be marked as primary key by attribute {typeof(KeyAttribute).Name}");
+            throw new ConfigurationException($"{typeof(TAuditEntity).Name}.{AuditPropertyV2Names.AuditV2Id} must be marked as primary key by attribute {typeof(KeyAttribute).Name}");
         }
 
-        var insertEditorProperty = sourceProperties.SingleOrDefault(p => p.CustomAttributes.Any(a => a.AttributeType == typeof(AuditInsertEditorV1Attribute)));
-        var lastEditorProperty = sourceProperties.SingleOrDefault(p => p.CustomAttributes.Any(a => a.AttributeType == typeof(LastEditorV1Attribute)));
+        var insertEditorProperty = sourceProperties.SingleOrDefault(p => p.CustomAttributes.Any(a => a.AttributeType == typeof(AuditInsertEditorV2Attribute)));
+        var lastEditorProperty = sourceProperties.SingleOrDefault(p => p.CustomAttributes.Any(a => a.AttributeType == typeof(LastEditorV2Attribute)));
 
         return builder
             .AfterInsert(trigger =>
@@ -101,13 +101,13 @@ public static class EntityTypeBuilderV1Extension
     {
         var memberBindings = sourceProperties.Select(p =>
                 CreateMemberAssignment(typeof(TAuditEntity).GetMember(p.Name)[0], Expression.Property(entity, p)))
-                    .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV1Names.AuditV1Id.ToString())[0], Expression.New(typeof(Guid))))
-                    .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV1Names.AuditV1OperationId.ToString())[0], Expression.Constant(auditOperationId)))
-                    .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV1Names.AuditV1DateLastChanged.ToString())[0], Expression.New(typeof(DateTimeOffset))));
+                    .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV2Names.AuditV2Id.ToString())[0], Expression.New(typeof(Guid))))
+                    .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV2Names.AuditV2OperationId.ToString())[0], Expression.Constant(auditOperationId)))
+                    .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV2Names.AuditV2DateLastChanged.ToString())[0], Expression.New(typeof(DateTimeOffset))));
 
         if (lastEditorProperty != null)
         {
-            memberBindings = memberBindings.Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV1Names.AuditV1LastEditorId.ToString())[0], Expression.Property(entity, lastEditorProperty)));
+            memberBindings = memberBindings.Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV2Names.AuditV2LastEditorId.ToString())[0], Expression.Property(entity, lastEditorProperty)));
         }
 
         return Expression.MemberInit(

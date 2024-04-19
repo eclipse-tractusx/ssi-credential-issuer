@@ -176,6 +176,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     /// <inheritdoc />
     public async Task ApproveCredential(Guid credentialId, CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(_identity.IdentityId, out var identityId))
+        {
+            throw UnexpectedConditionException.Create(CredentialErrors.USER_MUST_NOT_BE_TECHNICAL_USER, new ErrorParameter[] { new("identityId", _identity.IdentityId) });
+        }
+
         var companySsiRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
         var (exists, data) = await companySsiRepository.GetSsiApprovalData(credentialId).ConfigureAwait(false);
         ValidateApprovalData(credentialId, exists, data);
@@ -198,14 +203,14 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             });
         var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
         var content = JsonSerializer.Serialize(new { data.Type, CredentialId = credentialId }, Options);
-        await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
+        await _portalService.AddNotification(content, identityId, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
         var mailParameters = new Dictionary<string, string>
         {
             { "requestName", typeValue },
             { "credentialType", typeValue },
             { "expiryDate", expiry.ToString("o", CultureInfo.InvariantCulture) }
         };
-        await _portalService.TriggerMail("CredentialApproval", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
+        await _portalService.TriggerMail("CredentialApproval", identityId, mailParameters, cancellationToken).ConfigureAwait(false);
         await _repositories.SaveAsync().ConfigureAwait(false);
     }
 
@@ -272,6 +277,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     /// <inheritdoc />
     public async Task RejectCredential(Guid credentialId, CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(_identity.IdentityId, out var identityId))
+        {
+            throw UnexpectedConditionException.Create(CredentialErrors.USER_MUST_NOT_BE_TECHNICAL_USER, new ErrorParameter[] { new("identityId", _identity.IdentityId) });
+        }
+
         var companySsiRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
         var (exists, status, type, processId, processStepIds) = await companySsiRepository.GetSsiRejectionData(credentialId).ConfigureAwait(false);
         if (!exists)
@@ -286,7 +296,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
         var typeValue = type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", type.ToString()) });
         var content = JsonSerializer.Serialize(new { Type = type, CredentialId = credentialId }, Options);
-        await _portalService.AddNotification(content, _identity.IdentityId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
+        await _portalService.AddNotification(content, identityId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
 
         var mailParameters = new Dictionary<string, string>
         {
@@ -294,7 +304,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             { "reason", "Declined by the Operator" }
         };
 
-        await _portalService.TriggerMail("CredentialRejected", _identity.IdentityId, mailParameters, cancellationToken).ConfigureAwait(false);
+        await _portalService.TriggerMail("CredentialRejected", identityId, mailParameters, cancellationToken).ConfigureAwait(false);
 
         companySsiRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
