@@ -477,7 +477,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var docId = documentRepository.CreateDocument("schema.json", documentContent,
             hash, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, x =>
             {
-                x.CompanyUserId = _identity.IdentityId;
+                x.IdentityId = _identity.IdentityId;
                 x.DocumentStatusId = DocumentStatusId.ACTIVE;
             }).Id;
 

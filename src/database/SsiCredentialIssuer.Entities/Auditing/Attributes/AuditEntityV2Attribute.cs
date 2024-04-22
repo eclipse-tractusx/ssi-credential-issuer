@@ -39,5 +39,5 @@ public class AuditEntityV2Attribute : Attribute
         AuditEntityType = auditEntityType;
     }
 
-    public virtual Type AuditEntityType { get; }
+    public Type AuditEntityType { get; }
 }

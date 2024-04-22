@@ -46,7 +46,7 @@ public class AuditDocument20240419 : IAuditEntityV2
 
     public DocumentStatusId? DocumentStatusId { get; set; }
 
-    public string? CompanyUserId { get; set; }
+    public string? IdentityId { get; set; }
     public DateTimeOffset? DateLastChanged { get; set; }
     public string? LastEditorId { get; private set; }
 

@@ -66,7 +66,7 @@ public class Document : IAuditableV2, IBaseEntity
 
     public DocumentStatusId DocumentStatusId { get; set; }
 
-    public string? CompanyUserId { get; set; }
+    public string? IdentityId { get; set; }
 
     [LastChangedV2]
     public DateTimeOffset? DateLastChanged { get; set; }
