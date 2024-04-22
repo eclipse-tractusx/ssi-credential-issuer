@@ -27,7 +27,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddProcessIdentity(this IServiceCollection services, IConfigurationSection section)
     {
-        services.AddOptions<ProcessExecutionServiceSettings>().Bind(section);
+        services.AddOptions<ProcessExecutionServiceSettings>()
+            .Bind(section)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         return services
             .AddTransient<IIdentityIdService, ProcessIdentityIdService>();
     }
