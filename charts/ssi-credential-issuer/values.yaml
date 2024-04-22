@@ -80,10 +80,10 @@ issuermigrations:
   resources:
     requests:
       cpu: 15m
-      memory: 105M
+      memory: 200M
     limits:
       cpu: 45m
-      memory: 105M
+      memory: 200M
   seeding:
     testDataEnvironments: ""
     testDataPaths: "Seeder/Data"
@@ -102,10 +102,10 @@ processesworker:
   resources:
     requests:
       cpu: 15m
-      memory: 105M
+      memory: 200M
     limits:
       cpu: 45m
-      memory: 105M
+      memory: 200M
   logging:
     default: "Information"
   portal:
