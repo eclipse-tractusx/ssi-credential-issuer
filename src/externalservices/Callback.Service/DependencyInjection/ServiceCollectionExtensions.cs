@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddOptions<CallbackSettings>()
             .Bind(section)
+            .ValidateDataAnnotations()
             .ValidateOnStart();
 
         services.AddTransient<LoggingHandler<CallbackService>>();

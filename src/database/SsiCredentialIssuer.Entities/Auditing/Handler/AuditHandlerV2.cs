@@ -29,12 +29,12 @@ using System.Reflection;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Handler;
 
-public class AuditHandlerV1 : IAuditHandler
+public class AuditHandlerV2 : IAuditHandler
 {
     private readonly IIdentityIdService _identityService;
     private readonly IDateTimeProvider _dateTimeProvider;
 
-    public AuditHandlerV1(IIdentityIdService identityService, IDateTimeProvider dateTimeProvider)
+    public AuditHandlerV2(IIdentityIdService identityService, IDateTimeProvider dateTimeProvider)
     {
         _identityService = identityService;
         _dateTimeProvider = dateTimeProvider;
@@ -47,11 +47,11 @@ public class AuditHandlerV1 : IAuditHandler
                      .GroupBy(entry => entry.Metadata.ClrType))
         {
             var lastEditorNames = groupedEntries.Key.GetProperties()
-                .Where(x => Attribute.IsDefined(x, typeof(LastEditorV1Attribute)))
+                .Where(x => Attribute.IsDefined(x, typeof(LastEditorV2Attribute)))
                 .Select(x => x.Name)
                 .ToImmutableHashSet();
             var lastChangedNames = groupedEntries.Key.GetProperties()
-                .Where(x => Attribute.IsDefined(x, typeof(LastChangedV1Attribute)))
+                .Where(x => Attribute.IsDefined(x, typeof(LastChangedV2Attribute)))
                 .Select(x => x.Name)
                 .ToImmutableHashSet();
 
@@ -72,7 +72,7 @@ public class AuditHandlerV1 : IAuditHandler
                 }
             }
 
-            var auditPropertyInformation = groupedEntries.Key.GetAuditPropertyInformation();
+            var auditPropertyInformation = groupedEntries.Key.GetAuditV2PropertyInformation();
             if (auditPropertyInformation == null)
                 continue;
             var (auditEntityType, sourceProperties, _, targetProperties) = auditPropertyInformation;
@@ -86,7 +86,7 @@ public class AuditHandlerV1 : IAuditHandler
 
     private void AddAuditEntry(EntityEntry entityEntry, Type entityType, DbContext context, Type auditEntityType, IEnumerable<PropertyInfo> sourceProperties, IEnumerable<PropertyInfo> targetProperties)
     {
-        if (Activator.CreateInstance(auditEntityType) is not IAuditEntityV1 newAuditEntity)
+        if (Activator.CreateInstance(auditEntityType) is not IAuditEntityV2 newAuditEntity)
             throw new UnexpectedConditionException($"AuditEntityV1Attribute can only be used on types implementing IAuditEntityV1 but Type {entityType} isn't");
 
         var propertyValues = entityEntry.CurrentValues;
@@ -99,10 +99,10 @@ public class AuditHandlerV1 : IAuditHandler
             joined.Target.SetValue(newAuditEntity, joined.Value);
         }
 
-        newAuditEntity.AuditV1Id = Guid.NewGuid();
-        newAuditEntity.AuditV1OperationId = entityEntry.State.ToAuditOperation();
-        newAuditEntity.AuditV1DateLastChanged = _dateTimeProvider.OffsetNow;
-        newAuditEntity.AuditV1LastEditorId = _identityService.IdentityId;
+        newAuditEntity.AuditV2Id = Guid.NewGuid();
+        newAuditEntity.AuditV2OperationId = entityEntry.State.ToAuditOperation();
+        newAuditEntity.AuditV2DateLastChanged = _dateTimeProvider.OffsetNow;
+        newAuditEntity.AuditV2LastEditorId = _identityService.IdentityId;
 
         context.Add(newAuditEntity);
     }

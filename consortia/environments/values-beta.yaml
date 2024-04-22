@@ -17,6 +17,10 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
+portalBackendAddress: "https://portal-backend.beta.demo.catena-x.net"
+walletAddress: "https://dis-integration-service-prod.eu10.dim.cloud.sap"
+walletTokenAddress: "https://bpnl00000003crhk-catena-x.authentication.eu10.hana.ondemand.com/oauth/token"
+
 ingress:
   enabled: true
   className: "nginx"
@@ -39,8 +43,10 @@ ingress:
 
 issuer:
   swaggerEnabled: true
-  credential: 
+  credential:
+    issuerDid: "did:web:dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com:dim-hosted:2f45795c-d6cc-4038-96c9-63cedc0cd266"
     issuerBpn: "BPNL00000003CRHK"
+    statusListUrl: "https://dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com/credentials/status/c5f1d9bb-42d5-42b7-a80a-ccbda6891df3/3e6f1f74-56e3-443a-a75e-320c301aca07"
     encryptionConfigs: 
       index0: 
         encryptionKey: "<path:portal/data/ssi-credential-issuer/beta/credential#encryptionKey0>"

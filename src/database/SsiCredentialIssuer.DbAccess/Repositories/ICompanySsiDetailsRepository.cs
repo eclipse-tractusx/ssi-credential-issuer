@@ -52,7 +52,7 @@ public interface ICompanySsiDetailsRepository
     /// <param name="userId">Id of the creator</param>
     /// <param name="setOptionalFields">sets the optional fields</param>
     /// <returns>The created entity</returns>
-    CompanySsiDetail CreateSsiDetails(string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, Guid userId, Action<CompanySsiDetail>? setOptionalFields);
+    CompanySsiDetail CreateSsiDetails(string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId, Action<CompanySsiDetail>? setOptionalFields);
 
     /// <summary>
     /// Checks whether the credential details are already exists for the company and the given version

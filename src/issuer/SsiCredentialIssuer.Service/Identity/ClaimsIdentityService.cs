@@ -32,5 +32,5 @@ public class ClaimsIdentityService : IIdentityService, IIdentityIdService
 
     public IIdentityData IdentityData => _identityData;
 
-    public Guid IdentityId => _identityData.IdentityId;
+    public string IdentityId => _identityData.IdentityId;
 }

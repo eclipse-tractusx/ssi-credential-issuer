@@ -24,17 +24,18 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 
-[AuditEntityV1(typeof(AuditCompanySsiDetail20240228))]
-public class CompanySsiDetail : IAuditableV1, IBaseEntity
+[AuditEntityV2(typeof(AuditCompanySsiDetail20240419))]
+public class CompanySsiDetail : IAuditableV2, IBaseEntity
 {
     private CompanySsiDetail()
     {
         Bpnl = null!;
         IssuerBpn = null!;
+        CreatorUserId = null!;
         Documents = new HashSet<Document>();
     }
 
-    public CompanySsiDetail(Guid id, string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, Guid creatorUserId, DateTimeOffset dateCreated)
+    public CompanySsiDetail(Guid id, string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string creatorUserId, DateTimeOffset dateCreated)
         : this()
     {
         Id = id;
@@ -52,7 +53,7 @@ public class CompanySsiDetail : IAuditableV1, IBaseEntity
     public VerifiedCredentialTypeId VerifiedCredentialTypeId { get; set; }
     public CompanySsiDetailStatusId CompanySsiDetailStatusId { get; set; }
     public DateTimeOffset DateCreated { get; set; }
-    public Guid CreatorUserId { get; set; }
+    public string CreatorUserId { get; set; }
     public DateTimeOffset? ExpiryDate { get; set; }
     public Guid? VerifiedCredentialExternalTypeDetailVersionId { get; set; }
 
@@ -61,11 +62,11 @@ public class CompanySsiDetail : IAuditableV1, IBaseEntity
     public Guid? ExternalCredentialId { get; set; }
     public string? Credential { get; set; }
 
-    [LastChangedV1]
+    [LastChangedV2]
     public DateTimeOffset? DateLastChanged { get; set; }
 
-    [LastEditorV1]
-    public Guid? LastEditorId { get; private set; }
+    [LastEditorV2]
+    public string? LastEditorId { get; private set; }
 
     // Navigation Properties
     public virtual VerifiedCredentialType? VerifiedCredentialType { get; set; }

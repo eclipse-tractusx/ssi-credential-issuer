@@ -58,12 +58,8 @@ public class IntegrationTestFactory : WebApplicationFactory<IssuerBusinessLogic>
         var projectDir = Directory.GetCurrentDirectory();
         var configPath = Path.Combine(projectDir, "appsettings.IntegrationTests.json");
 
-        builder.ConfigureAppConfiguration((_, conf) =>
-        {
-            conf.AddJsonFile(configPath, true)
-                .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
-                .AddEnvironmentVariables();
-        });
+        var config = new ConfigurationBuilder().AddJsonFile(configPath, true).Build();
+        builder.UseConfiguration(config);
         builder.ConfigureTestServices(services =>
         {
             var identityService = services.SingleOrDefault(d => d.ServiceType.GetInterfaces().Contains(typeof(IIdentityService)));

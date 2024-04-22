@@ -21,5 +21,5 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
 
 public interface IIdentityIdService
 {
-    Guid IdentityId { get; }
+    string IdentityId { get; }
 }

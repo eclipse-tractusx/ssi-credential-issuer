@@ -92,7 +92,7 @@ public class ExpiryCheckServiceTests
             .Create();
         var data = new CredentialExpiryData[]
         {
-            new(credentialId, Guid.NewGuid(), inactiveVcsToDelete.AddDays(-1), null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, credentialScheduleData)
+            new(credentialId, Guid.NewGuid().ToString(), inactiveVcsToDelete.AddDays(-1), null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, credentialScheduleData)
         };
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
@@ -112,10 +112,11 @@ public class ExpiryCheckServiceTests
         // Arrange
         var now = DateTimeOffset.UtcNow;
         var expiredVcsToDeleteInMonth = now.AddMonths(-_settings.ExpiredVcsToDeleteInMonth);
-        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid(), now)
+        var creatorUserId = Guid.NewGuid();
+        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.PENDING, IssuerBpnl, creatorUserId.ToString(), now)
         {
             ExpiryDate = expiredVcsToDeleteInMonth.AddDays(-2),
-            CreatorUserId = Guid.NewGuid()
+            CreatorUserId = creatorUserId.ToString()
         };
         var credentialScheduleData = _fixture.Build<CredentialScheduleData>()
             .With(x => x.IsVcToDecline, true)
@@ -141,8 +142,8 @@ public class ExpiryCheckServiceTests
         // Assert
         A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.AddNotification(A<string>._, ssiDetail.CreatorUserId, NotificationTypeId.CREDENTIAL_REJECTED, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", ssiDetail.CreatorUserId, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.AddNotification(A<string>._, creatorUserId, NotificationTypeId.CREDENTIAL_REJECTED, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.TriggerMail("CredentialRejected", creatorUserId, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
         ssiDetail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.INACTIVE);
     }
@@ -155,11 +156,12 @@ public class ExpiryCheckServiceTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, Guid.NewGuid(), now)
+        var creatorUserId = Guid.NewGuid();
+        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, creatorUserId.ToString(), now)
         {
             ExpiryDate = now.AddDays(-days),
             ExpiryCheckTypeId = currentExpiryCheckTypeId,
-            CreatorUserId = Guid.NewGuid()
+            CreatorUserId = creatorUserId.ToString()
         };
         var credentialScheduleData = _fixture.Build<CredentialScheduleData>()
             .With(x => x.IsVcToDecline, false)
@@ -188,8 +190,8 @@ public class ExpiryCheckServiceTests
         // Assert
         A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.AddNotification(A<string>._, ssiDetail.CreatorUserId, NotificationTypeId.CREDENTIAL_EXPIRY, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.TriggerMail("CredentialExpiry", ssiDetail.CreatorUserId, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.AddNotification(A<string>._, creatorUserId, NotificationTypeId.CREDENTIAL_EXPIRY, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _portalService.TriggerMail("CredentialExpiry", creatorUserId, A<IDictionary<string, string>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
         ssiDetail.ExpiryCheckTypeId.Should().Be(expiryCheckTypeId);
     }

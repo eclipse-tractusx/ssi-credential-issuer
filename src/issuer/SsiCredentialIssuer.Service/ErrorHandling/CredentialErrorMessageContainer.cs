@@ -54,6 +54,7 @@ public class CredentialErrorMessageContainer : IErrorMessageContainer
         { CredentialErrors.DID_NOT_SET, "Did must not be null" },
         { CredentialErrors.ALREADY_LINKED_PROCESS, "Credential should not already be linked to a process" },
         { CredentialErrors.INVALID_DID_LOCATION, "The did url location must be a valid url" },
+        { CredentialErrors.USER_MUST_NOT_BE_TECHNICAL_USER, "The endpoint can not be called by a technical user" },
     }.ToImmutableDictionary(x => (int)x.Key, x => x.Value);
 
     public Type Type { get => typeof(CredentialErrors); }
@@ -88,5 +89,6 @@ public enum CredentialErrors
     MULTIPLE_USE_CASES,
     DID_NOT_SET,
     ALREADY_LINKED_PROCESS,
-    INVALID_DID_LOCATION
+    INVALID_DID_LOCATION,
+    USER_MUST_NOT_BE_TECHNICAL_USER
 }
