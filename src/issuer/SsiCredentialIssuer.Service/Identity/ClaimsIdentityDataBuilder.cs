@@ -24,16 +24,23 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 public class ClaimsIdentityDataBuilder : IClaimsIdentityDataBuilder
 {
     private string? _identityId;
+    private Guid? _companyUserId;
     private string? _bpnl;
     private bool? _isServiceAccount;
 
     public string IdentityId { get => _identityId ?? throw new UnexpectedConditionException("userId should never be null here (endpoint must be annotated with an identity policy)"); }
+    public Guid? CompanyUserId { get => _companyUserId; }
     public string Bpnl { get => _bpnl ?? throw new UnexpectedConditionException("bpnl should never be null here (endpoint must be annotated with an identity policy)"); }
     public bool IsServiceAccount { get => _isServiceAccount ?? throw new UnexpectedConditionException("isServiceAccount should never be null here (endpoint must be annotated with an isServiceACcount"); }
 
     public void AddIdentityId(string identityId)
     {
         _identityId = identityId;
+    }
+
+    public void AddCompanyUserId(Guid companyUserId)
+    {
+        _companyUserId = companyUserId;
     }
 
     public void AddBpnl(string bpnl)

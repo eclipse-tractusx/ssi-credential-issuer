@@ -88,7 +88,7 @@ public class ExpiryCheckService
                 await foreach (var credential in credentials.WithCancellation(stoppingToken).ConfigureAwait(false))
                 {
                     await ProcessCredentials(credential, companySsiDetailsRepository, repositories, portalService,
-                        stoppingToken);
+                        stoppingToken).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -141,7 +141,7 @@ public class ExpiryCheckService
         if (Guid.TryParse(data.RequesterId, out var requesterId))
         {
             var content = JsonSerializer.Serialize(new { Type = data.VerifiedCredentialTypeId, CredentialId = data.Id }, Options);
-            await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
+            await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
 
             var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
             var mailParameters = new Dictionary<string, string>
@@ -149,7 +149,7 @@ public class ExpiryCheckService
                 { "requestName", typeValue },
                 { "reason", "The credential is already expired" }
             };
-            await portalService.TriggerMail("CredentialRejected", requesterId, mailParameters, cancellationToken);
+            await portalService.TriggerMail("CredentialRejected", requesterId, mailParameters, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -189,7 +189,7 @@ public class ExpiryCheckService
 
         if (Guid.TryParse(data.RequesterId, out var requesterId))
         {
-            await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_EXPIRY, cancellationToken);
+            await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_EXPIRY, cancellationToken).ConfigureAwait(false);
             var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
             var mailParameters = new Dictionary<string, string>
             {
@@ -198,7 +198,7 @@ public class ExpiryCheckService
                 { "expiryDate", data.ExpiryDate?.ToString("dd MMMM yyyy") ?? throw new ConflictException("Expiry Date must be set here") }
             };
 
-            await portalService.TriggerMail("CredentialExpiry", requesterId, mailParameters, cancellationToken);
+            await portalService.TriggerMail("CredentialExpiry", requesterId, mailParameters, cancellationToken).ConfigureAwait(false);
         }
     }
 }

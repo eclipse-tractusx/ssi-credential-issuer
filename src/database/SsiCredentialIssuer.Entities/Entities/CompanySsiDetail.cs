@@ -31,6 +31,7 @@ public class CompanySsiDetail : IAuditableV2, IBaseEntity
     {
         Bpnl = null!;
         IssuerBpn = null!;
+        CreatorUserId = null!;
         Documents = new HashSet<Document>();
     }
 

@@ -80,7 +80,7 @@ public class MandatoryIdentityClaimHandler : AuthorizationHandler<MandatoryIdent
         var clientId = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.ClientId)?.Value;
         if (preferredUserName == null && clientId == null)
         {
-            _logger.LogInformation("Preferred user name {PreferredUserName} and clientId {ClientId} couldn't be parsed to uuid", preferredUserName, clientId);
+            _logger.LogInformation("Both preferred_user_name and client_id are null");
             _identityDataBuilder.Status = IClaimsIdentityDataBuilderStatus.Empty;
             return;
         }
@@ -92,7 +92,12 @@ public class MandatoryIdentityClaimHandler : AuthorizationHandler<MandatoryIdent
         }
 
         _identityDataBuilder.AddIdentityId(preferredUserName ?? clientId!);
-        _identityDataBuilder.AddIsServiceAccount(preferredUserName == null);
+        bool isCompanyUser;
+        if (isCompanyUser = Guid.TryParse(preferredUserName, out var companyUserId))
+        {
+            _identityDataBuilder.AddCompanyUserId(companyUserId);
+        }
+        _identityDataBuilder.AddIsServiceAccount(!isCompanyUser);
         _identityDataBuilder.Status = IClaimsIdentityDataBuilderStatus.Complete;
     }
 }

@@ -22,6 +22,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 public interface IClaimsIdentityDataBuilder : IIdentityData
 {
     void AddIdentityId(string identityId);
+    void AddCompanyUserId(Guid companyUserId);
     void AddIsServiceAccount(bool isServiceAccount);
     void AddBpnl(string bpnl);
     IClaimsIdentityDataBuilderStatus Status { get; set; }

@@ -22,6 +22,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 public interface IIdentityData
 {
     string IdentityId { get; }
+    Guid? CompanyUserId { get; }
     string Bpnl { get; }
     bool IsServiceAccount { get; }
 }

@@ -36,7 +36,7 @@ public class AuditCompanySsiDetail20240419 : IAuditEntityV2
     public VerifiedCredentialTypeId VerifiedCredentialTypeId { get; set; }
     public CompanySsiDetailStatusId CompanySsiDetailStatusId { get; set; }
     public DateTimeOffset DateCreated { get; private set; }
-    public string CreatorUserId { get; set; }
+    public string CreatorUserId { get; set; } = null!;
     public DateTimeOffset? ExpiryDate { get; set; }
     public Guid? VerifiedCredentialExternalTypeDetailVersionId { get; set; }
 

@@ -27,7 +27,7 @@ using System.Reflection;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Extensions;
 
-public static class AuditV1Extensions
+public static class AuditExtensions
 {
     public record AuditPropertyInformation
     (

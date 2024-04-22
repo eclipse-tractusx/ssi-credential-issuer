@@ -27,5 +27,5 @@ public class ProcessExecutionServiceSettings
     public int LockExpirySeconds { get; set; }
 
     [Required]
-    public string IdentityId { get; set; }
+    public string IdentityId { get; set; } = null!;
 }
