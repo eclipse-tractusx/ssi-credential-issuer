@@ -47,7 +47,7 @@ issuer:
   imagePullPolicy: "Always"
   swaggerEnabled: true
   credential:
-    issuerDid: "did:web:dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com:dim-hosted:2f45795c-d6cc-4038-96c9-63cedc0cd266"
+    issuerDid: "did:web:dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com:dim-hosted:2f45795c-d6cc-4038-96c9-63cedc0cd266:holder-iatp"
     issuerBpn: "BPNL00000003CRHK"
     statusListUrl: "https://dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com/credentials/status/c5f1d9bb-42d5-42b7-a80a-ccbda6891df3/3e6f1f74-56e3-443a-a75e-320c301aca07"
     encryptionConfigs:
