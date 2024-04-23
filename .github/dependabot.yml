@@ -17,15 +17,44 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-apiVersion: v2
-name: ssi-credential-issuer
-type: application
-version: 1.0.0-rc.2
-appVersion: 1.0.0-rc.2
-description: Helm chart for SSI Credential Issuer
-home: https://github.com/eclipse-tractusx/ssi-credential-issuer
-dependencies:
-  - condition: postgresql.enabled
-    name: postgresql
-    repository: https://charts.bitnami.com/bitnami
-    version: 12.12.x
+---
+version: 2
+updates:
+  # NuGet
+  -
+    package-ecosystem: "nuget"
+    target-branch: dev
+    directory: /
+    labels:
+      - "dependabot"
+      - "dependencies"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # Github Actions
+  -
+    package-ecosystem: "github-actions"
+    target-branch: dev
+    directory: /
+    labels:
+      - "dependabot"
+      - "github-actions"
+    schedule:
+      interval: "weekly"
+
+  # Docker
+  -
+    package-ecosystem: "docker"
+    target-branch: dev
+    directory: ./docker/
+    labels:
+      - "dependabot"
+      - "docker"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

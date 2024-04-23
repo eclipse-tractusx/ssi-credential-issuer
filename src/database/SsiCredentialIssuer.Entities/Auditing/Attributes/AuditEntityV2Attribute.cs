@@ -20,13 +20,24 @@
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Attributes;
 
 /// <summary>
-/// Attribute to mark the last editor id in the base class
+/// Attribute to Provide the needed methods to setup an audit trigger
 /// </summary>
 /// <remarks>
 /// The implementation of this Attribute must not be changed.
-/// When changes are needed create a V2 of it.
+/// When changes are needed create a V3 of it.
 /// </remarks>
-[AttributeUsage(AttributeTargets.Property)]
-public class LastChangedV1Attribute : Attribute
+[AttributeUsage(AttributeTargets.Class)]
+public class AuditEntityV2Attribute : Attribute
 {
+    public AuditEntityV2Attribute(Type auditEntityType)
+    {
+        if (!typeof(IAuditEntityV2).IsAssignableFrom(auditEntityType))
+        {
+            throw new ArgumentException($"Entity must derive from {nameof(IAuditEntityV2)}", nameof(auditEntityType));
+        }
+
+        AuditEntityType = auditEntityType;
+    }
+
+    public Type AuditEntityType { get; }
 }

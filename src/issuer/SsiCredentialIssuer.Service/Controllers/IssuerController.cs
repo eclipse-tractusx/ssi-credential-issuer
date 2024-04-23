@@ -124,7 +124,6 @@ public static class IssuerController
             .RequireAuthorization(r =>
             {
                 r.RequireRole(RequestSsiRole);
-                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
             })
             .WithDefaultResponses()

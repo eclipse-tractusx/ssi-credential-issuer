@@ -17,16 +17,36 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Attributes;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Enums;
+
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
 
 /// <summary>
-/// Attribute to mark the last editor id in the base class
+/// Marker interface to define that the entity is an audit entity
 /// </summary>
 /// <remarks>
 /// The implementation of this Attribute must not be changed.
-/// When changes are needed create a V2 of it.
+/// When changes are needed create a V3 of it.
 /// </remarks>
-[AttributeUsage(AttributeTargets.Property)]
-public class LastEditorV1Attribute : Attribute
+public interface IAuditEntityV2
 {
+    /// <summary>
+    /// Id of the audited entity
+    /// </summary>
+    Guid AuditV2Id { get; set; }
+
+    /// <summary>
+    /// Date Time of the last change of the entity
+    /// </summary>
+    DateTimeOffset AuditV2DateLastChanged { get; set; }
+
+    /// <summary>
+    /// Reference to the <see cref="CompanyUser"/> that changed the entity
+    /// </summary>
+    string? AuditV2LastEditorId { get; set; }
+
+    /// <summary>
+    /// Id of the audit operation
+    /// </summary>
+    AuditOperationId AuditV2OperationId { get; set; }
 }

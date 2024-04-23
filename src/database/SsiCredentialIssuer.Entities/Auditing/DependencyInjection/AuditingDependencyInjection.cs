@@ -28,7 +28,7 @@ public static class AuditingDependencyInjection
     public static IServiceCollection AddDbAuditing(this IServiceCollection services)
     {
         return services
-            .AddTransient<IAuditHandler, AuditHandlerV1>()
+            .AddTransient<IAuditHandler, AuditHandlerV2>()
             .AddTransient<IDateTimeProvider, UtcDateTimeProvider>();
     }
 }

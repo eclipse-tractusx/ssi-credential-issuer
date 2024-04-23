@@ -74,7 +74,7 @@ public class WalletBusinessLogicTests
         var id = Guid.NewGuid();
         var externalId = Guid.NewGuid();
         var schema = JsonDocument.Parse("{}");
-        var ssiDetail = new CompanySsiDetail(id, null!, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, Guid.NewGuid(), DateTimeOffset.UtcNow);
+        var ssiDetail = new CompanySsiDetail(id, null!, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, Guid.NewGuid().ToString(), DateTimeOffset.UtcNow);
         A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(A<Guid>._, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
             .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> setupOptionalFields) =>
             {
@@ -105,7 +105,7 @@ public class WalletBusinessLogicTests
         // Arrange
         var id = Guid.NewGuid();
         var credentialId = Guid.NewGuid();
-        var ssiDetail = new CompanySsiDetail(id, null!, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, Guid.NewGuid(), DateTimeOffset.UtcNow);
+        var ssiDetail = new CompanySsiDetail(id, null!, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, Guid.NewGuid().ToString(), DateTimeOffset.UtcNow);
         A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(A<Guid>._, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
             .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> setupOptionalFields) =>
             {
@@ -166,22 +166,29 @@ public class WalletBusinessLogicTests
         // Arrange
         const string data = """
             {
-                "id": "2e70ee49-5fae-438a-9435-0cce3854650d",
-                "@context": [
-                    "https://www.w3.org/2018/credentials/v1",
-                    "https://w3id.org/catenax/credentials/v1.0.0"
-                ],
+                "id": "f2ee21e938e217f362d3e7edac9e59a2b17d34017ef0f842e1f48513",
                 "type": [
                     "VerifiableCredential",
                     "BpnCredential"
                 ],
-                "issuanceDate": "2022-06-16T18:56:59Z",
-                "expirationDate": "2022-06-16T18:56:59Z",
-                "issuer": "2e70ee49-5fae-438a-9435-0cce3854650d",
+                "issuer": "did:web:example.org:dim-hosted:2f45795c-d6cc-4038-96c9-63cedc0cd266:holder-iatp",
+                "@context": [
+                    "https://www.w3.org/2018/credentials/v1",
+                    "https://w3id.org/catenax/credentials/v1.0.0"
+                ],
+                "issuanceDate": "2024-04-22T17:02:33.568629+00:00",
+                "expirationDate": "2025-04-22T17:02:33.568629+00:00",
+                "credentialStatus": {
+                    "id": "https://example.org/credentials/status/c5f1d9bb-42d5-42b7-a80a-ccbda6891df3/3e6f1f74-56e3-443a-a75e-320c301aca07#10",
+                    "type": "StatusList2021Entry",
+                    "statusPurpose": "revocation",
+                    "statusListIndex": "10",
+                    "statusListCredential": "https://example.org/credentials/status/c5f1d9bb-42d5-42b7-a80a-ccbda6891df3/3e6f1f74-56e3-443a-a75e-320c301aca07"
+                },
                 "credentialSubject": {
-                    "id": "2e70ee49-5fae-438a-9435-0cce3854650d",
-                    "holderIdentifier": "2e70ee49-5fae-438a-9435-0cce3854650d",
-                    "bpn": "2e70ee49-5fae-438a-9435-0cce3854650d"
+                    "id": "did:web:example.org:api:administration:staticdata:did:BPNL000001PS0000",
+                    "bpn": "BPNL000001PS0000",
+                    "holderIndentifier": "BPNL000001PS0000"
                 }
             }
             """;

@@ -51,10 +51,7 @@ public class MandatoryIdentityClaimHandlerTests
     public async Task HandleValidRequirement_WithoutUsername_ReturnsExpected()
     {
         // Arrange
-        var principal = new ClaimsPrincipal(new ClaimsIdentity[]
-        {
-            new(new[] { new Claim("preferred_username", "00000000-0000-0000-0000-000000000000") })
-        });
+        var principal = new ClaimsPrincipal(Array.Empty<ClaimsIdentity>());
 
         var context = new AuthorizationHandlerContext(Enumerable.Repeat(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity), 1), principal, null);
         var sut = new MandatoryIdentityClaimHandler(_claimsIdentityDataBuilder, _logger);
@@ -70,31 +67,6 @@ public class MandatoryIdentityClaimHandlerTests
         Assert.Throws<UnexpectedConditionException>(() => _claimsIdentityDataBuilder.Bpnl);
         A.CallTo(() => _mockLogger.Log(LogLevel.Information, A<Exception>._, A<string>._))
             .MustHaveHappenedOnceExactly();
-    }
-
-    [Fact]
-    public async Task HandleValidRequirement_WithUsernameWithoutBpn_ReturnsExpected()
-    {
-        // Arrange
-        var principal = new ClaimsPrincipal(new ClaimsIdentity[]
-        {
-            new(new[]
-            {
-                new Claim("preferred_username", "eb4f6b1d-cde2-4e7b-86d5-e678421c0bd3"),
-            })
-        });
-
-        var context = new AuthorizationHandlerContext(Enumerable.Repeat(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity), 1), principal, null);
-        var sut = new MandatoryIdentityClaimHandler(_claimsIdentityDataBuilder, _logger);
-
-        // Act
-        await sut.HandleAsync(context).ConfigureAwait(false);
-
-        // Assert
-        context.HasSucceeded.Should().Be(false);
-        _claimsIdentityDataBuilder.Status.Should().Be(IClaimsIdentityDataBuilderStatus.Empty);
-
-        Assert.Throws<UnexpectedConditionException>(() => _claimsIdentityDataBuilder.Bpnl);
     }
 
     [Fact]
@@ -120,7 +92,7 @@ public class MandatoryIdentityClaimHandlerTests
         context.HasSucceeded.Should().Be(true);
         _claimsIdentityDataBuilder.Status.Should().Be(IClaimsIdentityDataBuilderStatus.Complete);
 
-        _claimsIdentityDataBuilder.IdentityId.Should().Be(new Guid("eb4f6b1d-cde2-4e7b-86d5-e678421c0bd3"));
+        _claimsIdentityDataBuilder.IdentityId.Should().Be("eb4f6b1d-cde2-4e7b-86d5-e678421c0bd3");
         _claimsIdentityDataBuilder.Bpnl.Should().Be(Bpnl);
         A.CallTo(() => _mockLogger.Log(A<LogLevel>._, A<Exception>._, A<string>._))
             .MustNotHaveHappened();

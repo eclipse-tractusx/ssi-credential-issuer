@@ -17,15 +17,18 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Attributes;
 
 /// <summary>
-/// Marker interface to define that a entity is auditable
+/// Attribute to mark the creators id in the base class.
+/// The usage is optional. If not set <see cref="LastEditorV2Attribute"/>
+/// is being used to determine the creators id.
 /// </summary>
 /// <remarks>
 /// The implementation of this Attribute must not be changed.
-/// When changes are needed create a V2 of it.
+/// When changes are needed create a V3 of it.
 /// </remarks>
-public interface IAuditableV1
+[AttributeUsage(AttributeTargets.Property)]
+public class AuditInsertEditorV2Attribute : Attribute
 {
 }

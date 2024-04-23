@@ -1,4 +1,4 @@
-# Helm chart for Catena-X SSI Credential Issuer
+# Helm chart for SSI Credential Issuer
 
 This helm chart installs the Catena-X SSI Credential Issuer application.
 
@@ -27,7 +27,7 @@ To use the helm chart as a dependency:
 dependencies:
   - name: ssi-credential-issuer
     repository: https://eclipse-tractusx.github.io/charts/dev
-    version: 1.0.0-rc.1
+    version: 1.0.0-rc.2
 ```
 
 ## Requirements
@@ -40,6 +40,9 @@ dependencies:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| portalBackendAddress | string | `"https://portal-backend.example.org"` | Provide portal-backend base address. |
+| walletAddress | string | `"https://wallet.example.org"` |  |
+| walletTokenAddress | string | `"https://wallet.example.org/oauth/token"` |  |
 | issuer.image.name | string | `"docker.io/tractusx/ssi-credential-issuer-service"` |  |
 | issuer.image.tag | string | `""` |  |
 | issuer.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -56,9 +59,9 @@ dependencies:
 | issuer.portal.grantType | string | `"client_credentials"` |  |
 | issuer.portal.clientId | string | `"portal-client-id"` | Provide portal client-id from CX IAM centralidp. |
 | issuer.portal.clientSecret | string | `""` | Client-secret for portal client-id. Secret-key 'portal-client-secret'. |
-| issuer.credential.issuerDid | string | `""` |  |
-| issuer.credential.issuerBpn | string | `""` |  |
-| issuer.credential.statusListUrl | string | `""` |  |
+| issuer.credential.issuerDid | string | `"did:web:example"` |  |
+| issuer.credential.issuerBpn | string | `"BPNL00000001TEST"` |  |
+| issuer.credential.statusListUrl | string | `"https://example.org/statuslist"` |  |
 | issuer.credential.encryptionConfigIndex | int | `0` |  |
 | issuer.credential.encryptionConfigs.index0.index | int | `0` |  |
 | issuer.credential.encryptionConfigs.index0.cipherMode | string | `"CBC"` |  |
@@ -68,7 +71,7 @@ dependencies:
 | issuermigrations.image.name | string | `"docker.io/tractusx/ssi-credential-issuer-migrations"` |  |
 | issuermigrations.image.tag | string | `""` |  |
 | issuermigrations.imagePullPolicy | string | `"IfNotPresent"` |  |
-| issuermigrations.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| issuermigrations.resources | object | `{"limits":{"cpu":"45m","memory":"200M"},"requests":{"cpu":"15m","memory":"200M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
 | issuermigrations.seeding.testDataEnvironments | string | `""` |  |
 | issuermigrations.seeding.testDataPaths | string | `"Seeder/Data"` |  |
 | issuermigrations.logging.default | string | `"Information"` |  |
@@ -77,7 +80,7 @@ dependencies:
 | processesworker.image.name | string | `"docker.io/tractusx/ssi-credential-issuer-processes-worker"` |  |
 | processesworker.image.tag | string | `""` |  |
 | processesworker.imagePullPolicy | string | `"IfNotPresent"` |  |
-| processesworker.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| processesworker.resources | object | `{"limits":{"cpu":"45m","memory":"200M"},"requests":{"cpu":"15m","memory":"200M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
 | processesworker.logging.default | string | `"Information"` |  |
 | processesworker.portal.scope | string | `"openid"` |  |
 | processesworker.portal.grantType | string | `"client_credentials"` |  |
@@ -127,7 +130,6 @@ dependencies:
 | externalDatabase.database | string | `"issuer"` | Database name. |
 | externalDatabase.password | string | `""` | Password for the non-root username (default 'issuer'). Secret-key 'password'. |
 | externalDatabase.existingSecret | string | `"issuer-external-db"` | Secret containing the password non-root username, (default 'issuer'). |
-| externalDatabase.existingSecretPasswordKey | string | `"password"` | Name of an existing secret key containing the database credentials. |
 | centralidp | object | `{"address":"https://centralidp.example.org","authRealm":"CX-Central","jwtBearerOptions":{"metadataPath":"/auth/realms/CX-Central/.well-known/openid-configuration","refreshInterval":"00:00:30","requireHttpsMetadata":"true","tokenValidationParameters":{"validAudience":"Cl24-CX-SSI-CredentialIssuer","validIssuerPath":"/auth/realms/CX-Central"}},"tokenPath":"/auth/realms/CX-Central/protocol/openid-connect/token","useAuthTrail":true}` | Provide details about centralidp (CX IAM) Keycloak instance. |
 | centralidp.address | string | `"https://centralidp.example.org"` | Provide centralidp base address (CX IAM), without trailing '/auth'. |
 | centralidp.useAuthTrail | bool | `true` | Flag if the api should be used with an leading /auth path |

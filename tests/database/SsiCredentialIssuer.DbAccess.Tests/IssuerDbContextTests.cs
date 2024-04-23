@@ -61,7 +61,7 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
 
         var before = now.AddDays(-1);
         var id = Guid.NewGuid();
-        var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, "BPNL0001ISSUER", new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"), before);
+        var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, "BPNL0001ISSUER", "ac1cf001-7fbc-1f2f-817f-bce058020001", before);
 
         var sut = await CreateContext().ConfigureAwait(false);
         using var trans = await sut.Database.BeginTransactionAsync().ConfigureAwait(false);
@@ -71,11 +71,11 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
         await sut.SaveChangesAsync().ConfigureAwait(false);
 
         // Assert
-        ca.LastEditorId.Should().NotBeNull().And.Be(new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"));
+        ca.LastEditorId.Should().NotBeNull().And.Be("ac1cf001-7fbc-1f2f-817f-bce058020001");
         ca.DateLastChanged.Should().Be(now);
-        var auditEntries = await sut.AuditCompanySsiDetail20240228.Where(x => x.Id == id).ToListAsync();
-        auditEntries.Should().ContainSingle().Which.Should().Match<AuditCompanySsiDetail20240228>(
-            x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV1OperationId == AuditOperationId.INSERT && (x.AuditV1DateLastChanged - now) < TimeSpan.FromSeconds(1) && x.LastEditorId == new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"));
+        var auditEntries = await sut.AuditCompanySsiDetail20240419.Where(x => x.Id == id).ToListAsync();
+        auditEntries.Should().ContainSingle().Which.Should().Match<AuditCompanySsiDetail20240419>(
+            x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV2OperationId == AuditOperationId.INSERT && (x.AuditV2DateLastChanged - now) < TimeSpan.FromSeconds(1) && x.LastEditorId == "ac1cf001-7fbc-1f2f-817f-bce058020001");
         await trans.RollbackAsync().ConfigureAwait(false);
     }
 
@@ -89,7 +89,7 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
 
         var before = now.AddDays(-1);
         var id = Guid.NewGuid();
-        var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, "BPNL0001ISSUER", new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"), before);
+        var ca = new CompanySsiDetail(id, "BPNL00000001TEST", VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, "BPNL0001ISSUER", "ac1cf001-7fbc-1f2f-817f-bce058020001", before);
 
         var sut = await CreateContext().ConfigureAwait(false);
         using var trans = await sut.Database.BeginTransactionAsync().ConfigureAwait(false);
@@ -101,12 +101,12 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
         await sut.SaveChangesAsync().ConfigureAwait(false);
 
         // Assert
-        ca.LastEditorId.Should().NotBeNull().And.Be(new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"));
+        ca.LastEditorId.Should().NotBeNull().And.Be("ac1cf001-7fbc-1f2f-817f-bce058020001");
         ca.DateLastChanged.Should().Be(later);
-        var auditEntries = await sut.AuditCompanySsiDetail20240228.Where(x => x.Id == id).ToListAsync();
+        var auditEntries = await sut.AuditCompanySsiDetail20240419.Where(x => x.Id == id).ToListAsync();
         auditEntries.Should().HaveCount(2).And.Satisfy(
-            x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV1OperationId == AuditOperationId.INSERT && x.LastEditorId == new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"),
-            x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV1OperationId == AuditOperationId.DELETE && (x.AuditV1DateLastChanged - later) < TimeSpan.FromSeconds(1) && x.LastEditorId == new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001"));
+            x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV2OperationId == AuditOperationId.INSERT && x.LastEditorId == "ac1cf001-7fbc-1f2f-817f-bce058020001",
+            x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV2OperationId == AuditOperationId.DELETE && (x.AuditV2DateLastChanged - later) < TimeSpan.FromSeconds(1) && x.LastEditorId == "ac1cf001-7fbc-1f2f-817f-bce058020001");
         await trans.RollbackAsync().ConfigureAwait(false);
     }
 
