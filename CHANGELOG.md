@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2024-04-23)
+
+
+### Features
+
+* **ssi:** adjust framework creation endpoint ([#70](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/70)) ([2d06fe6](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/2d06fe65365b644a209900a464c6823cb0db372e))
+
+
+### Bug Fixes
+
+* **ssi:** adjust schemas ([#72](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/72)) ([ba63179](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/ba63179300aa835bcb0f0d5c874c927ea48c89c9))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0-rc.2 ([8c763cc](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/8c763cc516015797fd292436fb3225b902dc11f8))
+
 ## [1.0.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.1...v1.0.0-rc.1) (2024-04-15)
 
 
