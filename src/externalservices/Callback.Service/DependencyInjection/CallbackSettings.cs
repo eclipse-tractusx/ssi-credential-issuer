@@ -18,9 +18,12 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
+using System.ComponentModel.DataAnnotations;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
 
 public class CallbackSettings : KeyVaultAuthSettings
 {
+    [Required(AllowEmptyStrings = false)]
+    public string BaseAddress { get; set; } = null!;
 }
