@@ -23,7 +23,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
 public record CredentialExpiryData(
     Guid Id,
-    Guid RequesterId,
+    string RequesterId,
     DateTimeOffset? ExpiryDate,
     ExpiryCheckTypeId? ExpiryCheckTypeId,
     string? DetailVersion,

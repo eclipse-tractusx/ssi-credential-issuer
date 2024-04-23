@@ -23,6 +23,8 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 
 public class FakeIdentity : IIdentityData
 {
-    public Guid IdentityId => new("ac1cf001-7fbc-1f2f-817f-bce058020001");
+    public string IdentityId => "ac1cf001-7fbc-1f2f-817f-bce058020001";
+    public Guid? CompanyUserId => new Guid("ac1cf001-7fbc-1f2f-817f-bce058020001");
     public string Bpnl => "BPNL00000003AYRE";
+    public bool IsServiceAccount => false;
 }

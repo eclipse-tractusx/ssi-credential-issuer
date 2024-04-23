@@ -17,27 +17,12 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Attributes;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Enums;
 
-/// <summary>
-/// Attribute to Provide the needed methods to setup an audit trigger
-/// </summary>
-/// <remarks>
-/// The implementation of this Attribute must not be changed.
-/// When changes are needed create a V2 of it.
-/// </remarks>
-[AttributeUsage(AttributeTargets.Class)]
-public class AuditEntityV1Attribute : Attribute
+public enum AuditPropertyV2Names
 {
-    public AuditEntityV1Attribute(Type auditEntityType)
-    {
-        if (!typeof(IAuditEntityV1).IsAssignableFrom(auditEntityType))
-        {
-            throw new ArgumentException($"Entity must derive from {nameof(IAuditEntityV1)}", nameof(auditEntityType));
-        }
-
-        AuditEntityType = auditEntityType;
-    }
-
-    public virtual Type AuditEntityType { get; }
+    AuditV2Id,
+    AuditV2OperationId,
+    AuditV2DateLastChanged,
+    AuditV2LastEditorId
 }

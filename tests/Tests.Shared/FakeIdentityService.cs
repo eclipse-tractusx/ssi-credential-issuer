@@ -23,6 +23,6 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 
 public class FakeIdentityService : IIdentityService
 {
-    public Guid IdentityId => IdentityData.IdentityId;
+    public string IdentityId => IdentityData.IdentityId;
     public IIdentityData IdentityData { get; } = new FakeIdentity();
 }

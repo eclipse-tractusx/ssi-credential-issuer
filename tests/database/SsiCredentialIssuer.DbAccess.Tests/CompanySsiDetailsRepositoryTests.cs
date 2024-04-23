@@ -35,7 +35,7 @@ public class CompanySsiDetailsRepositoryTests
 {
     private const string ValidBpnl = "BPNL00000003AYRE";
     private readonly TestDbFixture _dbTestDbFixture;
-    private readonly Guid _userId = new("ac1cf001-7fbc-1f2f-817f-bce058020006");
+    private readonly string _userId = "ac1cf001-7fbc-1f2f-817f-bce058020006";
 
     public CompanySsiDetailsRepositoryTests(TestDbFixture testDbFixture)
     {

@@ -93,6 +93,8 @@ spec:
           value: "{{ .Values.issuer.logging.businessLogic }}"
         - name: "SWAGGERENABLED"
           value: "{{ .Values.issuer.swaggerEnabled }}"
+        - name: "PORTAL__CLIENTID"
+          value: "{{ .Values.issuer.portal.clientId }}"
         - name: "PORTAL__CLIENTSECRET"
           valueFrom:
             secretKeyRef:
@@ -102,6 +104,8 @@ spec:
           value: "{{ .Values.issuer.portal.grantType }}"
         - name: "PORTAL__TOKENADDRESS"
           value: "{{ .Values.centralidp.address }}{{ .Values.centralidp.tokenPath }}"
+        - name: "PORTAL__BASEADDRESS"
+          value: "{{ .Values.portalBackendAddress }}"
         - name: "PORTAL__PASSWORD"
           value: "empty"
         - name: "PORTAL__SCOPE"

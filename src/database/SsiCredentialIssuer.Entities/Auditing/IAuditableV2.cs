@@ -17,21 +17,15 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
 
-public interface IClaimsIdentityDataBuilder : IIdentityData
+/// <summary>
+/// Marker interface to define that a entity is auditable
+/// </summary>
+/// <remarks>
+/// The implementation of this Attribute must not be changed.
+/// When changes are needed create a V3 of it.
+/// </remarks>
+public interface IAuditableV2
 {
-    void AddIdentityId(string identityId);
-    void AddCompanyUserId(Guid companyUserId);
-    void AddIsServiceAccount(bool isServiceAccount);
-    void AddBpnl(string bpnl);
-    IClaimsIdentityDataBuilderStatus Status { get; set; }
-}
-
-public enum IClaimsIdentityDataBuilderStatus
-{
-    Initial,
-    Initialized,
-    Complete,
-    Empty
 }

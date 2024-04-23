@@ -32,6 +32,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddOptions<WalletSettings>()
             .Bind(config.GetSection("Wallet"))
+            .ValidateDataAnnotations()
             .ValidateOnStart();
 
         services.AddTransient<LoggingHandler<WalletService>>();

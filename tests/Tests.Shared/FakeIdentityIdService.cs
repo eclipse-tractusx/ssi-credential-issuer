@@ -23,7 +23,5 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 
 public class FakeIdentityIdService : IIdentityIdService
 {
-    private readonly Guid _identityId = new("ac1cf001-7fbc-1f2f-817f-bce058020001");
-
-    public Guid IdentityId => _identityId;
+    public string IdentityId => "ac1cf001-7fbc-1f2f-817f-bce058020001";
 }

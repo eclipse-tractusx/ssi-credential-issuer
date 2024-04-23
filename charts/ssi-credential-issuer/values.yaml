@@ -17,6 +17,11 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
+# -- Provide portal-backend base address.
+portalBackendAddress: "https://portal-backend.example.org"
+walletAddress: "https://wallet.example.org"
+walletTokenAddress: "https://wallet.example.org/oauth/token"
+
 issuer:
   image:
     name: "docker.io/tractusx/ssi-credential-issuer-service"
@@ -52,9 +57,9 @@ issuer:
     # -- Client-secret for portal client-id. Secret-key 'portal-client-secret'.
     clientSecret: ""
   credential:
-    issuerDid: ""
-    issuerBpn: ""
-    statusListUrl: ""
+    issuerDid: "did:web:example"
+    issuerBpn: "BPNL00000001TEST"
+    statusListUrl: "https://example.org/statuslist"
     encryptionConfigIndex: 0
     encryptionConfigs:
       index0:
@@ -75,10 +80,10 @@ issuermigrations:
   resources:
     requests:
       cpu: 15m
-      memory: 105M
+      memory: 200M
     limits:
       cpu: 45m
-      memory: 105M
+      memory: 200M
   seeding:
     testDataEnvironments: ""
     testDataPaths: "Seeder/Data"
@@ -97,10 +102,10 @@ processesworker:
   resources:
     requests:
       cpu: 15m
-      memory: 105M
+      memory: 200M
     limits:
       cpu: 45m
-      memory: 105M
+      memory: 200M
   logging:
     default: "Information"
   portal:

@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddOptions<PortalSettings>()
             .Bind(section)
+            .ValidateDataAnnotations()
             .ValidateOnStart();
 
         services.AddTransient<LoggingHandler<PortalService>>();
