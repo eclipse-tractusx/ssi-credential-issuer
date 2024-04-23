@@ -516,6 +516,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 c.ClientId = technicalUserDetails.ClientId;
                 c.ClientSecret = secret;
                 c.InitializationVector = initializationVector;
+                c.EncryptionMode = _settings.EncrptionConfigIndex;
                 c.HolderWalletUrl = technicalUserDetails.WalletUrl;
                 c.CallbackUrl = callbackUrl;
             });

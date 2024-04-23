@@ -32,9 +32,9 @@ ingress:
   tls:
     - secretName: "tls-secret"
       hosts:
-        - "ssi-credential-issuer-backend-rc.dev.demo.catena-x.net"
+        - "ssi-credential-issuer-rc.dev.demo.catena-x.net"
   hosts:
-    - host: "ssi-credential-issuer-backend-rc.dev.demo.catena-x.net"
+    - host: "ssi-credential-issuer-rc.dev.demo.catena-x.net"
       paths:
         - path: "/api/issuer"
           pathType: "Prefix"
