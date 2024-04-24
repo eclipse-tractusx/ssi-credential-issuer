@@ -177,6 +177,17 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
                 (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId));
 
     /// <inheritdoc />
+    public IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl) =>
+        _context.CompanySsiDetails.AsNoTracking()
+            .Where(c => c.Bpnl == bpnl)
+            .Select(c => new OwnedVerifiedCredentialData(
+                c.VerifiedCredentialTypeId,
+                c.CompanySsiDetailStatusId,
+                c.ExpiryDate,
+                c.IssuerBpn))
+            .ToAsyncEnumerable();
+
+    /// <inheritdoc />
     public Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId) =>
         _context.CompanySsiDetails
             .Where(x => x.Id == credentialId)

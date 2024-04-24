@@ -36,6 +36,7 @@ public static class IssuerController
 {
     private const string RequestSsiRole = "request_ssicredential";
     private const string DecisionSsiRole = "decision_ssicredential";
+    private const string ViewCredentialRequestRole = "view_credential_requests";
 
     public static RouteGroupBuilder MapIssuerApi(this RouteGroupBuilder group)
     {
@@ -90,6 +91,17 @@ public static class IssuerController
                 "OPTIONAL: Search string for the company name",
                 "Defines the sorting of the list")
             .RequireAuthorization(r => r.RequireRole(DecisionSsiRole))
+            .WithDefaultResponses()
+            .Produces(StatusCodes.Status200OK, typeof(IEnumerable<CredentialDetailData>), Constants.JsonContentType);
+
+        issuer.MapGet("owned-credentials", (IIssuerBusinessLogic logic) => logic.GetCredentialsForBpn())
+            .WithSwaggerDescription("Gets all outstanding, existing and inactive credentials for the company of the user",
+                "Example: GET: /api/issuer/owned-credentials")
+            .RequireAuthorization(r =>
+            {
+                r.RequireRole(ViewCredentialRequestRole);
+                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
+            })
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<CredentialDetailData>), Constants.JsonContentType);
 

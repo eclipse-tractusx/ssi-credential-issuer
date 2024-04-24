@@ -174,6 +174,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             ));
     }
 
+    public IAsyncEnumerable<OwnedVerifiedCredentialData> GetCredentialsForBpn() =>
+        _repositories
+            .GetInstance<ICompanySsiDetailsRepository>()
+            .GetOwnCredentialDetails(_identity.Bpnl);
+
     /// <inheritdoc />
     public async Task ApproveCredential(Guid credentialId, CancellationToken cancellationToken)
     {

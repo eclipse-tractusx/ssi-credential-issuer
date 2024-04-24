@@ -87,6 +87,12 @@ public interface ICompanySsiDetailsRepository
     /// <returns>Returns data to create the pagination</returns>
     IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId);
 
+    /// <summary>
+    /// Gets all credentials for a specific bpn
+    /// </summary>
+    /// <param name="bpnl">The bpn to filter the credentials for</param>
+    IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl);
+
     Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId);
     Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId);
     void AttachAndModifyCompanySsiDetails(Guid id, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields);
