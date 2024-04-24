@@ -45,7 +45,7 @@ public class CredentialCreationProcessHandler : ICredentialCreationProcessHandle
     {
         var data = await _issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialStorageInformationById(credentialId).ConfigureAwait(false);
         await _walletBusinessLogic.CreateCredential(credentialId, data.Schema, cancellationToken).ConfigureAwait(false);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             Enumerable.Repeat(ProcessStepTypeId.SIGN_CREDENTIAL, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -61,7 +61,7 @@ public class CredentialCreationProcessHandler : ICredentialCreationProcessHandle
         }
 
         await _walletBusinessLogic.SignCredential(credentialId, externalCredentialId!.Value, cancellationToken).ConfigureAwait(false);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -78,7 +78,7 @@ public class CredentialCreationProcessHandler : ICredentialCreationProcessHandle
 
         await _walletBusinessLogic.GetCredential(credentialId, externalCredentialId.Value, kindId, cancellationToken).ConfigureAwait(false);
         var nextProcessStep = callbackUrl == null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             hasEncryptionInformation
                 ? Enumerable.Repeat(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, 1)
                 : nextProcessStep,
@@ -106,7 +106,7 @@ public class CredentialCreationProcessHandler : ICredentialCreationProcessHandle
         }
 
         await _walletBusinessLogic.CreateCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credential, cancellationToken).ConfigureAwait(false);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -123,7 +123,7 @@ public class CredentialCreationProcessHandler : ICredentialCreationProcessHandle
 
         var issuerResponseData = new IssuerResponseData(bpn, IssuerResponseStatus.SUCCESSFUL, "Successfully created Credential");
         await _callbackService.TriggerCallback(callbackUrl, issuerResponseData, cancellationToken).ConfigureAwait(false);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             null,
             ProcessStepStatusId.DONE,
             false,

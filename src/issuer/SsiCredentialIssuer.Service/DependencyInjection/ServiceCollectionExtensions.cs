@@ -27,7 +27,6 @@ public static class ServiceCollectionExtensions
         services
             .AddIssuerService(config.GetSection("Credential"))
             .AddRevocationService()
-            .AddRevocationService()
             .AddCredentialService();
 
     private static IServiceCollection AddIssuerService(this IServiceCollection services, IConfigurationSection section) =>

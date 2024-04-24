@@ -73,7 +73,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
             x => x.CompanySsiDetailStatusId = data.StatusId,
             x => x.CompanySsiDetailStatusId = CompanySsiDetailStatusId.REVOKED);
 
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             Enumerable.Repeat(ProcessStepTypeId.TRIGGER_NOTIFICATION, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -89,7 +89,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
             await _portalService.AddNotification(content, companyUserId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
         }
 
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             Enumerable.Repeat(ProcessStepTypeId.TRIGGER_MAIL, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -110,7 +110,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
             await _portalService.TriggerMail("CredentialRejected", companyUserId, mailParameters, cancellationToken);
         }
 
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             null,
             ProcessStepStatusId.DONE,
             false,

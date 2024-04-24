@@ -178,7 +178,7 @@ public class ExpiryCheckService
         if (Guid.TryParse(data.RequesterId, out var requesterId))
         {
             await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_EXPIRY,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
             var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ??
                             throw new UnexpectedConditionException(
                                 $"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
@@ -186,8 +186,7 @@ public class ExpiryCheckService
             {
                 new("typeId", typeValue), new("version", data.DetailVersion ?? "no version"),
                 new("expiryDate",
-                    data.ExpiryDate?.ToString("dd MMMM yyyy") ??
-                    throw new ConflictException("Expiry Date must be set here"))
+                    data.ExpiryDate?.ToString("dd MMMM yyyy") ?? throw new ConflictException("Expiry Date must be set here"))
             };
             await portalService.TriggerMail("CredentialExpiry", requesterId, mailParameters, cancellationToken).ConfigureAwait(false);
         }

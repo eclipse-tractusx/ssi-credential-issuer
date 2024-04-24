@@ -52,7 +52,7 @@ public class WalletServiceTests
         var id = Guid.NewGuid();
         var response = new CreateCredentialResponse(id);
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -83,7 +83,7 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -110,7 +110,7 @@ public class WalletServiceTests
         const string jwt = "thisisonlyatestexample";
         var response = new SignCredentialResponse(jwt);
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -142,7 +142,7 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -173,7 +173,7 @@ public class WalletServiceTests
                    """;
         var response = new GetCredentialResponse("test", JsonDocument.Parse(json), "test123", "VALID");
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -199,7 +199,7 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -225,7 +225,7 @@ public class WalletServiceTests
         var id = Guid.NewGuid();
         var response = new CreateCredentialResponse(id);
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -255,7 +255,7 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -281,7 +281,7 @@ public class WalletServiceTests
         var id = Guid.NewGuid();
         var response = new CreateCredentialResponse(id);
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -309,7 +309,7 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };

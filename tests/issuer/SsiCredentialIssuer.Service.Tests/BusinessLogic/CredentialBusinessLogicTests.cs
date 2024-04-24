@@ -24,6 +24,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
+using System.Text;
 using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.BusinessLogic;
@@ -68,7 +69,7 @@ public class CredentialBusinessLogicTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetSignedCredentialForCredentialId(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, IEnumerable<ValueTuple<DocumentStatusId, byte[]>>>());
+            .Returns(default((bool, bool, IEnumerable<(DocumentStatusId, byte[])>)));
         async Task Act() => await _sut.GetCredentialDocument(CredentialId);
 
         // Act
@@ -83,7 +84,7 @@ public class CredentialBusinessLogicTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetSignedCredentialForCredentialId(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, IEnumerable<ValueTuple<DocumentStatusId, byte[]>>>(true, false, Enumerable.Empty<ValueTuple<DocumentStatusId, byte[]>>()));
+            .Returns((true, false, Enumerable.Empty<ValueTuple<DocumentStatusId, byte[]>>()));
         async Task Act() => await _sut.GetCredentialDocument(CredentialId);
 
         // Act
@@ -98,7 +99,7 @@ public class CredentialBusinessLogicTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetSignedCredentialForCredentialId(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, IEnumerable<ValueTuple<DocumentStatusId, byte[]>>>(true, true, Enumerable.Empty<ValueTuple<DocumentStatusId, byte[]>>()));
+            .Returns((true, true, Enumerable.Empty<ValueTuple<DocumentStatusId, byte[]>>()));
         async Task Act() => await _sut.GetCredentialDocument(CredentialId);
 
         // Act
@@ -115,7 +116,7 @@ public class CredentialBusinessLogicTests
         var json = JsonDocument.Parse("{\"test\":\"test\"}");
         var schema = JsonSerializer.Serialize(json, JsonSerializerOptions.Default);
         A.CallTo(() => _credentialRepository.GetSignedCredentialForCredentialId(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, IEnumerable<ValueTuple<DocumentStatusId, byte[]>>>(true, true, Enumerable.Repeat(new ValueTuple<DocumentStatusId, byte[]>(DocumentStatusId.ACTIVE, System.Text.Encoding.UTF8.GetBytes(schema)), 1)));
+            .Returns((true, true, Enumerable.Repeat((DocumentStatusId.ACTIVE, Encoding.UTF8.GetBytes(schema)), 1)));
 
         // Act
         var doc = await _sut.GetCredentialDocument(CredentialId);

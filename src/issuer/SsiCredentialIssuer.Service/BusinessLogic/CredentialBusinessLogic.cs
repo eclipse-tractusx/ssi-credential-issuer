@@ -55,8 +55,8 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
             throw ConflictException.Create(CredentialErrors.SIGNED_CREDENTIAL_NOT_FOUND);
         }
 
-        var credentialContent = documents.Single();
-        var content = System.Text.Encoding.UTF8.GetString(credentialContent.Content);
-        return JsonDocument.Parse(content);
+        var (_, credentialContent) = documents.Single();
+        using var stream = new MemoryStream(credentialContent);
+        return await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
     }
 }

@@ -54,8 +54,8 @@ public class RevocationBusinessLogicTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>());
-        async Task Act() => await _sut.RevokeCredential(CredentialId, true, CancellationToken.None).ConfigureAwait(false);
+            .Returns(default((bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<(Guid, DocumentStatusId)>)));
+        Task Act() => _sut.RevokeCredential(CredentialId, true, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<NotFoundException>(Act);
@@ -69,8 +69,8 @@ public class RevocationBusinessLogicTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, false, null, default, null!));
-        async Task Act() => await _sut.RevokeCredential(CredentialId, false, CancellationToken.None).ConfigureAwait(false);
+            .Returns((true, false, null, default, null!));
+        Task Act() => _sut.RevokeCredential(CredentialId, false, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ForbiddenException>(Act);
@@ -84,8 +84,8 @@ public class RevocationBusinessLogicTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, true, null, default, null!));
-        async Task Act() => await _sut.RevokeCredential(CredentialId, true, CancellationToken.None).ConfigureAwait(false);
+            .Returns((true, true, null, default, null!));
+        Task Act() => _sut.RevokeCredential(CredentialId, true, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -102,10 +102,10 @@ public class RevocationBusinessLogicTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, true, Guid.NewGuid(), statusId, null!));
+            .Returns((true, true, Guid.NewGuid(), statusId, null!));
 
         // Act
-        await _sut.RevokeCredential(CredentialId, true, CancellationToken.None).ConfigureAwait(false);
+        await _sut.RevokeCredential(CredentialId, true, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletService.RevokeCredentialForIssuer(A<Guid>._, A<CancellationToken>._)).MustNotHaveHappened();
@@ -124,7 +124,7 @@ public class RevocationBusinessLogicTests
             .With(x => x.DocumentStatusId, DocumentStatusId.ACTIVE)
             .Create();
         A.CallTo(() => _credentialRepository.GetRevocationDataById(CredentialId, Bpnl))
-            .Returns(new ValueTuple<bool, bool, Guid?, CompanySsiDetailStatusId, IEnumerable<ValueTuple<Guid, DocumentStatusId>>>(true, true, credential.ExternalCredentialId, CompanySsiDetailStatusId.ACTIVE, Enumerable.Repeat(new ValueTuple<Guid, DocumentStatusId>(document.Id, document.DocumentStatusId), 1)));
+            .Returns((true, true, credential.ExternalCredentialId, CompanySsiDetailStatusId.ACTIVE, Enumerable.Repeat((document.Id, document.DocumentStatusId), 1)));
         A.CallTo(() => _documentRepository.AttachAndModifyDocuments(A<IEnumerable<(Guid DocumentId, Action<Document>? Initialize, Action<Document> Modify)>>._))
             .Invokes((IEnumerable<(Guid DocumentId, Action<Document>? Initialize, Action<Document> Modify)> data) =>
             {
@@ -149,7 +149,7 @@ public class RevocationBusinessLogicTests
             });
 
         // Act
-        await _sut.RevokeCredential(CredentialId, true, CancellationToken.None).ConfigureAwait(false);
+        await _sut.RevokeCredential(CredentialId, true, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _walletService.RevokeCredentialForIssuer(A<Guid>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();

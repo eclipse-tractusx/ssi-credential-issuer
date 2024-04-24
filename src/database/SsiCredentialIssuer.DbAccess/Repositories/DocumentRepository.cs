@@ -34,7 +34,7 @@ public class DocumentRepository : IDocumentRepository
     /// <param name="dbContext">PortalDb context.</param>
     public DocumentRepository(IssuerDbContext dbContext)
     {
-        this._dbContext = dbContext;
+        _dbContext = dbContext;
     }
 
     /// <inheritdoc />

@@ -37,6 +37,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using ErrorParameter = Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.ErrorParameter;
@@ -225,7 +226,10 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         }
 
         var newCredential = frameworkCredential with { IssuanceDate = _dateTimeProvider.OffsetNow };
-        companySsiRepository.AttachAndModifyProcessData(credentialId, c => c.Schema = JsonDocument.Parse(JsonSerializer.Serialize(frameworkCredential, Options)), c => c.Schema = JsonDocument.Parse(JsonSerializer.Serialize(newCredential, Options)));
+        companySsiRepository.AttachAndModifyProcessData(
+            credentialId,
+            c => c.Schema = JsonSerializer.SerializeToDocument(frameworkCredential, Options),
+            c => c.Schema = JsonSerializer.SerializeToDocument(newCredential, Options));
     }
 
     private Guid CreateProcess()
@@ -505,7 +509,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         string? callbackUrl,
         ICompanySsiDetailsRepository companyCredentialDetailsRepository)
     {
-        var documentContent = System.Text.Encoding.UTF8.GetBytes(schema);
+        var documentContent = Encoding.UTF8.GetBytes(schema);
         var hash = SHA512.HashData(documentContent);
         var documentRepository = _repositories.GetInstance<IDocumentRepository>();
         var docId = documentRepository.CreateDocument("schema.json", documentContent,

@@ -50,7 +50,7 @@ public class CredentialExpiryProcessTypeExecutor : IProcessTypeExecutor
     public ProcessTypeId GetProcessTypeId() => ProcessTypeId.DECLINE_CREDENTIAL;
     public bool IsExecutableStepTypeId(ProcessStepTypeId processStepTypeId) => _executableProcessSteps.Contains(processStepTypeId);
     public IEnumerable<ProcessStepTypeId> GetExecutableStepTypeIds() => _executableProcessSteps;
-    public ValueTask<bool> IsLockRequested(ProcessStepTypeId processStepTypeId) => new(false);
+    public ValueTask<bool> IsLockRequested(ProcessStepTypeId processStepTypeId) => ValueTask.FromResult(false);
 
     public async ValueTask<IProcessTypeExecutor.InitializationResult> InitializeProcess(Guid processId, IEnumerable<ProcessStepTypeId> processStepTypeIds)
     {
