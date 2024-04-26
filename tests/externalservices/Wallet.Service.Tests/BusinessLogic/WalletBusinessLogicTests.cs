@@ -188,7 +188,7 @@ public class WalletBusinessLogicTests
                 "credentialSubject": {
                     "id": "did:web:example.org:api:administration:staticdata:did:BPNL000001PS0000",
                     "bpn": "BPNL000001PS0000",
-                    "holderIndentifier": "BPNL000001PS0000"
+                    "holderIdentifier": "BPNL000001PS0000"
                 }
             }
             """;
