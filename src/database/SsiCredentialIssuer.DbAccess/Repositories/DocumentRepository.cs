@@ -34,7 +34,7 @@ public class DocumentRepository : IDocumentRepository
     /// <param name="dbContext">PortalDb context.</param>
     public DocumentRepository(IssuerDbContext dbContext)
     {
-        this._dbContext = dbContext;
+        _dbContext = dbContext;
     }
 
     /// <inheritdoc />
@@ -59,5 +59,18 @@ public class DocumentRepository : IDocumentRepository
     {
         var document = new CompanySsiDetailAssignedDocument(documentId, companySsiDetailId);
         _dbContext.CompanySsiDetailAssignedDocuments.Add(document);
+    }
+
+    public void AttachAndModifyDocuments(IEnumerable<(Guid DocumentId, Action<Document>? Initialize, Action<Document> Modify)> documentData)
+    {
+        var initial = documentData.Select(x =>
+            {
+                var document = new Document(x.DocumentId, null!, null!, null!, default, default, default, default);
+                x.Initialize?.Invoke(document);
+                return (Document: document, x.Modify);
+            }
+        ).ToList();
+        _dbContext.AttachRange(initial.Select(x => x.Document));
+        initial.ForEach(x => x.Modify(x.Document));
     }
 }

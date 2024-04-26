@@ -42,14 +42,15 @@ try
                 .AddProcessExecutionService(hostContext.Configuration.GetSection("Processes"))
                 .AddPortalService(hostContext.Configuration.GetSection("Portal"))
                 .AddCallbackService(hostContext.Configuration.GetSection("Callback"))
-                .AddCredentialProcessExecutor(hostContext.Configuration);
+                .AddCredentialCreationProcessExecutor(hostContext.Configuration)
+                .AddCredentialExpiryProcessExecutor(hostContext.Configuration);
         })
         .AddLogging()
         .Build();
     Log.Information("Building worker completed");
 
     using var tokenSource = new CancellationTokenSource();
-    Console.CancelKeyPress += (s, e) =>
+    Console.CancelKeyPress += (_, e) =>
     {
         Log.Information("Canceling...");
         tokenSource.Cancel();

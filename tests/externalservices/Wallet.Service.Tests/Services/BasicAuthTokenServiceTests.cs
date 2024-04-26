@@ -22,7 +22,6 @@ using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Web;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared.Extensions;
@@ -82,9 +81,9 @@ public class BasicAuthTokenServiceTests
 
         var sut = new BasicAuthTokenService(_httpClientFactory);
 
-        var act = () => sut.GetBasicAuthorizedClient<BasicAuthTokenService>(settings, _cancellationToken);
+        Task<HttpClient> Act() => sut.GetBasicAuthorizedClient<BasicAuthTokenService>(settings, _cancellationToken);
 
-        var error = await Assert.ThrowsAsync<ServiceException>(act).ConfigureAwait(false);
+        var error = await Assert.ThrowsAsync<ServiceException>(Act).ConfigureAwait(false);
 
         error.Should().NotBeNull();
         error.InnerException.Should().Be(_testException);

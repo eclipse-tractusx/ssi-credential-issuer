@@ -26,8 +26,8 @@ public class ProcessType
 {
     private ProcessType()
     {
-        this.Label = null!;
-        this.Processes = new HashSet<Process>();
+        Label = null!;
+        Processes = new HashSet<Process>();
     }
 
     public ProcessType(ProcessTypeId processTypeId) : this()

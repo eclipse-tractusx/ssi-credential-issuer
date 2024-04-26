@@ -19,16 +19,27 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 
 public static class CredentialHandlerExtensions
 {
-    public static IServiceCollection AddCredentialProcessHandler(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddCredentialCreationProcessHandler(this IServiceCollection services, IConfiguration config)
     {
         services
-            .AddTransient<ICredentialProcessHandler, CredentialProcessHandler>()
+            .AddTransient<ICredentialCreationProcessHandler, Creation.CredentialCreationProcessHandler>()
+            .AddWalletService(config);
+
+        return services;
+    }
+
+    public static IServiceCollection AddCredentialExpiryProcessHandler(this IServiceCollection services, IConfiguration config)
+    {
+        services
+            .AddTransient<ICredentialExpiryProcessHandler, CredentialExpiryProcessHandler>()
             .AddWalletService(config);
 
         return services;

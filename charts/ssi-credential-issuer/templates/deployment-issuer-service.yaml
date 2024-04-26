@@ -131,6 +131,38 @@ spec:
             secretKeyRef:
               name: "{{ template "issuer.secretName" . }}"
               key: "credential-encryption-key0"
+        - name: "WALLET__BASEADDRESS"
+          value: "{{ .Values.walletAddress }}"
+        - name: "WALLET__CLIENTID"
+          value: "{{ .Values.processesworker.wallet.clientId }}"
+        - name: "WALLET__CLIENTSECRET"
+          valueFrom:
+            secretKeyRef:
+              name: "{{ template "issuer.secretName" . }}"
+              key: "wallet-client-secret"
+        - name: "WALLET__GRANTTYPE"
+          value: "{{ .Values.processesworker.wallet.grantType }}"
+        - name: "WALLET__TOKENADDRESS"
+          value: "{{ .Values.walletTokenAddress }}"
+        - name: "WALLET__PASSWORD"
+          value: "empty"
+        - name: "WALLET__SCOPE"
+          value: "{{ .Values.processesworker.wallet.scope }}"
+        - name: "WALLET__USERNAME"
+          value: "empty"
+        - name: "WALLET__ENCRYPTIONCONFIG__ENCRYPTIONCONFIGINDEX"
+          value: "{{ .Values.processesworker.wallet.encryptionConfigIndex }}"
+        - name: "WALLET__ENCRYPTIONCONFIGS__0__INDEX"
+          value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.index}}"
+        - name: "WALLET__ENCRYPTIONCONFIGS__0__CIPHERMODE"
+          value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.cipherMode}}"
+        - name: "WALLET__ENCRYPTIONCONFIGS__0__PADDINGMODE"
+          value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.paddingMode}}"
+        - name: "WALLET__ENCRYPTIONCONFIGS__0__ENCRYPTIONKEY"
+          valueFrom:
+            secretKeyRef:
+              name: "{{ template "issuer.secretName" . }}"
+              key: "process-wallet-encryption-key0"
         ports:
         - name: http
           containerPort: {{ .Values.portContainer }}

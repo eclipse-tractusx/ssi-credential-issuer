@@ -59,18 +59,20 @@ public class CompanySsiDetailsRepositoryTests
         var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.MinValue).ToListAsync().ConfigureAwait(false);
 
         // Assert
-        result.Should().HaveCount(5);
-        result.Where(x => x.Description != null).Should().HaveCount(5).And.Satisfy(
+        result.Should().HaveCount(8);
+        result.Where(x => x.Description != null).Should().HaveCount(7).And.Satisfy(
             x => x.Description == "T",
-            x => x.Description == "CO2",
             x => x.Description == "BT",
             x => x.Description == "CE",
-            x => x.Description == "QM");
+            x => x.Description == "QM",
+            x => x.Description == "DCM",
+            x => x.Description == "Puris",
+            x => x.Description == "BPDM");
         var traceability = result.Single(x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
         traceability.VerifiedCredentials.Should().HaveCount(3).And.Satisfy(
-            x => x.ExternalDetailData.Version == "1.0.0" && x.SsiDetailData.Single().ParticipationStatus == CompanySsiDetailStatusId.PENDING,
-            x => x.ExternalDetailData.Version == "2.0.0" && !x.SsiDetailData.Any(),
-            x => x.ExternalDetailData.Version == "3.0.0" && !x.SsiDetailData.Any());
+            x => x.ExternalDetailData.Version == "1.0" && x.SsiDetailData.Single().ParticipationStatus == CompanySsiDetailStatusId.PENDING,
+            x => x.ExternalDetailData.Version == "2.0" && !x.SsiDetailData.Any(),
+            x => x.ExternalDetailData.Version == "3.0" && !x.SsiDetailData.Any());
     }
 
     [Fact]
@@ -84,18 +86,20 @@ public class CompanySsiDetailsRepositoryTests
         var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, dt).ToListAsync().ConfigureAwait(false);
 
         // Assert
-        result.Should().HaveCount(5);
-        result.Where(x => x.Description != null).Should().HaveCount(5).And.Satisfy(
+        result.Should().HaveCount(8);
+        result.Where(x => x.Description != null).Should().HaveCount(7).And.Satisfy(
             x => x.Description == "T",
-            x => x.Description == "CO2",
             x => x.Description == "BT",
             x => x.Description == "CE",
-            x => x.Description == "QM");
+            x => x.Description == "QM",
+            x => x.Description == "DCM",
+            x => x.Description == "Puris",
+            x => x.Description == "BPDM");
         var traceability = result.Single(x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
         traceability.VerifiedCredentials.Should().HaveCount(3).And.Satisfy(
-            x => x.ExternalDetailData.Version == "1.0.0" && x.SsiDetailData.Count() == 1,
-            x => x.ExternalDetailData.Version == "2.0.0" && !x.SsiDetailData.Any(),
-            x => x.ExternalDetailData.Version == "3.0.0" && !x.SsiDetailData.Any());
+            x => x.ExternalDetailData.Version == "1.0" && x.SsiDetailData.Count() == 1,
+            x => x.ExternalDetailData.Version == "2.0" && !x.SsiDetailData.Any(),
+            x => x.ExternalDetailData.Version == "3.0" && !x.SsiDetailData.Any());
     }
 
     #endregion

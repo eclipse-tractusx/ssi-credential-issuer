@@ -35,7 +35,7 @@ public record FrameworkCredential(
 
 public record FrameworkCredentialSubject(
     [property: JsonPropertyName("id")] string Did,
-    [property: JsonPropertyName("holderIndentifier")] string HolderIndentifier,
+    [property: JsonPropertyName("holderIdentifier")] string HolderIdentifier,
     [property: JsonPropertyName("group")] string Group,
     [property: JsonPropertyName("useCase")] string UseCase,
     [property: JsonPropertyName("contractTemplate")] string ContractTemplate,
@@ -56,7 +56,7 @@ public record MembershipCredential(
 
 public record MembershipCredentialSubject(
     [property: JsonPropertyName("id")] string Did,
-    [property: JsonPropertyName("holderIndentifier")] string HolderIndentifier,
+    [property: JsonPropertyName("holderIdentifier")] string HolderIdentifier,
     [property: JsonPropertyName("memberOf")] string MemberOf
 );
 
@@ -79,6 +79,6 @@ public record CredentialStatus(
 
 public record BpnCredentialSubject(
     [property: JsonPropertyName("id")] string Did,
-    [property: JsonPropertyName("holderIndentifier")] string HolderIndentifier,
+    [property: JsonPropertyName("holderIdentifier")] string HolderIdentifier,
     [property: JsonPropertyName("bpn")] string Bpn
 );

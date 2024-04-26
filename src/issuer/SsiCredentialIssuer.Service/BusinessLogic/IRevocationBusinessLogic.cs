@@ -17,14 +17,9 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.DependencyInjection;
-
-public static class CredentialServiceCollectionExtensions
+public interface IRevocationBusinessLogic
 {
-    public static IServiceCollection AddCredentialService(this IServiceCollection services, IConfigurationSection section) =>
-        services
-            .ConfigureCredentialSettings(section)
-            .AddTransient<IIssuerBusinessLogic, IssuerBusinessLogic>();
+    Task RevokeCredential(Guid credentialId, bool revokeForIssuer, CancellationToken cancellationToken);
 }
