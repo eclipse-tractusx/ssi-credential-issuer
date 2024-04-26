@@ -6,7 +6,6 @@ nuget/nuget/-/EFCore.NamingConventions/7.0.2, Apache-2.0, approved, #10067
 nuget/nuget/-/FakeItEasy/7.4.0, MIT, approved, #10080
 nuget/nuget/-/Fare/2.1.1, MIT, approved, clearlydefined
 nuget/nuget/-/FluentAssertions/6.11.0, Apache-2.0 AND MIT, approved, #10061
-nuget/nuget/-/Flurl.Http.Signed/3.2.4, MIT, approved, #3503
 nuget/nuget/-/Flurl.Signed/3.0.6, MIT, approved, #3501
 nuget/nuget/-/Humanizer.Core/2.14.1, MIT, approved, #10060
 nuget/nuget/-/Json.More.Net/2.0.0, MIT, approved, clearlydefined
