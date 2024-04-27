@@ -51,7 +51,7 @@ public class WalletBusinessLogicTests
             ClientSecret = "pass@Secret",
             TokenAddress = "https://example.org/token",
             EncryptionConfigs = Enumerable.Repeat(_encryptionModeConfig, 1),
-            EncrptionConfigIndex = 0
+            EncryptionConfigIndex = 0
         });
         _walletService = A.Fake<IWalletService>();
         var issuerRepositories = A.Fake<IIssuerRepositories>();

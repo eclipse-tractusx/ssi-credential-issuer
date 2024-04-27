@@ -32,5 +32,5 @@ public class WalletSettings : BasicAuthSettings
     public IEnumerable<EncryptionModeConfig> EncryptionConfigs { get; set; } = null!;
 
     [Required]
-    public int EncrptionConfigIndex { get; set; }
+    public int EncryptionConfigIndex { get; set; }
 }
