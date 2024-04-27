@@ -26,6 +26,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Dependen
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Serilog;
 
 LoggingExtensions.EnsureInitialized();
@@ -42,8 +43,9 @@ try
                 .AddProcessExecutionService(hostContext.Configuration.GetSection("Processes"))
                 .AddPortalService(hostContext.Configuration.GetSection("Portal"))
                 .AddCallbackService(hostContext.Configuration.GetSection("Callback"))
-                .AddCredentialCreationProcessExecutor(hostContext.Configuration)
-                .AddCredentialExpiryProcessExecutor(hostContext.Configuration);
+                .AddWalletService(hostContext.Configuration)
+                .AddCredentialCreationProcessExecutor()
+                .AddCredentialExpiryProcessExecutor();
         })
         .AddLogging()
         .Build();

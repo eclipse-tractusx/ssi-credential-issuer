@@ -52,7 +52,6 @@ public class IssuerBusinessLogicTests
     private readonly IProcessStepRepository _processStepRepository;
 
     private readonly IIssuerBusinessLogic _sut;
-    private readonly IIdentityService _identityService;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IHttpClientFactory _clientFactory;
     private readonly IPortalService _portalService;
@@ -73,7 +72,7 @@ public class IssuerBusinessLogicTests
         _processStepRepository = A.Fake<IProcessStepRepository>();
         _identity = A.Fake<IIdentityData>();
 
-        _identityService = A.Fake<IIdentityService>();
+        var identityService = A.Fake<IIdentityService>();
         _dateTimeProvider = A.Fake<IDateTimeProvider>();
         _clientFactory = A.Fake<IHttpClientFactory>();
         _portalService = A.Fake<IPortalService>();
@@ -88,7 +87,7 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _identity.CompanyUserId).Returns(identityId);
         A.CallTo(() => _identity.IsServiceAccount).Returns(false);
         A.CallTo(() => _identity.Bpnl).Returns(Bpnl);
-        A.CallTo(() => _identityService.IdentityData).Returns(_identity);
+        A.CallTo(() => identityService.IdentityData).Returns(_identity);
 
         var options = A.Fake<IOptions<IssuerSettings>>();
         A.CallTo(() => options.Value).Returns(new IssuerSettings
@@ -107,7 +106,7 @@ public class IssuerBusinessLogicTests
             StatusListUrl = "https://example.org/statuslist"
         });
 
-        _sut = new IssuerBusinessLogic(_issuerRepositories, _identityService, _dateTimeProvider, _clientFactory, _portalService, options);
+        _sut = new IssuerBusinessLogic(_issuerRepositories, identityService, _dateTimeProvider, _clientFactory, _portalService, options);
     }
 
     #region GetUseCaseParticipationAsync
@@ -137,6 +136,23 @@ public class IssuerBusinessLogicTests
 
         // Act
         var result = await _sut.GetSsiCertificatesAsync();
+
+        // Assert
+        result.Should().HaveCount(5);
+    }
+
+    #endregion
+
+    #region GetCredentialsForBpn
+
+    [Fact]
+    public async Task GetCredentialsForBpn_ReturnsExpected()
+    {
+        // Arrange
+        Setup_GetCredentialsForBpn();
+
+        // Act
+        var result = await _sut.GetCredentialsForBpn().ToListAsync().ConfigureAwait(false);
 
         // Assert
         result.Should().HaveCount(5);
@@ -839,6 +855,12 @@ public class IssuerBusinessLogicTests
     {
         A.CallTo(() => _companySsiDetailsRepository.GetSsiCertificates(Bpnl, A<DateTimeOffset>._))
             .Returns(_fixture.Build<SsiCertificateTransferData>().With(x => x.Credentials, Enumerable.Repeat(new SsiCertificateExternalTypeDetailTransferData(_fixture.Create<ExternalTypeDetailData>(), _fixture.CreateMany<CompanySsiDetailTransferData>(1)), 1)).CreateMany(5).ToAsyncEnumerable());
+    }
+
+    private void Setup_GetCredentialsForBpn()
+    {
+        A.CallTo(() => _companySsiDetailsRepository.GetOwnCredentialDetails(Bpnl))
+            .Returns(_fixture.Build<OwnedVerifiedCredentialData>().CreateMany(5).ToAsyncEnumerable());
     }
 
     private void ConfigureHttpClientFactoryFixture(HttpResponseMessage httpResponseMessage, Action<HttpRequestMessage?>? setMessage = null)

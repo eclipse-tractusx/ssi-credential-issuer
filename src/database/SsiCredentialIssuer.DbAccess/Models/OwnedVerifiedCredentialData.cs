@@ -17,13 +17,13 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
-using System.ComponentModel.DataAnnotations;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
-public class CallbackSettings : KeyVaultAuthSettings
-{
-    [Required(AllowEmptyStrings = false)]
-    public string BaseAddress { get; set; } = null!;
-}
+public record OwnedVerifiedCredentialData(
+    VerifiedCredentialTypeId CredentialType,
+    CompanySsiDetailStatusId Status,
+    DateTimeOffset? ExpiryDate,
+    string Authority
+);

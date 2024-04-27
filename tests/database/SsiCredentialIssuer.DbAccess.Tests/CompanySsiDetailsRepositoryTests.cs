@@ -191,6 +191,44 @@ public class CompanySsiDetailsRepositoryTests
 
     #endregion
 
+    #region GetOwnCredentialDetails
+
+    [Fact]
+    public async Task GetOwnCredentialDetails_WithValidData_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetOwnCredentialDetails(ValidBpnl).ToListAsync().ConfigureAwait(false);
+
+        // Assert
+        result.Should().HaveCount(6)
+            .And.Satisfy(
+                x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK && x.Status == CompanySsiDetailStatusId.PENDING,
+                x => x.CredentialType == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.Status == CompanySsiDetailStatusId.PENDING,
+                x => x.CredentialType == VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE && x.Status == CompanySsiDetailStatusId.PENDING,
+                x => x.CredentialType == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK && x.Status == CompanySsiDetailStatusId.INACTIVE,
+                x => x.CredentialType == VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE && x.Status == CompanySsiDetailStatusId.INACTIVE,
+                x => x.CredentialType == VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE && x.Status == CompanySsiDetailStatusId.INACTIVE
+            );
+    }
+
+    [Fact]
+    public async Task GetOwnCredentialDetails_WithBpnWithoutCredential_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetOwnCredentialDetails("BPNL000000INVALID").ToListAsync().ConfigureAwait(false);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    #endregion
+
     #region CreateSsiDetails
 
     [Fact]

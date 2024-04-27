@@ -60,6 +60,8 @@ public class CallbackServiceTests
             TokenAddress = "https://example.org/token"
         });
         _tokenService = A.Fake<ITokenService>();
+        // _fixture.Inject(_tokenService);
+        _fixture.Inject(_options);
     }
 
     #endregion
@@ -71,24 +73,17 @@ public class CallbackServiceTests
     {
         // Arrange
         var data = new IssuerResponseData("Test1", IssuerResponseStatus.SUCCESSFUL, "test 123");
-        var httpMessageHandlerMock =
-            new HttpMessageHandlerMock(HttpStatusCode.OK);
-        using var httpClient = new HttpClient(httpMessageHandlerMock);
-        httpClient.BaseAddress = new Uri("https://base.address.com");
-        A.CallTo(() => _tokenService.GetAuthorizedClient<CallbackService>(_options.Value, A<CancellationToken>._))
-            .Returns(httpClient);
-        var sut = new CallbackService(_tokenService, _options);
+        HttpRequestMessage? request = null;
+        ConfigureTokenServiceFixture<CallbackService>(new HttpResponseMessage(HttpStatusCode.OK), httpRequestMessage => request = httpRequestMessage);
+        var sut = _fixture.Create<CallbackService>();
 
         // Act
-        await sut.TriggerCallback("https://example.org/callback", data, CancellationToken.None).ConfigureAwait(false);
+        await sut.TriggerCallback("/callback", data, CancellationToken.None).ConfigureAwait(false);
 
         // Assert
-        httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
-            x.Content is JsonContent &&
-            (x.Content as JsonContent)!.ObjectType == typeof(IssuerResponseData) &&
-            ((x.Content as JsonContent)!.Value as IssuerResponseData)!.Status == IssuerResponseStatus.SUCCESSFUL &&
-            ((x.Content as JsonContent)!.Value as IssuerResponseData)!.Bpn == "Test1"
-        );
+        request.Should().NotBeNull();
+        request!.RequestUri.Should().Be("https://example.com/callback");
+        request.Content.Should().BeOfType<JsonContent>();
     }
 
     [Theory]
@@ -117,4 +112,23 @@ public class CallbackServiceTests
     }
 
     #endregion
+
+    private void ConfigureTokenServiceFixture<T>(HttpResponseMessage httpResponseMessage, Action<HttpRequestMessage?>? setMessage = null)
+    {
+        var messageHandler = A.Fake<HttpMessageHandler>();
+        A.CallTo(messageHandler) // mock protected method
+            .Where(x => x.Method.Name == "SendAsync")
+            .WithReturnType<Task<HttpResponseMessage>>()
+            .ReturnsLazily(call =>
+            {
+                var message = call.Arguments.Get<HttpRequestMessage>(0);
+                setMessage?.Invoke(message);
+                return Task.FromResult(httpResponseMessage);
+            });
+        var httpClient = new HttpClient(messageHandler) { BaseAddress = new Uri("https://example.com") };
+        _fixture.Inject(httpClient);
+
+        var tokenService = _fixture.Freeze<Fake<ITokenService>>();
+        A.CallTo(() => tokenService.FakedObject.GetAuthorizedClient<T>(A<KeyVaultAuthSettings>._, A<CancellationToken>._)).Returns(httpClient);
+    }
 }

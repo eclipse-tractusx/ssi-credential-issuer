@@ -17,7 +17,6 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Expiry;
@@ -27,13 +26,13 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Depe
 
 public static class CredentialProcessCollectionExtensions
 {
-    public static IServiceCollection AddCredentialCreationProcessExecutor(this IServiceCollection services, IConfiguration config) =>
+    public static IServiceCollection AddCredentialCreationProcessExecutor(this IServiceCollection services) =>
         services
             .AddTransient<IProcessTypeExecutor, Creation.CredentialCreationProcessTypeExecutor>()
-            .AddCredentialCreationProcessHandler(config);
+            .AddCredentialCreationProcessHandler();
 
-    public static IServiceCollection AddCredentialExpiryProcessExecutor(this IServiceCollection services, IConfiguration config) =>
+    public static IServiceCollection AddCredentialExpiryProcessExecutor(this IServiceCollection services) =>
         services
             .AddTransient<IProcessTypeExecutor, CredentialExpiryProcessTypeExecutor>()
-            .AddCredentialExpiryProcessHandler(config);
+            .AddCredentialExpiryProcessHandler();
 }

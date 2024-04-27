@@ -37,7 +37,7 @@ public class WalletServiceTests
             ClientId = "CatenaX",
             ClientSecret = "pass@Secret",
             TokenAddress = "https://example.org/token",
-            EncrptionConfigIndex = 0
+            EncryptionConfigIndex = 0
         });
         _sut = new WalletService(_basicAuthTokenService, _options);
     }
