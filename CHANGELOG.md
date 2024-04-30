@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.0-rc.3](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.1...v1.0.0-rc.3) (2024-04-30)
+
+
+### Features
+
+* **revocation:** add endpoints to revoke credentials ([#43](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/43)) ([dc9c70d](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/dc9c70da4c0bcba979c71b5c636526c13041c774))
+* **ssi:** adjust framework creation endpoint ([#70](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/70)) ([2d06fe6](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/2d06fe65365b644a209900a464c6823cb0db372e))
+
+
+### Bug Fixes
+
+* adjust bpn schema ([#84](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/84)) ([e32ec3a](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/e32ec3a47e94133294a8e7035f81e5d8fbe305e3))
+* **callback:** set the correct base address for the callback ([#83](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/83)) ([9f79c54](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/9f79c541873c951eb6335aba6b5b1adda0ee25e9)), closes [#71](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/71)
+* **ssi:** adjust schemas ([#72](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/72)) ([ba63179](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/ba63179300aa835bcb0f0d5c874c927ea48c89c9))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0-rc.3 ([1d3132c](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/1d3132c4ddb34db4f4c71613f6360906c4fb8664))
+
 ## [1.0.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.1...v1.0.0-rc.1) (2024-04-15)
 
 
