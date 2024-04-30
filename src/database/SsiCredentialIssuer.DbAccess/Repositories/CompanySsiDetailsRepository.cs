@@ -144,16 +144,16 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
                 (verifiedCredentialExternalTypeUseCaseDetailId == null || x.VerifiedCredentialExternalTypeDetailVersionId == verifiedCredentialExternalTypeUseCaseDetailId));
 
     /// <inheritdoc />
-    public Task<(bool Exists, string? Version, string? Template, IEnumerable<string> UseCase, DateTimeOffset Expiry)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId) =>
+    public Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId) =>
         _context.VerifiedCredentialExternalTypeDetailVersions
             .Where(x =>
                 x.Id == verifiedCredentialExternalTypeUseCaseDetailId &&
                 x.VerifiedCredentialExternalType!.VerifiedCredentialTypeAssignedExternalTypes.Any(y => y.VerifiedCredentialTypeId == verifiedCredentialTypeId))
-            .Select(x => new ValueTuple<bool, string?, string?, IEnumerable<string>, DateTimeOffset>(
+            .Select(x => new ValueTuple<bool, string?, string?, IEnumerable<VerifiedCredentialExternalTypeId>, DateTimeOffset>(
                 true,
                 x.Version,
                 x.Template,
-                x.VerifiedCredentialExternalType!.VerifiedCredentialTypeAssignedExternalTypes.Select(y => y.VerifiedCredentialType!.VerifiedCredentialTypeAssignedUseCase!.UseCase!.Shortname),
+                x.VerifiedCredentialExternalType!.VerifiedCredentialTypeAssignedExternalTypes.Select(y => y.VerifiedCredentialExternalTypeId),
                 x.Expiry))
             .SingleOrDefaultAsync();
 
@@ -177,6 +177,17 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
                 (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId));
 
     /// <inheritdoc />
+    public IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl) =>
+        _context.CompanySsiDetails.AsNoTracking()
+            .Where(c => c.Bpnl == bpnl)
+            .Select(c => new OwnedVerifiedCredentialData(
+                c.VerifiedCredentialTypeId,
+                c.CompanySsiDetailStatusId,
+                c.ExpiryDate,
+                c.IssuerBpn))
+            .ToAsyncEnumerable();
+
+    /// <inheritdoc />
     public Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId) =>
         _context.CompanySsiDetails
             .Where(x => x.Id == credentialId)
@@ -188,6 +199,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
                     x.ProcessId,
                     x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind == null ? null : x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId,
                     x.Bpnl,
+                    x.CompanySsiProcessData!.Schema,
                     x.VerifiedCredentialExternalTypeDetailVersion == null ?
                         null :
                         new DetailData(

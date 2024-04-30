@@ -21,6 +21,7 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
@@ -41,9 +42,10 @@ public class BasicAuthTokenService : IBasicAuthTokenService
             $"{typeof(T).Name}Auth",
             settings.ClientId,
             settings.ClientSecret,
-            settings.TokenAddress);
+            settings.TokenAddress,
+            "client_credentials");
 
-        var token = await this.GetBasicTokenAsync(tokenParameters, cancellationToken).ConfigureAwait(false);
+        var token = await GetBasicTokenAsync(tokenParameters, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         var httpClient = _httpClientFactory.CreateClient(typeof(T).Name);
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -54,19 +56,19 @@ public class BasicAuthTokenService : IBasicAuthTokenService
     {
         var formParameters = new Dictionary<string, string>
         {
-            { "grant_type", "client_credentials" }
+            { "grant_type", settings.GrantType }
         };
         using var content = new FormUrlEncodedContent(formParameters);
-        var authClient = _httpClientFactory.CreateClient(settings.HttpClientName);
+        using var authClient = _httpClientFactory.CreateClient(settings.HttpClientName);
         var authenticationString = $"{settings.ClientId}:{settings.ClientSecret}";
-        var base64String = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(authenticationString));
+        var base64String = Convert.ToBase64String(Encoding.ASCII.GetBytes(authenticationString));
 
         authClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64String);
 
         var response = await authClient.PostAsync(settings.TokenAddress, content, cancellationToken)
             .CatchingIntoServiceExceptionFor("token-post", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE).ConfigureAwait(false);
 
-        var responseObject = await response.Content.ReadFromJsonAsync<AuthResponse>(Options, cancellationToken).ConfigureAwait(false);
+        var responseObject = await response.Content.ReadFromJsonAsync<AuthResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         return responseObject?.AccessToken;
     }
 }

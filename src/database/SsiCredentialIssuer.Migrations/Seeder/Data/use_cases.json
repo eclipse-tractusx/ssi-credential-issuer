@@ -5,16 +5,6 @@
     "shortname": "T"
   },
   {
-    "id": "06b243a4-ba51-4bf3-bc40-5d79a2231b87",
-    "name": "Sustainability & CO2-Footprint",
-    "shortname": "CO2"
-  },
-  {
-    "id": "06b243a4-ba51-4bf3-bc40-5d79a2231b88",
-    "name": "Manufacturing as a Service",
-    "shortname": "MaaS"
-  },
-  {
     "id": "06b243a4-ba51-4bf3-bc40-5d79a2231b89",
     "name": "Real-Time Control",
     "shortname": "RTC"
@@ -30,18 +20,13 @@
     "shortname": "CE"
   },
   {
-    "id": "1aacde78-35ec-4df3-ba1e-f988cddcbbd9",
-    "name": "None",
-    "shortname": "None"
-  },
-  {
     "id": "41e4a4c0-aae4-41c0-97c9-ebafde410de4",
     "name": "Demand and Capacity Management",
     "shortname": "DCM"
   },
   {
     "id": "6909ccc7-37c8-4088-99ab-790f20702460",
-    "name": "Business Partner Management",
+    "name": "Business Partner Data Management",
     "shortname": "BPDM"
   },
   {
@@ -53,5 +38,10 @@
     "id": "b3948771-3372-4568-9e0e-acca4e674098",
     "name": "Behavior Twin",
     "shortname": "BT"
+  },
+  {
+    "id": "3793a2d9-6bc5-44f0-b952-7d3f6b747dd7",
+    "name": "Demand and Capacity Management",
+    "shortname": "Puris"
   }
 ]

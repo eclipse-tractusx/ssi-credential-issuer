@@ -26,8 +26,8 @@ public class ProcessStepStatus
 {
     private ProcessStepStatus()
     {
-        this.Label = null!;
-        this.ProcessSteps = new HashSet<ProcessStep>();
+        Label = null!;
+        ProcessSteps = new HashSet<ProcessStep>();
     }
 
     public ProcessStepStatus(ProcessStepStatusId processStepStatusId) : this()

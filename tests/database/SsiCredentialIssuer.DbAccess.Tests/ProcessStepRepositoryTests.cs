@@ -53,7 +53,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task CreateProcess_CreatesSuccessfully()
     {
         // Arrange
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
         var changeTracker = dbContext.ChangeTracker;
 
         // Act
@@ -84,7 +84,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         // Arrange
         var processId = Guid.NewGuid();
         var processStepTypeIds = _fixture.CreateMany<ProcessStepTypeId>(3).ToImmutableArray();
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
         var changeTracker = dbContext.ChangeTracker;
 
         // Act
@@ -116,7 +116,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     {
         // Arrange
         var processId = Guid.NewGuid();
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
         var changeTracker = dbContext.ChangeTracker;
 
         // Act
@@ -141,7 +141,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task AttachAndModifyProcessStep_WithExistingProcessStep_UpdatesStatus()
     {
         // Arrange
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
 
         // Act
         sut.AttachAndModifyProcessStep(new Guid("48f35f84-8d98-4fbd-ba80-8cbce5eeadb5"),
@@ -176,7 +176,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         // Arrange
         var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep InitialStep, ProcessStep ModifiedStep)>(5).ToImmutableArray();
 
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
 
         // Act
         sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<ProcessStep>?, Action<ProcessStep>>(
@@ -214,7 +214,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         // Arrange
         var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep InitialStep)>(5).ToImmutableArray();
 
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
 
         // Act
         sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<ProcessStep>?, Action<ProcessStep>>(
@@ -250,7 +250,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         // Arrange
         var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep InitialStep)>(5).ToImmutableArray();
 
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
 
         // Act
         sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<ProcessStep>?, Action<ProcessStep>>(
@@ -293,10 +293,10 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
             ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
         };
 
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetActiveProcesses(processTypeIds, processStepTypeIds, DateTimeOffset.Parse("2023-03-02 00:00:00.000000 +00:00")).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetActiveProcesses(processTypeIds, processStepTypeIds, DateTimeOffset.Parse("2023-03-02 00:00:00.000000 +00:00")).ToListAsync();
         result.Should().HaveCount(1)
             .And.Satisfy(
                 x => x.Id == new Guid("dd371565-9489-4907-a2e4-b8cbfe7a8cd2") && x.ProcessTypeId == ProcessTypeId.CREATE_CREDENTIAL && x.LockExpiryDate == DateTimeOffset.Parse("2023-03-01 00:00:00.000000 +00:00")
@@ -315,10 +315,10 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
             ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
         };
 
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetActiveProcesses(processTypeIds, processStepTypeIds, DateTimeOffset.Parse("2023-02-28 00:00:00.000000 +00:00")).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetActiveProcesses(processTypeIds, processStepTypeIds, DateTimeOffset.Parse("2023-02-28 00:00:00.000000 +00:00")).ToListAsync();
         result.Should().BeEmpty();
     }
 
@@ -331,10 +331,10 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     {
         // Arrange
         var processId = new Guid("dd371565-9489-4907-a2e4-b8cbfe7a8cd2");
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetProcessStepData(processId).ToListAsync().ConfigureAwait(false);
+        var result = await sut.GetProcessStepData(processId).ToListAsync();
         result.Should().HaveCount(1)
             .And.Satisfy(
                 x => x.ProcessStepId == new Guid("cd231cb8-55de-4ae4-b93f-d440512341fb") && x.ProcessStepTypeId == ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT
@@ -345,14 +345,14 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     private async Task<(ProcessStepRepository sut, IssuerDbContext dbContext)> CreateSutWithContext()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         var sut = new ProcessStepRepository(context);
         return (sut, context);
     }
 
     private async Task<ProcessStepRepository> CreateSut()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         var sut = new ProcessStepRepository(context);
         return sut;
     }

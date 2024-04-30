@@ -17,9 +17,11 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
+
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
 public interface IBasicAuthTokenService
 {
-    Task<HttpClient> GetBasicAuthorizedClient<T>(BasicAuthSettings settings, CancellationToken cancellationToken);
+    Task<HttpClient> GetBasicAuthorizedClient<T>(BasicAuthSettings settings, CancellationToken cancellationToken = default);
 }

@@ -26,6 +26,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Dependen
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Serilog;
 
 LoggingExtensions.EnsureInitialized();
@@ -42,14 +43,16 @@ try
                 .AddProcessExecutionService(hostContext.Configuration.GetSection("Processes"))
                 .AddPortalService(hostContext.Configuration.GetSection("Portal"))
                 .AddCallbackService(hostContext.Configuration.GetSection("Callback"))
-                .AddCredentialProcessExecutor(hostContext.Configuration);
+                .AddWalletService(hostContext.Configuration)
+                .AddCredentialCreationProcessExecutor()
+                .AddCredentialExpiryProcessExecutor();
         })
         .AddLogging()
         .Build();
     Log.Information("Building worker completed");
 
     using var tokenSource = new CancellationTokenSource();
-    Console.CancelKeyPress += (s, e) =>
+    Console.CancelKeyPress += (_, e) =>
     {
         Log.Information("Canceling...");
         tokenSource.Cancel();
@@ -58,7 +61,7 @@ try
 
     Log.Information("Start processing");
     var workerInstance = host.Services.GetRequiredService<ProcessExecutionService>();
-    await workerInstance.ExecuteAsync(tokenSource.Token).ConfigureAwait(false);
+    await workerInstance.ExecuteAsync(tokenSource.Token).ConfigureAwait(ConfigureAwaitOptions.None);
     Log.Information("Execution finished shutting down");
 }
 catch (Exception ex) when (!ex.GetType().Name.Equals("StopTheHostException", StringComparison.Ordinal))

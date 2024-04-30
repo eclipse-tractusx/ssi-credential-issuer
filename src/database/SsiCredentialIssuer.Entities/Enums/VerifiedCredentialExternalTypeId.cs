@@ -35,12 +35,21 @@ public enum VerifiedCredentialExternalTypeId
     [EnumMember(Value = "vehicleDismantle")]
     VEHICLE_DISMANTLE = 4,
 
-    [EnumMember(Value = "SustainabilityCredential")]
-    SUSTAINABILITY_CREDENTIAL = 5,
+    [EnumMember(Value = "CircularEconomyCredential")]
+    CIRCULAR_ECONOMY = 5,
 
     [EnumMember(Value = "QualityCredential")]
     QUALITY_CREDENTIAL = 6,
 
     [EnumMember(Value = "BusinessPartnerCredential")]
-    BUSINESS_PARTNER_NUMBER = 7
+    BUSINESS_PARTNER_NUMBER = 7,
+
+    [EnumMember(Value = "DemandCapacityCredential")]
+    DEMAND_AND_CAPACITY_MANAGEMENT = 8,
+
+    [EnumMember(Value = "DemandCapacityCredential")]
+    DEMAND_AND_CAPACITY_MANAGEMENT_PURIS = 9,
+
+    [EnumMember(Value = "BusinessPartnerCredential")]
+    BUSINESS_PARTNER_DATA_MANAGEMENT = 10
 }

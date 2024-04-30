@@ -21,10 +21,15 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 public enum ProcessStepTypeId
 {
-    // Issuer Process
+    // CREATE CREDENTIAL PROCESS
     CREATE_CREDENTIAL = 1,
     SIGN_CREDENTIAL = 2,
     SAVE_CREDENTIAL_DOCUMENT = 3,
     CREATE_CREDENTIAL_FOR_HOLDER = 4,
     TRIGGER_CALLBACK = 5,
+
+    // DECLINE PROCESS
+    REVOKE_CREDENTIAL = 100,
+    TRIGGER_NOTIFICATION = 101,
+    TRIGGER_MAIL = 102
 }

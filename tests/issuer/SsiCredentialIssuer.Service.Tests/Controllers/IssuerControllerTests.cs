@@ -49,7 +49,7 @@ public class IssuerControllerTests : IClassFixture<IntegrationTestFactory>
     public async Task GetCertificateTypes()
     {
         // Act
-        var types = await _client.GetFromJsonAsync<IEnumerable<VerifiedCredentialTypeId>>($"{BaseUrl}/certificateTypes", JsonOptions).ConfigureAwait(false);
+        var types = await _client.GetFromJsonAsync<IEnumerable<VerifiedCredentialTypeId>>($"{BaseUrl}/certificateTypes", JsonOptions);
 
         // Assert
         types.Should().NotBeNull().And.HaveCount(2).And.Satisfy(
@@ -66,7 +66,7 @@ public class IssuerControllerTests : IClassFixture<IntegrationTestFactory>
     public async Task CheckSwagger_ReturnsExpected()
     {
         // Act
-        var response = await _client.GetAsync($"{BaseUrl}/swagger/v1/swagger.json").ConfigureAwait(false);
+        var response = await _client.GetAsync($"{BaseUrl}/swagger/v1/swagger.json");
 
         // Assert
         response.Should().NotBeNull();

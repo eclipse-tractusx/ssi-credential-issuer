@@ -19,6 +19,7 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
 
@@ -35,8 +36,10 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<LoggingHandler<CallbackService>>();
 
+        var sp = services.BuildServiceProvider();
+        var settings = sp.GetRequiredService<IOptions<CallbackSettings>>();
         return services
             .AddScoped<ICallbackService, CallbackService>()
-            .AddCustomHttpClientWithAuthentication<CallbackService>(null);
+            .AddCustomHttpClientWithAuthentication<CallbackService>(settings.Value.BaseAddress);
     }
 }

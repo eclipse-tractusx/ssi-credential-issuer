@@ -5,6 +5,7 @@ using FluentAssertions;
 using Json.More;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
@@ -37,7 +38,7 @@ public class WalletServiceTests
             ClientId = "CatenaX",
             ClientSecret = "pass@Secret",
             TokenAddress = "https://example.org/token",
-            EncrptionConfigIndex = 0
+            EncryptionConfigIndex = 0
         });
         _sut = new WalletService(_basicAuthTokenService, _options);
     }
@@ -52,7 +53,7 @@ public class WalletServiceTests
         var id = Guid.NewGuid();
         var response = new CreateCredentialResponse(id);
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -60,7 +61,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.CreateCredential(payload, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.CreateCredential(payload, CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -83,14 +84,14 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.CreateCredential(payload, CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await _sut.CreateCredential(payload, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -110,7 +111,7 @@ public class WalletServiceTests
         const string jwt = "thisisonlyatestexample";
         var response = new SignCredentialResponse(jwt);
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -118,7 +119,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.SignCredential(credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.SignCredential(credentialId, CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -142,14 +143,14 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.SignCredential(credentialId, CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await _sut.SignCredential(credentialId, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -171,9 +172,9 @@ public class WalletServiceTests
                         "root": "123"
                    }
                    """;
-        var response = new GetCredentialResponse("test", JsonDocument.Parse(json), "test123");
+        var response = new GetCredentialResponse("test", JsonDocument.Parse(json), "test123", "VALID");
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -181,7 +182,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.GetCredential(credentialId, CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.GetCredential(credentialId, CancellationToken.None);
 
         // Assert
         result.RootElement.ToJsonString().Should().Be("{\"root\":\"123\"}");
@@ -199,14 +200,14 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.GetCredential(credentialId, CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await _sut.GetCredential(credentialId, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -225,7 +226,7 @@ public class WalletServiceTests
         var id = Guid.NewGuid();
         var response = new CreateCredentialResponse(id);
         var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
@@ -233,7 +234,7 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None).ConfigureAwait(false);
+        var result = await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -255,14 +256,68 @@ public class WalletServiceTests
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        var httpClient = new HttpClient(httpMessageHandlerMock)
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
         };
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(A<BasicAuthSettings>._, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None);
+
+        // Assert
+        var ex = await Assert.ThrowsAsync<ServiceException>(Act);
+        ex.Message.Should().Be(message);
+        ex.StatusCode.Should().Be(statusCode);
+    }
+
+    #endregion
+
+    #region RevokeCredentialForIssuer
+
+    [Fact]
+    public async Task RevokeCredentialForIssuer_WithValid_DoesNotThrowException()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var response = new CreateCredentialResponse(id);
+        var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
+        {
+            BaseAddress = new Uri("https://base.address.com")
+        };
+        A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(A<BasicAuthSettings>._, A<CancellationToken>._))
+            .Returns(httpClient);
+
+        // Act
+        await _sut.RevokeCredentialForIssuer(Guid.NewGuid(), CancellationToken.None);
+
+        // Assert
+        httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
+            x.Content is JsonContent &&
+            (x.Content as JsonContent)!.ObjectType == typeof(RevokeCredentialRequest) &&
+            ((x.Content as JsonContent)!.Value as RevokeCredentialRequest)!.Payload.Revoke);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.Conflict, "{ \"message\": \"Framework test!\" }", "call to external system revoke-credential failed with statuscode 409 - Message: { \"message\": \"Framework test!\" }")]
+    [InlineData(HttpStatusCode.BadRequest, "{ \"test\": \"123\" }", "call to external system revoke-credential failed with statuscode 400 - Message: { \"test\": \"123\" }")]
+    [InlineData(HttpStatusCode.BadRequest, "this is no json", "call to external system revoke-credential failed with statuscode 400 - Message: this is no json")]
+    [InlineData(HttpStatusCode.Forbidden, null, "call to external system revoke-credential failed with statuscode 403")]
+    public async Task RevokeCredentialForIssuer_WithConflict_ThrowsServiceExceptionWithErrorContent(HttpStatusCode statusCode, string? content, string message)
+    {
+        // Arrange
+        var httpMessageHandlerMock = content == null
+            ? new HttpMessageHandlerMock(statusCode)
+            : new HttpMessageHandlerMock(statusCode, new StringContent(content));
+        using var httpClient = new HttpClient(httpMessageHandlerMock)
+        {
+            BaseAddress = new Uri("https://base.address.com")
+        };
+        A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(A<BasicAuthSettings>._, A<CancellationToken>._)).Returns(httpClient);
+
+        // Act
+        async Task Act() => await _sut.RevokeCredentialForIssuer(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);

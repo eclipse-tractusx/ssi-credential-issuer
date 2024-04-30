@@ -17,14 +17,13 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.DependencyInjection;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
 
-public static class CredentialServiceCollectionExtensions
+public interface ICredentialExpiryProcessHandler
 {
-    public static IServiceCollection AddCredentialService(this IServiceCollection services, IConfigurationSection section) =>
-        services
-            .ConfigureCredentialSettings(section)
-            .AddTransient<IIssuerBusinessLogic, IssuerBusinessLogic>();
+    Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RevokeCredential(Guid credentialId, CancellationToken cancellationToken);
+    Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerNotification(Guid credentialId, CancellationToken cancellationToken);
+    Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerMail(Guid credentialId, CancellationToken cancellationToken);
 }
