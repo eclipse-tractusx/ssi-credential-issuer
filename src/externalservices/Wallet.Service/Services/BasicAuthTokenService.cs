@@ -42,9 +42,10 @@ public class BasicAuthTokenService : IBasicAuthTokenService
             $"{typeof(T).Name}Auth",
             settings.ClientId,
             settings.ClientSecret,
-            settings.TokenAddress);
+            settings.TokenAddress,
+            "client_credentials");
 
-        var token = await GetBasicTokenAsync(tokenParameters, cancellationToken).ConfigureAwait(false);
+        var token = await GetBasicTokenAsync(tokenParameters, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         var httpClient = _httpClientFactory.CreateClient(typeof(T).Name);
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -55,7 +56,7 @@ public class BasicAuthTokenService : IBasicAuthTokenService
     {
         var formParameters = new Dictionary<string, string>
         {
-            { "grant_type", "client_credentials" }
+            { "grant_type", settings.GrantType }
         };
         using var content = new FormUrlEncodedContent(formParameters);
         using var authClient = _httpClientFactory.CreateClient(settings.HttpClientName);
@@ -67,7 +68,7 @@ public class BasicAuthTokenService : IBasicAuthTokenService
         var response = await authClient.PostAsync(settings.TokenAddress, content, cancellationToken)
             .CatchingIntoServiceExceptionFor("token-post", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE).ConfigureAwait(false);
 
-        var responseObject = await response.Content.ReadFromJsonAsync<AuthResponse>(Options, cancellationToken).ConfigureAwait(false);
+        var responseObject = await response.Content.ReadFromJsonAsync<AuthResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         return responseObject?.AccessToken;
     }
 }

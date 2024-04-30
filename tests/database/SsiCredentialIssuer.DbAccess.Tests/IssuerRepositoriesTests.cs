@@ -53,7 +53,7 @@ public class IssuerRepositoriesTests : IAssemblyFixture<TestDbFixture>
     public async Task GetInstance_CompanySsiDetails_CreatesSuccessfully()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = sut.GetInstance<ICompanySsiDetailsRepository>();
@@ -66,7 +66,7 @@ public class IssuerRepositoriesTests : IAssemblyFixture<TestDbFixture>
     public async Task GetInstance_Credential_CreatesSuccessfully()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = sut.GetInstance<ICredentialRepository>();
@@ -79,7 +79,7 @@ public class IssuerRepositoriesTests : IAssemblyFixture<TestDbFixture>
     public async Task GetInstance_DocumentRepo_CreatesSuccessfully()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = sut.GetInstance<IDocumentRepository>();
@@ -92,7 +92,7 @@ public class IssuerRepositoriesTests : IAssemblyFixture<TestDbFixture>
     public async Task GetInstance_ProcessStep_CreatesSuccessfully()
     {
         // Arrange
-        var sut = await CreateSut().ConfigureAwait(false);
+        var sut = await CreateSut();
 
         // Act
         var result = sut.GetInstance<IProcessStepRepository>();
@@ -109,7 +109,7 @@ public class IssuerRepositoriesTests : IAssemblyFixture<TestDbFixture>
     public async Task Clear_CreateSuccessfully()
     {
         // Arrange
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
         var changeTracker = dbContext.ChangeTracker;
         dbContext.Processes.Add(new Process(Guid.NewGuid(), ProcessTypeId.CREATE_CREDENTIAL, Guid.NewGuid()));
 
@@ -129,7 +129,7 @@ public class IssuerRepositoriesTests : IAssemblyFixture<TestDbFixture>
     public async Task Attach_CreateSuccessfully()
     {
         // Arrange
-        var (sut, dbContext) = await CreateSutWithContext().ConfigureAwait(false);
+        var (sut, dbContext) = await CreateSutWithContext();
         var changeTracker = dbContext.ChangeTracker;
         var now = DateTimeOffset.Now;
 
@@ -153,14 +153,14 @@ public class IssuerRepositoriesTests : IAssemblyFixture<TestDbFixture>
 
     private async Task<(IssuerRepositories sut, IssuerDbContext dbContext)> CreateSutWithContext()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         var sut = new IssuerRepositories(context);
         return (sut, context);
     }
 
     private async Task<IssuerRepositories> CreateSut()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         var sut = new IssuerRepositories(context);
         return sut;
     }

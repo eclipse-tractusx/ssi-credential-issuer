@@ -47,7 +47,7 @@ public class CallbackService : ICallbackService
 
     public async Task TriggerCallback(string callbackUrl, IssuerResponseData responseData, CancellationToken cancellationToken)
     {
-        var client = await _tokenService.GetAuthorizedClient<CallbackService>(_settings, cancellationToken).ConfigureAwait(false);
+        var client = await _tokenService.GetAuthorizedClient<CallbackService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await client.PostAsJsonAsync($"{callbackUrl}", responseData, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("callback", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
             .ConfigureAwait(false);

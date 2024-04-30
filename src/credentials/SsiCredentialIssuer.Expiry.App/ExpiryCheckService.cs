@@ -88,7 +88,7 @@ public class ExpiryCheckService
                     .GetExpiryData(now, inactiveVcsToDelete, expiredVcsToDelete);
                 await foreach (var credential in credentials.WithCancellation(stoppingToken).ConfigureAwait(false))
                 {
-                    await ProcessCredentials(credential, companySsiDetailsRepository, repositories, portalService, processStepRepository, stoppingToken).ConfigureAwait(false);
+                    await ProcessCredentials(credential, companySsiDetailsRepository, repositories, portalService, processStepRepository, stoppingToken).ConfigureAwait(ConfigureAwaitOptions.None);
                 }
             }
             catch (Exception ex)
@@ -121,7 +121,7 @@ public class ExpiryCheckService
         }
 
         // Saving here to make sure the each credential is handled by there own 
-        await repositories.SaveAsync().ConfigureAwait(false);
+        await repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
     }
 
     private static void HandleDecline(
@@ -178,7 +178,7 @@ public class ExpiryCheckService
         if (Guid.TryParse(data.RequesterId, out var requesterId))
         {
             await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_EXPIRY,
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
             var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ??
                             throw new UnexpectedConditionException(
                                 $"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
@@ -188,7 +188,7 @@ public class ExpiryCheckService
                 new("expiryDate",
                     data.ExpiryDate?.ToString("dd MMMM yyyy") ?? throw new ConflictException("Expiry Date must be set here"))
             };
-            await portalService.TriggerMail("CredentialExpiry", requesterId, mailParameters, cancellationToken).ConfigureAwait(false);
+            await portalService.TriggerMail("CredentialExpiry", requesterId, mailParameters, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         }
     }
 }
