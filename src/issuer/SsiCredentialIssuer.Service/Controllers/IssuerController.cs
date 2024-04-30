@@ -36,6 +36,7 @@ public static class IssuerController
 {
     private const string RequestSsiRole = "request_ssicredential";
     private const string DecisionSsiRole = "decision_ssicredential";
+    private const string ViewCredentialRequestRole = "view_credential_requests";
 
     public static RouteGroupBuilder MapIssuerApi(this RouteGroupBuilder group)
     {
@@ -93,6 +94,17 @@ public static class IssuerController
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<CredentialDetailData>), Constants.JsonContentType);
 
+        issuer.MapGet("owned-credentials", (IIssuerBusinessLogic logic) => logic.GetCredentialsForBpn())
+            .WithSwaggerDescription("Gets all outstanding, existing and inactive credentials for the company of the user",
+                "Example: GET: /api/issuer/owned-credentials")
+            .RequireAuthorization(r =>
+            {
+                r.RequireRole(ViewCredentialRequestRole);
+                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
+            })
+            .WithDefaultResponses()
+            .Produces(StatusCodes.Status200OK, typeof(IEnumerable<CredentialDetailData>), Constants.JsonContentType);
+
         issuer.MapPost("bpn", ([FromBody] CreateBpnCredentialRequest requestData, CancellationToken cancellationToken, IIssuerBusinessLogic logic) => logic.CreateBpnCredential(requestData, cancellationToken))
             .WithSwaggerDescription("Creates a bpn credential for the given data",
                 "POST: api/issuer/bpn",
@@ -131,7 +143,7 @@ public static class IssuerController
 
         issuer.MapPut("{credentialId}/approval", async ([FromRoute] Guid credentialId, CancellationToken cancellationToken, IIssuerBusinessLogic logic) =>
             {
-                await logic.ApproveCredential(credentialId, cancellationToken).ConfigureAwait(false);
+                await logic.ApproveCredential(credentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
                 return Results.NoContent();
             })
             .WithSwaggerDescription("Approves the given credential and triggers the verified credential creation",
@@ -151,7 +163,7 @@ public static class IssuerController
 
         issuer.MapPut("{credentialId}/reject", async ([FromRoute] Guid credentialId, CancellationToken cancellationToken, IIssuerBusinessLogic logic) =>
             {
-                await logic.RejectCredential(credentialId, cancellationToken).ConfigureAwait(false);
+                await logic.RejectCredential(credentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
                 return Results.NoContent();
             })
             .WithSwaggerDescription("Rejects the given credential",

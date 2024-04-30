@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 using System.ComponentModel.DataAnnotations;
 
@@ -32,5 +33,5 @@ public class WalletSettings : BasicAuthSettings
     public IEnumerable<EncryptionModeConfig> EncryptionConfigs { get; set; } = null!;
 
     [Required]
-    public int EncrptionConfigIndex { get; set; }
+    public int EncryptionConfigIndex { get; set; }
 }

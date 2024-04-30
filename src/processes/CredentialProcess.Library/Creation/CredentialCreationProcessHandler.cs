@@ -26,15 +26,15 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 
-public class CredentialProcessHandler : ICredentialProcessHandler
+public class CredentialCreationProcessHandler : ICredentialCreationProcessHandler
 {
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly IWalletBusinessLogic _walletBusinessLogic;
     private readonly ICallbackService _callbackService;
 
-    public CredentialProcessHandler(IIssuerRepositories issuerRepositories, IWalletBusinessLogic walletBusinessLogic, ICallbackService callbackService)
+    public CredentialCreationProcessHandler(IIssuerRepositories issuerRepositories, IWalletBusinessLogic walletBusinessLogic, ICallbackService callbackService)
     {
         _issuerRepositories = issuerRepositories;
         _walletBusinessLogic = walletBusinessLogic;
@@ -43,9 +43,9 @@ public class CredentialProcessHandler : ICredentialProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CreateCredential(Guid credentialId, CancellationToken cancellationToken)
     {
-        var data = await _issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialStorageInformationById(credentialId).ConfigureAwait(false);
-        await _walletBusinessLogic.CreateCredential(credentialId, data.Schema, cancellationToken).ConfigureAwait(false);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        var data = await _issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialStorageInformationById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        await _walletBusinessLogic.CreateCredential(credentialId, data.Schema, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        return (
             Enumerable.Repeat(ProcessStepTypeId.SIGN_CREDENTIAL, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -54,14 +54,14 @@ public class CredentialProcessHandler : ICredentialProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> SignCredential(Guid credentialId, CancellationToken cancellationToken)
     {
-        var externalCredentialId = await _issuerRepositories.GetInstance<ICredentialRepository>().GetWalletCredentialId(credentialId).ConfigureAwait(false);
+        var externalCredentialId = await _issuerRepositories.GetInstance<ICredentialRepository>().GetWalletCredentialId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId is null)
         {
             throw new ConflictException("ExternalCredentialId must be set here");
         }
 
-        await _walletBusinessLogic.SignCredential(credentialId, externalCredentialId!.Value, cancellationToken).ConfigureAwait(false);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        await _walletBusinessLogic.SignCredential(credentialId, externalCredentialId!.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        return (
             Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -70,15 +70,15 @@ public class CredentialProcessHandler : ICredentialProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> SaveCredentialDocument(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (externalCredentialId, kindId, hasEncryptionInformation, callbackUrl) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(false);
+        var (externalCredentialId, kindId, hasEncryptionInformation, callbackUrl) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId == null)
         {
             throw new ConflictException("ExternalCredentialId must be set here");
         }
 
-        await _walletBusinessLogic.GetCredential(credentialId, externalCredentialId.Value, kindId, cancellationToken).ConfigureAwait(false);
+        await _walletBusinessLogic.GetCredential(credentialId, externalCredentialId.Value, kindId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var nextProcessStep = callbackUrl == null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        return (
             hasEncryptionInformation
                 ? Enumerable.Repeat(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, 1)
                 : nextProcessStep,
@@ -89,7 +89,7 @@ public class CredentialProcessHandler : ICredentialProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CreateCredentialForHolder(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (holderWalletData, credential, encryptionInformation, callbackUrl) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialData(credentialId).ConfigureAwait(false);
+        var (holderWalletData, credential, encryptionInformation, callbackUrl) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (credential is null)
         {
             throw new ConflictException("Credential must be set here");
@@ -105,8 +105,8 @@ public class CredentialProcessHandler : ICredentialProcessHandler
             throw new ConflictException("Wallet secret must be set");
         }
 
-        await _walletBusinessLogic.CreateCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credential, cancellationToken).ConfigureAwait(false);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        await _walletBusinessLogic.CreateCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credential, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        return (
             callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -115,15 +115,15 @@ public class CredentialProcessHandler : ICredentialProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerCallback(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (bpn, callbackUrl) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetCallbackUrl(credentialId).ConfigureAwait(false);
+        var (bpn, callbackUrl) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetCallbackUrl(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (callbackUrl is null)
         {
             throw new ConflictException("CallbackUrl must be set");
         }
 
         var issuerResponseData = new IssuerResponseData(bpn, IssuerResponseStatus.SUCCESSFUL, "Successfully created Credential");
-        await _callbackService.TriggerCallback(callbackUrl, issuerResponseData, cancellationToken).ConfigureAwait(false);
-        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+        await _callbackService.TriggerCallback(callbackUrl, issuerResponseData, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        return (
             null,
             ProcessStepStatusId.DONE,
             false,

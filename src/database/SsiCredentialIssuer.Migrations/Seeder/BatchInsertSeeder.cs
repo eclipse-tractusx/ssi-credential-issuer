@@ -62,35 +62,35 @@ public class BatchInsertSeeder : ICustomSeeder
 
         _logger.LogInformation("Start BaseEntityBatch Seeder");
         await SeedBaseEntity(cancellationToken);
-        await SeedTable<CompanySsiProcessData>("company_ssi_process_datas", x => x.CompanySsiDetailId, cancellationToken).ConfigureAwait(false);
-        await SeedTable<VerifiedCredentialTypeAssignedKind>("verified_credential_type_assigned_kinds", x => new { x.VerifiedCredentialTypeId, x.VerifiedCredentialTypeKindId }, cancellationToken).ConfigureAwait(false);
-        await SeedTable<VerifiedCredentialTypeAssignedUseCase>("verified_credential_type_assigned_use_cases", x => new { x.VerifiedCredentialTypeId, x.UseCaseId }, cancellationToken).ConfigureAwait(false);
-        await SeedTable<VerifiedCredentialTypeAssignedExternalType>("verified_credential_type_assigned_external_types", x => new { x.VerifiedCredentialTypeId, x.VerifiedCredentialExternalTypeId }, cancellationToken).ConfigureAwait(false);
+        await SeedTable<CompanySsiProcessData>("company_ssi_process_datas", x => x.CompanySsiDetailId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTable<VerifiedCredentialTypeAssignedKind>("verified_credential_type_assigned_kinds", x => new { x.VerifiedCredentialTypeId, x.VerifiedCredentialTypeKindId }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTable<VerifiedCredentialTypeAssignedUseCase>("verified_credential_type_assigned_use_cases", x => new { x.VerifiedCredentialTypeId, x.UseCaseId }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTable<VerifiedCredentialTypeAssignedExternalType>("verified_credential_type_assigned_external_types", x => new { x.VerifiedCredentialTypeId, x.VerifiedCredentialExternalTypeId }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         _logger.LogInformation("Finished BaseEntityBatch Seeder");
     }
 
     private async Task SeedBaseEntity(CancellationToken cancellationToken)
     {
-        await SeedTableForBaseEntity<Document>("documents", cancellationToken).ConfigureAwait(false);
-        await SeedTableForBaseEntity<UseCase>("use_cases", cancellationToken).ConfigureAwait(false);
-        await SeedTableForBaseEntity<ProcessStep>("process_steps", cancellationToken).ConfigureAwait(false);
-        await SeedTableForBaseEntity<Process>("processes", cancellationToken).ConfigureAwait(false);
-        await SeedTableForBaseEntity<VerifiedCredentialExternalTypeDetailVersion>("verified_credential_external_type_detail_versions", cancellationToken).ConfigureAwait(false);
-        await SeedTableForBaseEntity<CompanySsiDetail>("company_ssi_details", cancellationToken).ConfigureAwait(false);
+        await SeedTableForBaseEntity<Document>("documents", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTableForBaseEntity<UseCase>("use_cases", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTableForBaseEntity<ProcessStep>("process_steps", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTableForBaseEntity<Process>("processes", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTableForBaseEntity<VerifiedCredentialExternalTypeDetailVersion>("verified_credential_external_type_detail_versions", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTableForBaseEntity<CompanySsiDetail>("company_ssi_details", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
     }
 
     private async Task SeedTableForBaseEntity<T>(string fileName, CancellationToken cancellationToken) where T : class, IBaseEntity
     {
-        await SeedTable<T>(fileName, x => x.Id, cancellationToken).ConfigureAwait(false);
+        await SeedTable<T>(fileName, x => x.Id, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
     }
 
     private async Task SeedTable<T>(string fileName, Func<T, object> keySelector, CancellationToken cancellationToken) where T : class
     {
         _logger.LogInformation("Start seeding {Filename}", fileName);
         var additionalEnvironments = _settings.TestDataEnvironments ?? Enumerable.Empty<string>();
-        var data = await SeederHelper.GetSeedData<T>(_logger, fileName, _settings.DataPaths, cancellationToken, additionalEnvironments.ToArray()).ConfigureAwait(false);
+        var data = await SeederHelper.GetSeedData<T>(_logger, fileName, _settings.DataPaths, cancellationToken, additionalEnvironments.ToArray()).ConfigureAwait(ConfigureAwaitOptions.None);
         _logger.LogInformation("Found {ElementCount} data", data.Count);
         if (data.Any())
         {
@@ -101,7 +101,7 @@ public class BatchInsertSeeder : ICustomSeeder
                 .Where(t => t.x == null)
                 .Select(t => t.t.d).ToList();
             _logger.LogInformation("Seeding {DataCount} {TableName}", data.Count, typeName);
-            await _context.Set<T>().AddRangeAsync(data, cancellationToken).ConfigureAwait(false);
+            await _context.Set<T>().AddRangeAsync(data, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
             _logger.LogInformation("Seeded {TableName}", typeName);
         }
     }

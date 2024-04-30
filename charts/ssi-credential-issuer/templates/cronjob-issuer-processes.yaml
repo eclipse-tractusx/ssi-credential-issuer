@@ -123,7 +123,7 @@ spec:
               value: "{{ .Values.processesworker.wallet.scope }}"
             - name: "WALLET__USERNAME"
               value: "empty"
-            - name: "WALLET__ENCRYPTIONCONFIG__ENCRYPTIONCONFIGINDEX"
+            - name: "WALLET__ENCRYPTIONCONFIGINDEX"
               value: "{{ .Values.processesworker.wallet.encryptionConfigIndex }}"
             - name: "WALLET__ENCRYPTIONCONFIGS__0__INDEX"
               value: "{{ .Values.processesworker.wallet.encryptionConfigs.index0.index}}"

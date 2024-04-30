@@ -55,7 +55,7 @@ public class KeycloakClaimsTransformationTests
         var principal = new ClaimsPrincipal(identity);
 
         // Act
-        var result = await _sut.TransformAsync(principal).ConfigureAwait(false);
+        var result = await _sut.TransformAsync(principal);
 
         // Assert
         result.Claims.Should().ContainSingle()
@@ -71,7 +71,7 @@ public class KeycloakClaimsTransformationTests
         var principal = new ClaimsPrincipal(identity);
 
         // Act
-        var result = await _sut.TransformAsync(principal).ConfigureAwait(false);
+        var result = await _sut.TransformAsync(principal);
 
         // Assert
         result.Claims.Should().HaveCount(2).And.Satisfy(
@@ -88,7 +88,7 @@ public class KeycloakClaimsTransformationTests
         var principal = new ClaimsPrincipal(identity);
 
         // Act
-        var result = await _sut.TransformAsync(principal).ConfigureAwait(false);
+        var result = await _sut.TransformAsync(principal);
 
         // Assert
         result.Claims.Should().ContainSingle()

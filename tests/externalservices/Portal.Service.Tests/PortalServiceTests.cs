@@ -30,7 +30,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Xunit;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Tests;
@@ -81,7 +80,7 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        await sut.AddNotification("Test", requester, NotificationTypeId.CREDENTIAL_APPROVAL, CancellationToken.None).ConfigureAwait(false);
+        await sut.AddNotification("Test", requester, NotificationTypeId.CREDENTIAL_APPROVAL, CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -111,7 +110,7 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        async Task Act() => await sut.AddNotification("Test", requester, NotificationTypeId.CREDENTIAL_APPROVAL, CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await sut.AddNotification("Test", requester, NotificationTypeId.CREDENTIAL_APPROVAL, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
@@ -137,7 +136,7 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        await sut.TriggerMail("Test", requesterId, new Dictionary<string, string>(), CancellationToken.None).ConfigureAwait(false);
+        await sut.TriggerMail("Test", requesterId, Enumerable.Empty<MailParameter>(), CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
@@ -166,7 +165,7 @@ public class PortalServiceTests
         var sut = new PortalService(_tokenService, _options);
 
         // Act
-        async Task Act() => await sut.TriggerMail("Test", requesterId, new Dictionary<string, string>(), CancellationToken.None).ConfigureAwait(false);
+        async Task Act() => await sut.TriggerMail("Test", requesterId, Enumerable.Empty<MailParameter>(), CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);

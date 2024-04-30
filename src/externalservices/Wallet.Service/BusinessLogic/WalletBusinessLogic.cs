@@ -48,25 +48,25 @@ public class WalletBusinessLogic : IWalletBusinessLogic
 
     public async Task CreateCredential(Guid companySsiDetailId, JsonDocument schema, CancellationToken cancellationToken)
     {
-        var credentialId = await _walletService.CreateCredential(schema, cancellationToken).ConfigureAwait(false);
+        var credentialId = await _walletService.CreateCredential(schema, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         _repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c => c.ExternalCredentialId = null, c => c.ExternalCredentialId = credentialId);
     }
 
     public async Task SignCredential(Guid companySsiDetailId, Guid credentialId, CancellationToken cancellationToken)
     {
-        var credential = await _walletService.SignCredential(credentialId, cancellationToken).ConfigureAwait(false);
+        var credential = await _walletService.SignCredential(credentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         _repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c => c.Credential = null, c => c.Credential = credential);
     }
 
     public async Task GetCredential(Guid credentialId, Guid externalCredentialId, VerifiedCredentialTypeKindId kindId, CancellationToken cancellationToken)
     {
-        var credential = await _walletService.GetCredential(externalCredentialId, cancellationToken).ConfigureAwait(false);
-        await ValidateSchema(kindId, credential, cancellationToken).ConfigureAwait(false);
+        var credential = await _walletService.GetCredential(externalCredentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await ValidateSchema(kindId, credential, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         using var stream = new MemoryStream();
         using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true });
         credential.WriteTo(writer);
-        await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+        await writer.FlushAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var documentContent = stream.ToArray();
         var hash = SHA512.HashData(documentContent);
         var documentRepository = _repositories.GetInstance<IDocumentRepository>();
@@ -83,7 +83,7 @@ public class WalletBusinessLogic : IWalletBusinessLogic
         }
 
         var path = Path.Combine(location, "Schemas", $"{kindId}Credential.schema.json");
-        var schemaJson = await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(false);
+        var schemaJson = await File.ReadAllTextAsync(path, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         var schema = JsonSchema.FromText(schemaJson);
         SchemaRegistry.Global.Register(schema);
@@ -101,7 +101,7 @@ public class WalletBusinessLogic : IWalletBusinessLogic
 
         await _walletService
             .CreateCredentialForHolder(holderWalletUrl, clientId, secret, credential, cancellationToken)
-            .ConfigureAwait(false);
+            .ConfigureAwait(ConfigureAwaitOptions.None);
 
         _repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyProcessData(companySsiDetailId,
             c =>

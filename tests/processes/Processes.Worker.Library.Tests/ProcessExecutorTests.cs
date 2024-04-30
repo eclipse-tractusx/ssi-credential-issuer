@@ -24,7 +24,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.Collections.Immutable;
-using System.Linq.Expressions;
 using ProcessTypeId = Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums.ProcessTypeId;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.Tests;
@@ -81,10 +80,10 @@ public class ProcessExecutorTests
     public async Task ExecuteProcess_WithInvalidProcessTypeId_Throws()
     {
         // Arrange
-        var Act = async () => await _sut.ExecuteProcess(Guid.NewGuid(), (ProcessTypeId)default, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var Act = async () => await _sut.ExecuteProcess(Guid.NewGuid(), (ProcessTypeId)default, CancellationToken.None).ToListAsync();
 
         // Act
-        var result = await Assert.ThrowsAsync<UnexpectedConditionException>(Act).ConfigureAwait(false);
+        var result = await Assert.ThrowsAsync<UnexpectedConditionException>(Act);
 
         // Assert
         result.Message.Should().Be($"processType {(ProcessTypeId)default} is not a registered executable processType.");
@@ -171,7 +170,7 @@ public class ProcessExecutorTests
             });
 
         // Act
-        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync();
 
         // Assert
         result.Should().HaveSameCount(executionResults).And.ContainInOrder(executionResults);
@@ -270,7 +269,7 @@ public class ProcessExecutorTests
             });
 
         // Act
-        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync();
 
         // Assert
         result.Should().HaveSameCount(executionResults).And.ContainInOrder(executionResults);
@@ -314,7 +313,7 @@ public class ProcessExecutorTests
             .Returns(new IProcessTypeExecutor.InitializationResult(false, null));
 
         // Act
-        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync();
 
         // Assert
         result.Should().HaveCount(1).And.Contain(IProcessExecutor.ProcessExecutionResult.Unmodified);
@@ -382,7 +381,7 @@ public class ProcessExecutorTests
             });
 
         // Act
-        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync();
 
         // Assert
         result.Should().HaveSameCount(executionResults).And.ContainInOrder(executionResults);
@@ -498,7 +497,7 @@ public class ProcessExecutorTests
             });
 
         // Act
-        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync();
 
         // Assert
         result.
@@ -606,7 +605,7 @@ public class ProcessExecutorTests
             });
 
         // Act
-        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync();
 
         result.Should().HaveSameCount(executionResults).And.ContainInOrder(executionResults);
 
@@ -695,7 +694,7 @@ public class ProcessExecutorTests
             });
 
         // Act
-        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync();
 
         // Assert
         result.Should().HaveSameCount(executionResults).And.ContainInOrder(executionResults);
@@ -785,7 +784,7 @@ public class ProcessExecutorTests
             });
 
         // Act
-        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync().ConfigureAwait(false);
+        var result = await _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ToListAsync();
 
         // Assert
         result.Should().HaveSameCount(executionResults).And.ContainInOrder(executionResults);
@@ -841,14 +840,14 @@ public class ProcessExecutorTests
 
         var Act = async () =>
         {
-            await foreach (var stepResult in _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None).ConfigureAwait(false))
+            await foreach (var stepResult in _sut.ExecuteProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, CancellationToken.None))
             {
                 stepResults.Add(stepResult);
             }
         };
 
         // Act
-        var result = await Assert.ThrowsAsync<SystemException>(Act).ConfigureAwait(false);
+        var result = await Assert.ThrowsAsync<SystemException>(Act);
 
         // Assert
         stepResults.Should().HaveSameCount(executionResults).And.ContainInOrder(executionResults);

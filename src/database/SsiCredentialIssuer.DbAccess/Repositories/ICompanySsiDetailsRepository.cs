@@ -70,7 +70,7 @@ public interface ICompanySsiDetailsRepository
     /// <param name="verifiedCredentialExternalTypeUseCaseDetailId">Id of vc external type use case detail id</param>
     /// <param name="verifiedCredentialTypeId">Id of the vc type</param>
     /// <returns>Returns a valueTuple with identifiers if the externalTypeUseCaseDetailId exists and the corresponding credentialTypeId</returns>
-    Task<(bool Exists, string? Version, string? Template, IEnumerable<string> UseCase, DateTimeOffset Expiry)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId);
+    Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId);
 
     /// <summary>
     /// Checks whether the given credentialTypeId is a <see cref="VerifiedCredentialTypeKindId"/> Certificate
@@ -86,6 +86,12 @@ public interface ICompanySsiDetailsRepository
     /// <param name="credentialTypeId">OPTIONAL: The type of the credential that should be returned</param>
     /// <returns>Returns data to create the pagination</returns>
     IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId);
+
+    /// <summary>
+    /// Gets all credentials for a specific bpn
+    /// </summary>
+    /// <param name="bpnl">The bpn to filter the credentials for</param>
+    IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl);
 
     Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId);
     Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId);

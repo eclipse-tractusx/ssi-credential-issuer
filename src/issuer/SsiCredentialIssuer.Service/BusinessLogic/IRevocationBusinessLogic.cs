@@ -17,20 +17,9 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using System.ComponentModel.DataAnnotations;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
-
-public class BasicAuthSettings
+public interface IRevocationBusinessLogic
 {
-    [Required(AllowEmptyStrings = false)]
-    public string ClientId { get; set; } = null!;
-
-    [Required(AllowEmptyStrings = false)]
-    public string ClientSecret { get; set; } = null!;
-
-    [Required(AllowEmptyStrings = false)]
-    public string TokenAddress { get; set; } = null!;
+    Task RevokeCredential(Guid credentialId, bool revokeForIssuer, CancellationToken cancellationToken);
 }
-
-public record GetBasicTokenSettings(string HttpClientName, string ClientId, string ClientSecret, string TokenAddress);

@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
@@ -27,6 +28,7 @@ public record SsiApprovalData(
     Guid? ProcessId,
     VerifiedCredentialTypeKindId? Kind,
     string? Bpn,
+    JsonDocument? Schema,
     DetailData? DetailData
 );
 

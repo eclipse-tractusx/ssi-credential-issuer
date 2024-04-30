@@ -37,6 +37,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using ErrorParameter = Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.ErrorParameter;
@@ -103,7 +104,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                                         d.ExpiryDate,
                                         d.Documents))
                                     .SingleOrDefault(),
-                                (InvalidOperationException _) => throw ConflictException.Create(CredentialErrors.MULTIPLE_SSI_DETAIL))))
+                                (InvalidOperationException _) => throw ConflictException.Create(IssuerErrors.MULTIPLE_SSI_DETAIL))))
                     .ToList()))
             .ToListAsync()
             .ConfigureAwait(false);
@@ -127,7 +128,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                                         d.ExpiryDate,
                                         d.Documents))
                                     .SingleOrDefault(),
-                                (InvalidOperationException _) => throw ConflictException.Create(CredentialErrors.MULTIPLE_SSI_DETAIL))))
+                                (InvalidOperationException _) => throw ConflictException.Create(IssuerErrors.MULTIPLE_SSI_DETAIL))))
                     .ToList()))
             .ToListAsync()
             .ConfigureAwait(false);
@@ -173,6 +174,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             ));
     }
 
+    public IAsyncEnumerable<OwnedVerifiedCredentialData> GetCredentialsForBpn() =>
+        _repositories
+            .GetInstance<ICompanySsiDetailsRepository>()
+            .GetOwnCredentialDetails(_identity.Bpnl);
+
     /// <inheritdoc />
     public async Task ApproveCredential(Guid credentialId, CancellationToken cancellationToken)
     {
@@ -182,12 +188,13 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         }
 
         var companySsiRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var (exists, data) = await companySsiRepository.GetSsiApprovalData(credentialId).ConfigureAwait(false);
+        var (exists, data) = await companySsiRepository.GetSsiApprovalData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         ValidateApprovalData(credentialId, exists, data);
 
         var processId = CreateProcess();
 
         var expiry = GetExpiryDate(data.DetailData?.ExpiryDate);
+        UpdateIssuanceDate(credentialId, data, companySsiRepository);
         companySsiRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
                 c.CompanySsiDetailStatusId = data.Status;
@@ -201,17 +208,33 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 c.ExpiryDate = expiry;
                 c.ProcessId = processId;
             });
-        var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
-        var content = JsonSerializer.Serialize(new { data.Type, CredentialId = credentialId }, Options);
-        await _portalService.AddNotification(content, _identity.CompanyUserId.Value, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(false);
-        var mailParameters = new Dictionary<string, string>
+        var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(IssuerErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
+        var mailParameters = new MailParameter[]
         {
-            { "requestName", typeValue },
-            { "credentialType", typeValue },
-            { "expiryDate", expiry.ToString("o", CultureInfo.InvariantCulture) }
+            new("requestName", typeValue),
+            new("credentialType", typeValue),
+            new("expiryDate", expiry.ToString("o", CultureInfo.InvariantCulture))
         };
-        await _portalService.TriggerMail("CredentialApproval", _identity.CompanyUserId.Value, mailParameters, cancellationToken).ConfigureAwait(false);
-        await _repositories.SaveAsync().ConfigureAwait(false);
+        await _portalService.TriggerMail("CredentialApproval", _identity.CompanyUserId.Value, mailParameters, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        var content = JsonSerializer.Serialize(new { data.Type, CredentialId = credentialId }, Options);
+        await _portalService.AddNotification(content, _identity.CompanyUserId.Value, NotificationTypeId.CREDENTIAL_APPROVAL, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await _repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
+    }
+
+    private void UpdateIssuanceDate(Guid credentialId, SsiApprovalData data,
+        ICompanySsiDetailsRepository companySsiRepository)
+    {
+        var frameworkCredential = data.Schema!.Deserialize<FrameworkCredential>();
+        if (frameworkCredential == null)
+        {
+            throw UnexpectedConditionException.Create(IssuerErrors.SCHEMA_NOT_FRAMEWORK);
+        }
+
+        var newCredential = frameworkCredential with { IssuanceDate = _dateTimeProvider.OffsetNow };
+        companySsiRepository.AttachAndModifyProcessData(
+            credentialId,
+            c => c.Schema = JsonSerializer.SerializeToDocument(frameworkCredential, Options),
+            c => c.Schema = JsonSerializer.SerializeToDocument(newCredential, Options));
     }
 
     private Guid CreateProcess()
@@ -226,37 +249,52 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     {
         if (!exists)
         {
-            throw NotFoundException.Create(CredentialErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
+            throw NotFoundException.Create(IssuerErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
         }
 
         if (data.Status != CompanySsiDetailStatusId.PENDING)
         {
-            throw ConflictException.Create(CredentialErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
+            throw ConflictException.Create(IssuerErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
         }
 
         if (string.IsNullOrWhiteSpace(data.Bpn))
         {
-            throw UnexpectedConditionException.Create(CredentialErrors.BPN_NOT_SET);
+            throw UnexpectedConditionException.Create(IssuerErrors.BPN_NOT_SET);
         }
 
-        if (data.DetailData == null && data.Kind == VerifiedCredentialTypeKindId.FRAMEWORK)
-        {
-            throw ConflictException.Create(CredentialErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET);
-        }
+        ValidateFrameworkCredential(data);
 
-        if (data.Kind != VerifiedCredentialTypeKindId.FRAMEWORK && data.Kind != VerifiedCredentialTypeKindId.MEMBERSHIP && data.Kind != VerifiedCredentialTypeKindId.BPN)
+        if (Enum.GetValues<VerifiedCredentialTypeKindId>().All(x => x != data.Kind))
         {
-            throw ConflictException.Create(CredentialErrors.KIND_NOT_SUPPORTED, new ErrorParameter[] { new("kind", data.Kind != null ? data.Kind.Value.ToString() : "empty kind") });
-        }
-
-        if (data.Kind == VerifiedCredentialTypeKindId.FRAMEWORK && string.IsNullOrWhiteSpace(data.DetailData!.Version))
-        {
-            throw ConflictException.Create(CredentialErrors.EMPTY_VERSION);
+            throw ConflictException.Create(IssuerErrors.KIND_NOT_SUPPORTED, new ErrorParameter[] { new("kind", data.Kind != null ? data.Kind.Value.ToString() : "empty kind") });
         }
 
         if (data.ProcessId is not null)
         {
-            throw UnexpectedConditionException.Create(CredentialErrors.ALREADY_LINKED_PROCESS);
+            throw UnexpectedConditionException.Create(IssuerErrors.ALREADY_LINKED_PROCESS);
+        }
+
+        if (data.Schema is null)
+        {
+            throw UnexpectedConditionException.Create(IssuerErrors.SCHEMA_NOT_SET);
+        }
+    }
+
+    private static void ValidateFrameworkCredential(SsiApprovalData data)
+    {
+        if (data.Kind != VerifiedCredentialTypeKindId.FRAMEWORK)
+        {
+            return;
+        }
+
+        if (data.DetailData == null)
+        {
+            throw ConflictException.Create(IssuerErrors.EXTERNAL_TYPE_DETAIL_ID_NOT_SET);
+        }
+
+        if (string.IsNullOrWhiteSpace(data.DetailData!.Version))
+        {
+            throw ConflictException.Create(IssuerErrors.EMPTY_VERSION);
         }
     }
 
@@ -268,7 +306,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
         if (expiry < now)
         {
-            throw ConflictException.Create(CredentialErrors.EXPIRY_DATE_IN_PAST);
+            throw ConflictException.Create(IssuerErrors.EXPIRY_DATE_IN_PAST);
         }
 
         return expiry > future ? future : expiry;
@@ -283,28 +321,28 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         }
 
         var companySsiRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var (exists, status, type, processId, processStepIds) = await companySsiRepository.GetSsiRejectionData(credentialId).ConfigureAwait(false);
+        var (exists, status, type, processId, processStepIds) = await companySsiRepository.GetSsiRejectionData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!exists)
         {
-            throw NotFoundException.Create(CredentialErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
+            throw NotFoundException.Create(IssuerErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
         }
 
         if (status != CompanySsiDetailStatusId.PENDING)
         {
-            throw ConflictException.Create(CredentialErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
+            throw ConflictException.Create(IssuerErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
         }
 
-        var typeValue = type.GetEnumValue() ?? throw UnexpectedConditionException.Create(CredentialErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", type.ToString()) });
+        var typeValue = type.GetEnumValue() ?? throw UnexpectedConditionException.Create(IssuerErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", type.ToString()) });
         var content = JsonSerializer.Serialize(new { Type = type, CredentialId = credentialId }, Options);
-        await _portalService.AddNotification(content, _identity.CompanyUserId.Value, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(false);
+        await _portalService.AddNotification(content, _identity.CompanyUserId.Value, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
-        var mailParameters = new Dictionary<string, string>
+        var mailParameters = new MailParameter[]
         {
-            { "requestName", typeValue },
-            { "reason", "Declined by the Operator" }
+            new("requestName", typeValue),
+            new("reason", "Declined by the Operator")
         };
 
-        await _portalService.TriggerMail("CredentialRejected", _identity.CompanyUserId.Value, mailParameters, cancellationToken).ConfigureAwait(false);
+        await _portalService.TriggerMail("CredentialRejected", _identity.CompanyUserId.Value, mailParameters, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         companySsiRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
@@ -326,7 +364,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 )));
         }
 
-        await _repositories.SaveAsync().ConfigureAwait(false);
+        await _repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
     }
 
     /// <inheritdoc />
@@ -336,7 +374,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     public async Task<Guid> CreateBpnCredential(CreateBpnCredentialRequest requestData, CancellationToken cancellationToken)
     {
         var companyCredentialDetailsRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(false);
+        var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var schemaData = new BpnCredential(
             Guid.NewGuid(),
             Context,
@@ -363,7 +401,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     {
         var companyCredentialDetailsRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
 
-        var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(false);
+        var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var schemaData = new MembershipCredential(
             Guid.NewGuid(),
             Context,
@@ -389,40 +427,45 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     public async Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken)
     {
         var companyCredentialDetailsRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId).ConfigureAwait(false);
+        var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!result.Exists)
         {
-            throw ControllerArgumentException.Create(CredentialErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialExternalTypeDetailId", requestData.UseCaseFrameworkId.ToString()) });
+            throw ControllerArgumentException.Create(IssuerErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialExternalTypeDetailId", requestData.UseCaseFrameworkId.ToString()) });
         }
 
         if (result.Expiry < _dateTimeProvider.OffsetNow)
         {
-            throw ControllerArgumentException.Create(CredentialErrors.EXPIRY_DATE_IN_PAST);
+            throw ControllerArgumentException.Create(IssuerErrors.EXPIRY_DATE_IN_PAST);
         }
 
         if (string.IsNullOrWhiteSpace(result.Version))
         {
-            throw ControllerArgumentException.Create(CredentialErrors.EMPTY_VERSION);
+            throw ControllerArgumentException.Create(IssuerErrors.EMPTY_VERSION);
         }
 
         if (string.IsNullOrWhiteSpace(result.Template))
         {
-            throw ControllerArgumentException.Create(CredentialErrors.EMPTY_TEMPLATE);
+            throw ControllerArgumentException.Create(IssuerErrors.EMPTY_TEMPLATE);
         }
 
-        if (result.UseCase.Count() != 1)
+        if (result.ExternalTypeIds.Count() != 1)
         {
-            throw ControllerArgumentException.Create(CredentialErrors.MULTIPLE_USE_CASES);
+            throw ControllerArgumentException.Create(IssuerErrors.MULTIPLE_USE_CASES);
         }
 
-        var useCase = result.UseCase.Single();
-        var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(false);
+        var externalTypeId = result.ExternalTypeIds.Single().GetEnumValue();
+        if (externalTypeId is null)
+        {
+            throw ControllerArgumentException.Create(IssuerErrors.EMPTY_EXTERNAL_TYPE_ID);
+        }
+
+        var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var schemaData = new FrameworkCredential(
             Guid.NewGuid(),
             Context,
-            new[] { "VerifiableCredential", $"{useCase}Credential" },
-            $"{useCase}Credential",
-            $"Framework Credential for UseCase {useCase}",
+            new[] { "VerifiableCredential", $"{externalTypeId}Credential" },
+            $"{externalTypeId}Credential",
+            $"Framework Credential for UseCase {externalTypeId}",
             DateTimeOffset.UtcNow,
             result.Expiry,
             _settings.IssuerDid,
@@ -430,7 +473,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 holderDid,
                 requestData.HolderBpn,
                 "UseCaseFramework",
-                useCase,
+                externalTypeId,
                 result.Template!,
                 result.Version!
             ),
@@ -446,16 +489,16 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     {
         if (!Uri.TryCreate(didDocumentLocation, UriKind.Absolute, out var uri) || uri.Scheme != "https" || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment) || UrlPathInvalidCharsRegex.IsMatch(uri.AbsolutePath))
         {
-            throw ControllerArgumentException.Create(CredentialErrors.INVALID_DID_LOCATION, null, nameof(didDocumentLocation));
+            throw ControllerArgumentException.Create(IssuerErrors.INVALID_DID_LOCATION, null, nameof(didDocumentLocation));
         }
 
         var client = _clientFactory.CreateClient("didDocumentDownload");
         var result = await client.GetAsync(uri, cancellationToken)
             .CatchingIntoServiceExceptionFor("get-did-document").ConfigureAwait(false);
-        var did = await result.Content.ReadFromJsonAsync<DidDocument>(Options, cancellationToken).ConfigureAwait(false);
+        var did = await result.Content.ReadFromJsonAsync<DidDocument>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         if (did == null)
         {
-            throw ConflictException.Create(CredentialErrors.DID_NOT_SET);
+            throw ConflictException.Create(IssuerErrors.DID_NOT_SET);
         }
 
         return did.Id;
@@ -471,7 +514,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         string? callbackUrl,
         ICompanySsiDetailsRepository companyCredentialDetailsRepository)
     {
-        var documentContent = System.Text.Encoding.UTF8.GetBytes(schema);
+        var documentContent = Encoding.UTF8.GetBytes(schema);
         var hash = SHA512.HashData(documentContent);
         var documentRepository = _repositories.GetInstance<IDocumentRepository>();
         var docId = documentRepository.CreateDocument("schema.json", documentContent,
@@ -521,7 +564,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 c.CallbackUrl = callbackUrl;
             });
 
-        await _repositories.SaveAsync().ConfigureAwait(false);
+        await _repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
         return ssiDetailId;
     }
 }

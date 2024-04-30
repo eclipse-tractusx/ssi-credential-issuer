@@ -24,6 +24,7 @@ using Microsoft.EntityFrameworkCore;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.Text;
 using Xunit;
@@ -54,7 +55,7 @@ public class DocumentRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task CreateDocument_ReturnsExpectedDocument()
     {
         // Arrange
-        var (sut, context) = await CreateSut().ConfigureAwait(false);
+        var (sut, context) = await CreateSut();
         var test = "This is just test content";
         var content = Encoding.UTF8.GetBytes(test);
 
@@ -84,7 +85,7 @@ public class DocumentRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task AssignDocumentToCompanySsiDetails_ReturnsExpectedDocument()
     {
         // Arrange
-        var (sut, context) = await CreateSut().ConfigureAwait(false);
+        var (sut, context) = await CreateSut();
         var companySsiDetailId = Guid.NewGuid();
         var documentId = Guid.NewGuid();
 
@@ -103,11 +104,41 @@ public class DocumentRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     #endregion
 
+    #region AttachAndModifyDocuments
+
+    [Fact]
+    public async Task AttachAndModifyDocuments_ReturnsExpectedResult()
+    {
+        // Arrange
+        var (sut, context) = await CreateSut();
+
+        var documentData = new (Guid DocumentId, Action<Document>?, Action<Document>)[] {
+            (Guid.NewGuid(), null, document => document.DocumentStatusId = DocumentStatusId.INACTIVE),
+            (Guid.NewGuid(), document => document.DocumentStatusId = DocumentStatusId.INACTIVE, document => document.DocumentStatusId = DocumentStatusId.INACTIVE),
+            (Guid.NewGuid(), document => document.DocumentStatusId = DocumentStatusId.ACTIVE, document => document.DocumentStatusId = DocumentStatusId.INACTIVE),
+        };
+
+        // Act
+        sut.AttachAndModifyDocuments(documentData);
+
+        // Assert
+        var changeTracker = context.ChangeTracker;
+        var changedEntries = changeTracker.Entries().ToList();
+        changeTracker.HasChanges().Should().BeTrue();
+        changedEntries.Should().HaveCount(3).And.AllSatisfy(x => x.Entity.Should().BeOfType<Document>()).And.Satisfy(
+            x => x.State == EntityState.Modified && ((Document)x.Entity).Id == documentData[0].DocumentId && ((Document)x.Entity).DocumentStatusId == DocumentStatusId.INACTIVE,
+            x => x.State == EntityState.Unchanged && ((Document)x.Entity).Id == documentData[1].DocumentId && ((Document)x.Entity).DocumentStatusId == DocumentStatusId.INACTIVE,
+            x => x.State == EntityState.Modified && ((Document)x.Entity).Id == documentData[2].DocumentId && ((Document)x.Entity).DocumentStatusId == DocumentStatusId.INACTIVE
+        );
+    }
+
+    #endregion
+
     #region Setup    
 
     private async Task<(DocumentRepository, IssuerDbContext)> CreateSut()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         var sut = new DocumentRepository(context);
         return (sut, context);
     }
