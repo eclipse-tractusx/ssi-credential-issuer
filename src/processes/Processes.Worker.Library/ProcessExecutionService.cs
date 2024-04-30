@@ -90,7 +90,7 @@ public class ProcessExecutionService
                     {
                         if (hasChanged)
                         {
-                            await executorRepositories.SaveAsync().ConfigureAwait(false);
+                            await executorRepositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
                         }
 
                         executorRepositories.Clear();
@@ -98,7 +98,7 @@ public class ProcessExecutionService
 
                     if (process.ReleaseLock())
                     {
-                        await executorRepositories.SaveAsync().ConfigureAwait(false);
+                        await executorRepositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
                         executorRepositories.Clear();
                     }
 

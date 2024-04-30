@@ -20,6 +20,7 @@
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 using System.Net.Http.Json;
@@ -47,9 +48,9 @@ public class WalletService : IWalletService
         var data = new CreateCredentialRequest("catena-x-portal", new CredentialPayload(payload));
         var result = await client.PostAsJsonAsync("api/v2.0.0/credentials", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("create-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
-                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(false)))
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
-        var response = await result.Content.ReadFromJsonAsync<CreateCredentialResponse>(Options, cancellationToken).ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<CreateCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         if (response == null)
         {
             throw new ConflictException(NoIdErrorMessage);
@@ -64,9 +65,9 @@ public class WalletService : IWalletService
         var data = new SignCredentialRequest(new SignPayload(new SignUpdate("external", "jwt")));
         var result = await client.PatchAsJsonAsync($"/api/v2.0.0/credentials/{credentialId}", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("sign-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
-                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(false)))
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
-        var response = await result.Content.ReadFromJsonAsync<SignCredentialResponse>(Options, cancellationToken).ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<SignCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         if (response is null)
         {
             throw new ServiceException(NoIdErrorMessage, true);
@@ -80,9 +81,9 @@ public class WalletService : IWalletService
         using var client = await _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
         var result = await client.GetAsync($"/api/v2.0.0/credentials/{externalCredentialId}", cancellationToken)
             .CatchingIntoServiceExceptionFor("get-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
-                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(false)))
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
-        var response = await result.Content.ReadFromJsonAsync<GetCredentialResponse>(Options, cancellationToken).ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<GetCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         if (response is null)
         {
             throw new ServiceException(NoIdErrorMessage, true);
@@ -103,9 +104,9 @@ public class WalletService : IWalletService
         var data = new DeriveCredentialData("catena-x-portal", new DeriveCredentialPayload(new DeriveCredential(credential)));
         var result = await client.PostAsJsonAsync("/api/v2.0.0/credentials", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("create-holder-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
-                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(false)))
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
-        var response = await result.Content.ReadFromJsonAsync<CreateCredentialResponse>(Options, cancellationToken).ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<CreateCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         if (response is null)
         {
             throw new ServiceException(NoIdErrorMessage, true);
@@ -120,7 +121,7 @@ public class WalletService : IWalletService
         var data = new RevokeCredentialRequest(new RevokePayload(true));
         await client.PatchAsJsonAsync($"/api/v2.0.0/credentials/{externalCredentialId}", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("revoke-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
-                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(false)))
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
     }
 }

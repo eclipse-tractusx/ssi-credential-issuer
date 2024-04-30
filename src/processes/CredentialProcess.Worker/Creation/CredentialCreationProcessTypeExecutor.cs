@@ -56,7 +56,7 @@ public class CredentialCreationProcessTypeExecutor : IProcessTypeExecutor
 
     public async ValueTask<IProcessTypeExecutor.InitializationResult> InitializeProcess(Guid processId, IEnumerable<ProcessStepTypeId> processStepTypeIds)
     {
-        var (exists, credentialId) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetDataForProcessId(processId).ConfigureAwait(false);
+        var (exists, credentialId) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetDataForProcessId(processId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!exists)
         {
             throw new NotFoundException($"process {processId} does not exist or is not associated with an credential");
@@ -83,15 +83,15 @@ public class CredentialCreationProcessTypeExecutor : IProcessTypeExecutor
             (nextStepTypeIds, stepStatusId, modified, processMessage) = processStepTypeId switch
             {
                 ProcessStepTypeId.CREATE_CREDENTIAL => await _credentialCreationProcessHandler.CreateCredential(_credentialId, cancellationToken)
-                    .ConfigureAwait(false),
+                    .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.SIGN_CREDENTIAL => await _credentialCreationProcessHandler.SignCredential(_credentialId, cancellationToken)
-                    .ConfigureAwait(false),
+                    .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => await _credentialCreationProcessHandler.SaveCredentialDocument(_credentialId, cancellationToken)
-                    .ConfigureAwait(false),
+                    .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await _credentialCreationProcessHandler.CreateCredentialForHolder(_credentialId, cancellationToken)
-                    .ConfigureAwait(false),
+                    .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.TRIGGER_CALLBACK => await _credentialCreationProcessHandler.TriggerCallback(_credentialId, cancellationToken)
-                    .ConfigureAwait(false),
+                    .ConfigureAwait(ConfigureAwaitOptions.None),
                 _ => (null, ProcessStepStatusId.TODO, false, null)
             };
         }

@@ -39,7 +39,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
 
     public async Task<JsonDocument> GetCredentialDocument(Guid credentialId)
     {
-        var (exists, isSameCompany, documents) = await _repositories.GetInstance<ICredentialRepository>().GetSignedCredentialForCredentialId(credentialId, _identityData.Bpnl).ConfigureAwait(false);
+        var (exists, isSameCompany, documents) = await _repositories.GetInstance<ICredentialRepository>().GetSignedCredentialForCredentialId(credentialId, _identityData.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!exists)
         {
             throw NotFoundException.Create(CredentialErrors.CREDENTIAL_NOT_FOUND, new[] { new ErrorParameter("credentialId", credentialId.ToString()) });
@@ -57,6 +57,6 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
 
         var (_, credentialContent) = documents.Single();
         using var stream = new MemoryStream(credentialContent);
-        return await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        return await JsonDocument.ParseAsync(stream).ConfigureAwait(ConfigureAwaitOptions.None);
     }
 }

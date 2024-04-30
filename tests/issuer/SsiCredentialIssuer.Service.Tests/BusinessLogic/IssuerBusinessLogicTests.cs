@@ -152,7 +152,7 @@ public class IssuerBusinessLogicTests
         Setup_GetCredentialsForBpn();
 
         // Act
-        var result = await _sut.GetCredentialsForBpn().ToListAsync().ConfigureAwait(false);
+        var result = await _sut.GetCredentialsForBpn().ToListAsync();
 
         // Assert
         result.Should().HaveCount(5);

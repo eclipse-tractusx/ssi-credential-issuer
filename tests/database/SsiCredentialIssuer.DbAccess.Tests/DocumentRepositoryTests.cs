@@ -55,7 +55,7 @@ public class DocumentRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task CreateDocument_ReturnsExpectedDocument()
     {
         // Arrange
-        var (sut, context) = await CreateSut().ConfigureAwait(false);
+        var (sut, context) = await CreateSut();
         var test = "This is just test content";
         var content = Encoding.UTF8.GetBytes(test);
 
@@ -85,7 +85,7 @@ public class DocumentRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task AssignDocumentToCompanySsiDetails_ReturnsExpectedDocument()
     {
         // Arrange
-        var (sut, context) = await CreateSut().ConfigureAwait(false);
+        var (sut, context) = await CreateSut();
         var companySsiDetailId = Guid.NewGuid();
         var documentId = Guid.NewGuid();
 
@@ -110,7 +110,7 @@ public class DocumentRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task AttachAndModifyDocuments_ReturnsExpectedResult()
     {
         // Arrange
-        var (sut, context) = await CreateSut().ConfigureAwait(false);
+        var (sut, context) = await CreateSut();
 
         var documentData = new (Guid DocumentId, Action<Document>?, Action<Document>)[] {
             (Guid.NewGuid(), null, document => document.DocumentStatusId = DocumentStatusId.INACTIVE),
@@ -138,7 +138,7 @@ public class DocumentRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     private async Task<(DocumentRepository, IssuerDbContext)> CreateSut()
     {
-        var context = await _dbTestDbFixture.GetDbContext().ConfigureAwait(false);
+        var context = await _dbTestDbFixture.GetDbContext();
         var sut = new DocumentRepository(context);
         return (sut, context);
     }

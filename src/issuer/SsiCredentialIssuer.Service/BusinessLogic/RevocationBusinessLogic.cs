@@ -45,7 +45,7 @@ public class RevocationBusinessLogic : IRevocationBusinessLogic
     {
         var credentialRepository = _repositories.GetInstance<ICredentialRepository>();
         var data = await credentialRepository.GetRevocationDataById(credentialId, _identityData.Bpnl)
-            .ConfigureAwait(false);
+            .ConfigureAwait(ConfigureAwaitOptions.None);
         if (!data.Exists)
         {
             throw NotFoundException.Create(RevocationDataErrors.CREDENTIAL_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
@@ -67,7 +67,7 @@ public class RevocationBusinessLogic : IRevocationBusinessLogic
         }
 
         // call walletService
-        await _walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(false);
+        await _walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         _repositories.GetInstance<IDocumentRepository>().AttachAndModifyDocuments(
             data.Documents.Select(d => new ValueTuple<Guid, Action<Document>?, Action<Document>>(
                 d.DocumentId,

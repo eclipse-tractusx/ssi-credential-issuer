@@ -69,9 +69,9 @@ public class BatchUpdateSeeder : ICustomSeeder
                 dbEntry.Template = entry.Template;
                 dbEntry.Expiry = entry.Expiry;
                 dbEntry.ValidFrom = entry.ValidFrom;
-            }, cancellationToken).ConfigureAwait(false);
+            }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         _logger.LogInformation("Finished BaseEntityBatch Seeder");
     }
 
@@ -79,7 +79,7 @@ public class BatchUpdateSeeder : ICustomSeeder
     {
         _logger.LogInformation("Start seeding {Filename}", fileName);
         var additionalEnvironments = _settings.TestDataEnvironments ?? Enumerable.Empty<string>();
-        var data = await SeederHelper.GetSeedData<T>(_logger, fileName, _settings.DataPaths, cancellationToken, additionalEnvironments.ToArray()).ConfigureAwait(false);
+        var data = await SeederHelper.GetSeedData<T>(_logger, fileName, _settings.DataPaths, cancellationToken, additionalEnvironments.ToArray()).ConfigureAwait(ConfigureAwaitOptions.None);
         _logger.LogInformation("Found {ElementCount} data", data.Count);
         if (data.Any())
         {

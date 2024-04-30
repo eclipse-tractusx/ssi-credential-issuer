@@ -143,7 +143,7 @@ public static class IssuerController
 
         issuer.MapPut("{credentialId}/approval", async ([FromRoute] Guid credentialId, CancellationToken cancellationToken, IIssuerBusinessLogic logic) =>
             {
-                await logic.ApproveCredential(credentialId, cancellationToken).ConfigureAwait(false);
+                await logic.ApproveCredential(credentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
                 return Results.NoContent();
             })
             .WithSwaggerDescription("Approves the given credential and triggers the verified credential creation",
@@ -163,7 +163,7 @@ public static class IssuerController
 
         issuer.MapPut("{credentialId}/reject", async ([FromRoute] Guid credentialId, CancellationToken cancellationToken, IIssuerBusinessLogic logic) =>
             {
-                await logic.RejectCredential(credentialId, cancellationToken).ConfigureAwait(false);
+                await logic.RejectCredential(credentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
                 return Results.NoContent();
             })
             .WithSwaggerDescription("Rejects the given credential",

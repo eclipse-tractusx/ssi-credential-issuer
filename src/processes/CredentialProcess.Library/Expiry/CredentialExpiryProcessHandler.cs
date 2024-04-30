@@ -48,7 +48,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
     {
         var credentialRepository = _repositories.GetInstance<ICredentialRepository>();
         var data = await credentialRepository.GetRevocationDataById(credentialId, string.Empty)
-            .ConfigureAwait(false);
+            .ConfigureAwait(ConfigureAwaitOptions.None);
         if (!data.Exists)
         {
             throw new NotFoundException($"Credential {credentialId} does not exist");
@@ -60,7 +60,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
         }
 
         // call walletService
-        await _walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(false);
+        await _walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         _repositories.GetInstance<IDocumentRepository>().AttachAndModifyDocuments(
             data.Documents.Select(d => new ValueTuple<Guid, Action<Document>?, Action<Document>>(
@@ -82,7 +82,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerNotification(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (typeId, requesterId) = await _repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(false);
+        var (typeId, requesterId) = await _repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (Guid.TryParse(requesterId, out var companyUserId))
         {
             var content = JsonSerializer.Serialize(new { Type = typeId, CredentialId = credentialId }, Options);
@@ -98,7 +98,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerMail(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (typeId, requesterId) = await _repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(false);
+        var (typeId, requesterId) = await _repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
 
         var typeValue = typeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {typeId} does not exists");
         if (Guid.TryParse(requesterId, out var companyUserId))
