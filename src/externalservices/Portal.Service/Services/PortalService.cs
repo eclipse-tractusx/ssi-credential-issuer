@@ -24,34 +24,34 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjectio
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 
-public class PortalService : IPortalService
+public class PortalService(ITokenService tokenService, IOptions<PortalSettings> options)
+    : IPortalService
 {
-    private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-
-    private readonly ITokenService _tokenService;
-    private readonly PortalSettings _settings;
-
-    public PortalService(ITokenService tokenService, IOptions<PortalSettings> options)
+    private static readonly JsonSerializerOptions Options = new()
     {
-        _tokenService = tokenService;
-        _settings = options.Value;
-    }
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter(allowIntegerValues: false) }
+    };
+
+    private readonly PortalSettings _settings = options.Value;
 
     public async Task AddNotification(string content, Guid requester, NotificationTypeId notificationTypeId, CancellationToken cancellationToken)
     {
-        using var client = await _tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        using var client = await tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var data = new NotificationRequest(requester, content, notificationTypeId);
         await client.PostAsJsonAsync("api/notification/ssi-credentials", data, Options, cancellationToken)
-            .CatchingIntoServiceExceptionFor("notification", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
+            .CatchingIntoServiceExceptionFor("notification", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION,
+        async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
     }
 
     public async Task TriggerMail(string template, Guid requester, IEnumerable<MailParameter> mailParameters, CancellationToken cancellationToken)
     {
-        using var client = await _tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        using var client = await tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var data = new MailData(requester, template, mailParameters);
         await client.PostAsJsonAsync("api/administration/mail/ssi-credentials", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("mail", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
