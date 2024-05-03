@@ -44,7 +44,7 @@ public class PortalService : IPortalService
     {
         using var client = await _tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var data = new NotificationRequest(requester, content, notificationTypeId);
-        await client.PostAsJsonAsync("api/notifications/ssi-credentials", data, Options, cancellationToken)
+        await client.PostAsJsonAsync("api/notification/ssi-credentials", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("notification", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
             .ConfigureAwait(false);
     }
