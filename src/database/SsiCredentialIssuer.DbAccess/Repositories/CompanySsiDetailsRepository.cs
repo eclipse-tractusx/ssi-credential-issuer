@@ -199,6 +199,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
                     x.ProcessId,
                     x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind == null ? null : x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId,
                     x.Bpnl,
+                    x.CreatorUserId,
                     x.CompanySsiProcessData!.Schema,
                     x.VerifiedCredentialExternalTypeDetailVersion == null ?
                         null :
@@ -213,13 +214,14 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
             .SingleOrDefaultAsync();
 
     /// <inheritdoc />
-    public Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId) =>
+    public Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, string UserId, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId) =>
         _context.CompanySsiDetails
             .Where(x => x.Id == credentialId)
-            .Select(x => new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, Guid?, IEnumerable<Guid>>(
+            .Select(x => new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, string, Guid?, IEnumerable<Guid>>(
                 true,
                 x.CompanySsiDetailStatusId,
                 x.VerifiedCredentialTypeId,
+                x.CreatorUserId,
                 x.ProcessId,
                 x.Process!.ProcessSteps.Where(ps => ps.ProcessStepStatusId == ProcessStepStatusId.TODO).Select(p => p.Id)
             ))
