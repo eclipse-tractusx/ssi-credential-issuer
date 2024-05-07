@@ -463,8 +463,8 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var schemaData = new FrameworkCredential(
             Guid.NewGuid(),
             Context,
-            new[] { "VerifiableCredential", $"{externalTypeId}Credential" },
-            $"{externalTypeId}Credential",
+            new[] { "VerifiableCredential", externalTypeId },
+            externalTypeId,
             $"Framework Credential for UseCase {externalTypeId}",
             DateTimeOffset.UtcNow,
             result.Expiry,
