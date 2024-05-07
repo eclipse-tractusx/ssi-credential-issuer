@@ -38,6 +38,9 @@ public enum VerifiedCredentialTypeId
     [EnumMember(Value = "Circular Economy")]
     CIRCULAR_ECONOMY = 5,
 
+    [EnumMember(Value = "frameworkAgreement.quality")]
+    FRAMEWORK_AGREEMENT_QUALITY = 6,
+
     [EnumMember(Value = "BusinessPartnerCredential")]
     BUSINESS_PARTNER_NUMBER = 7,
 

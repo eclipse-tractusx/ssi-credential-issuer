@@ -584,7 +584,7 @@ public class IssuerBusinessLogicTests
         var result = await _sut.GetCertificateTypes().ToListAsync();
 
         // Assert
-        result.Should().HaveCount(9);
+        result.Should().HaveCount(10);
     }
 
     #endregion
