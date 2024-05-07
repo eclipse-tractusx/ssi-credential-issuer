@@ -38,6 +38,9 @@ public enum VerifiedCredentialExternalTypeId
     [EnumMember(Value = "CircularEconomyCredential")]
     CIRCULAR_ECONOMY = 5,
 
+    [EnumMember(Value = "QualityCredential")]
+    QUALITY_CREDENTIAL = 6,
+
     [EnumMember(Value = "BusinessPartnerCredential")]
     BUSINESS_PARTNER_NUMBER = 7,
 
