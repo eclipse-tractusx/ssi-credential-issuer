@@ -96,16 +96,12 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                     .Select(y =>
                         new CompanySsiExternalTypeDetailData(
                             y.ExternalDetailData,
-                            y.SsiDetailData.CatchingInto(
-                                data => data
+                            y.SsiDetailData
                                     .Select(d => new CompanySsiDetailData(
                                         d.CredentialId,
                                         d.ParticipationStatus,
                                         d.ExpiryDate,
-                                        d.Documents))
-                                    .SingleOrDefault(),
-                                (InvalidOperationException _) => throw ConflictException.Create(IssuerErrors.MULTIPLE_SSI_DETAIL))))
-                    .ToList()))
+                                        d.Documents))))))
             .ToListAsync()
             .ConfigureAwait(false);
 
@@ -120,16 +116,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                     .Select(y =>
                         new CompanySsiExternalTypeDetailData(
                             y.ExternalDetailData,
-                            y.SsiDetailData.CatchingInto(
-                                data => data
-                                    .Select(d => new CompanySsiDetailData(
+                            y.SsiDetailData.Select(d => new CompanySsiDetailData(
                                         d.CredentialId,
                                         d.ParticipationStatus,
                                         d.ExpiryDate,
-                                        d.Documents))
-                                    .SingleOrDefault(),
-                                (InvalidOperationException _) => throw ConflictException.Create(IssuerErrors.MULTIPLE_SSI_DETAIL))))
-                    .ToList()))
+                                        d.Documents))))))
             .ToListAsync()
             .ConfigureAwait(false);
 
@@ -426,8 +417,13 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
     public async Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken)
     {
+        if (_identity.IsServiceAccount || _identity.CompanyUserId == null)
+        {
+            throw UnexpectedConditionException.Create(CredentialErrors.USER_MUST_NOT_BE_TECHNICAL_USER, new ErrorParameter[] { new("identityId", _identity.IdentityId) });
+        }
+
         var companyCredentialDetailsRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId, _identity.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!result.Exists)
         {
             throw ControllerArgumentException.Create(IssuerErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialExternalTypeDetailId", requestData.UseCaseFrameworkId.ToString()) });
@@ -451,6 +447,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         if (result.ExternalTypeIds.Count() != 1)
         {
             throw ControllerArgumentException.Create(IssuerErrors.MULTIPLE_USE_CASES);
+        }
+
+        if (result.PendingCredentialRequestExists)
+        {
+            throw ConflictException.Create(IssuerErrors.PENDING_CREDENTIAL_ALREADY_EXISTS, new ErrorParameter[] { new("versionId", requestData.UseCaseFrameworkVersionId.ToString()), new("frameworkId", requestData.UseCaseFrameworkId.ToString()) });
         }
 
         var externalTypeId = result.ExternalTypeIds.Single().GetEnumValue();

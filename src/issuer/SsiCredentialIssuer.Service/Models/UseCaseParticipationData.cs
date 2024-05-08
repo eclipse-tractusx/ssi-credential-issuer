@@ -39,7 +39,7 @@ public record CertificateParticipationData
 public record CompanySsiExternalTypeDetailData
 (
     ExternalTypeDetailData ExternalDetailData,
-    CompanySsiDetailData? SsiDetailData
+    IEnumerable<CompanySsiDetailData> SsiDetailData
 );
 
 public record CompanySsiDetailData

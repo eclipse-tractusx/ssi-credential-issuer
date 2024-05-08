@@ -137,6 +137,7 @@ public static class IssuerController
             {
                 r.RequireRole(RequestSsiRole);
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
+                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
             })
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(Guid), contentType: Constants.JsonContentType);
@@ -153,7 +154,6 @@ public static class IssuerController
             .RequireAuthorization(r =>
             {
                 r.RequireRole(DecisionSsiRole);
-                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
             })
             .WithDefaultResponses()

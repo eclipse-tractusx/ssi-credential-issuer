@@ -700,8 +700,8 @@ public class IssuerBusinessLogicTests
         // Arrange
         var useCaseId = Guid.NewGuid();
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns(default((bool, string?, string?, IEnumerable<VerifiedCredentialExternalTypeId>, DateTimeOffset)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns(default((bool, string?, string?, IEnumerable<VerifiedCredentialExternalTypeId>, DateTimeOffset, bool)));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -719,8 +719,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, null, null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(-5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, null, null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(-5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -738,8 +738,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, null, null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, null, null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -757,8 +757,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, "1.0.0", null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -776,8 +776,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, "1.0.0", "https://example.org/tempalte", new[] { VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL }, now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", "https://example.org/tempalte", new[] { VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL }, now.AddDays(5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -795,8 +795,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -804,6 +804,25 @@ public class IssuerBusinessLogicTests
 
         // Assert
         ex.Message.Should().Be(IssuerErrors.MULTIPLE_USE_CASES.ToString());
+    }
+
+    [Fact]
+    public async Task CreateFrameworkCredential_WithAlreadyPendingRequest_ThrowsConflictException()
+    {
+        // Arrange
+        var useCaseId = Guid.NewGuid();
+        var now = DateTimeOffset.Now;
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        var data = new CreateFrameworkCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Repeat(VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, 1), now.AddDays(5), true));
+        Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+
+        // Assert
+        ex.Message.Should().Be(IssuerErrors.PENDING_CREDENTIAL_ALREADY_EXISTS.ToString());
     }
 
     [Fact]
@@ -817,8 +836,8 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
         HttpRequestMessage? request = null;
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Repeat(VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, 1), now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Repeat(VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, 1), now.AddDays(5), false));
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,

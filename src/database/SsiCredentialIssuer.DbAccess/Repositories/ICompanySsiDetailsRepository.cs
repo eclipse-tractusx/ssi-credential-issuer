@@ -69,8 +69,9 @@ public interface ICompanySsiDetailsRepository
     /// </summary>
     /// <param name="verifiedCredentialExternalTypeUseCaseDetailId">Id of vc external type use case detail id</param>
     /// <param name="verifiedCredentialTypeId">Id of the vc type</param>
+    /// <param name="bpnl">The business partner number of the current user</param>
     /// <returns>Returns a valueTuple with identifiers if the externalTypeUseCaseDetailId exists and the corresponding credentialTypeId</returns>
-    Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId);
+    Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry, bool PendingCredentialRequestExists)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId, string bpnl);
 
     /// <summary>
     /// Checks whether the given credentialTypeId is a <see cref="VerifiedCredentialTypeKindId"/> Certificate
