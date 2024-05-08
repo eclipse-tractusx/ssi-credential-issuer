@@ -84,45 +84,16 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<UseCaseParticipationData>> GetUseCaseParticipationAsync() =>
-        await _repositories
+    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationAsync() =>
+        _repositories
             .GetInstance<ICompanySsiDetailsRepository>()
-            .GetUseCaseParticipationForCompany(_identity.Bpnl, _dateTimeProvider.OffsetNow)
-            .Select(x => new UseCaseParticipationData(
-                x.UseCase,
-                x.Description,
-                x.CredentialType,
-                x.VerifiedCredentials
-                    .Select(y =>
-                        new CompanySsiExternalTypeDetailData(
-                            y.ExternalDetailData,
-                            y.SsiDetailData
-                                    .Select(d => new CompanySsiDetailData(
-                                        d.CredentialId,
-                                        d.ParticipationStatus,
-                                        d.ExpiryDate,
-                                        d.Documents))))))
-            .ToListAsync()
-            .ConfigureAwait(false);
+            .GetUseCaseParticipationForCompany(_identity.Bpnl, _dateTimeProvider.OffsetNow);
 
     /// <inheritdoc />
-    public async Task<IEnumerable<CertificateParticipationData>> GetSsiCertificatesAsync() =>
-        await _repositories
+    public IAsyncEnumerable<CertificateParticipationData> GetSsiCertificatesAsync() =>
+        _repositories
             .GetInstance<ICompanySsiDetailsRepository>()
-            .GetSsiCertificates(_identity.Bpnl, _dateTimeProvider.OffsetNow)
-            .Select(x => new CertificateParticipationData(
-                x.CredentialType,
-                x.Credentials
-                    .Select(y =>
-                        new CompanySsiExternalTypeDetailData(
-                            y.ExternalDetailData,
-                            y.SsiDetailData.Select(d => new CompanySsiDetailData(
-                                        d.CredentialId,
-                                        d.ParticipationStatus,
-                                        d.ExpiryDate,
-                                        d.Documents))))))
-            .ToListAsync()
-            .ConfigureAwait(false);
+            .GetSsiCertificates(_identity.Bpnl, _dateTimeProvider.OffsetNow);
 
     /// <inheritdoc />
     public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailSorting? sorting)
