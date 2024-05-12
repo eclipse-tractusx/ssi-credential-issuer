@@ -95,7 +95,7 @@ public interface ICompanySsiDetailsRepository
     IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl);
 
     Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId);
-    Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId);
+    Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, string UserId, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId);
     void AttachAndModifyCompanySsiDetails(Guid id, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields);
     IAsyncEnumerable<VerifiedCredentialTypeId> GetCertificateTypes(string bpnl);
     IAsyncEnumerable<CredentialExpiryData> GetExpiryData(DateTimeOffset now, DateTimeOffset inactiveVcsToDelete, DateTimeOffset expiredVcsToDelete);

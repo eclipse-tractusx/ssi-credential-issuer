@@ -27,7 +27,8 @@ public record SsiApprovalData(
     VerifiedCredentialTypeId Type,
     Guid? ProcessId,
     VerifiedCredentialTypeKindId? Kind,
-    string? Bpn,
+    string Bpn,
+    string UserId,
     JsonDocument? Schema,
     DetailData? DetailData
 );
