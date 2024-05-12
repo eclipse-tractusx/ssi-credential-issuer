@@ -63,7 +63,7 @@ public static class IssuerController
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
             })
             .WithDefaultResponses()
-            .Produces(StatusCodes.Status200OK, typeof(IEnumerable<SsiCertificateTransferData>), Constants.JsonContentType);
+            .Produces(StatusCodes.Status200OK, typeof(IEnumerable<CertificateParticipationData>), Constants.JsonContentType);
 
         issuer.MapGet("certificateTypes", (IIssuerBusinessLogic logic) => logic.GetCertificateTypes())
             .WithSwaggerDescription("Gets the certificate types for which the company can apply for",

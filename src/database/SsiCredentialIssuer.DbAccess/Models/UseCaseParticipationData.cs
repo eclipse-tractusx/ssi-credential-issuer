@@ -21,21 +21,27 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
-public record UseCaseParticipationTransferData
+public record UseCaseParticipationData
 (
     string? UseCase,
     string? Description,
     VerifiedCredentialTypeId CredentialType,
-    IEnumerable<CompanySsiExternalTypeDetailTransferData> VerifiedCredentials
+    IEnumerable<CompanySsiExternalTypeDetailData> VerifiedCredentials
 );
 
-public record CompanySsiExternalTypeDetailTransferData
+public record CertificateParticipationData
+(
+    VerifiedCredentialTypeId CredentialType,
+    IEnumerable<CompanySsiExternalTypeDetailData> Credentials
+);
+
+public record CompanySsiExternalTypeDetailData
 (
     ExternalTypeDetailData ExternalDetailData,
-    IEnumerable<CompanySsiDetailTransferData> SsiDetailData
+    IEnumerable<CompanySsiDetailData> SsiDetailData
 );
 
-public record CompanySsiDetailTransferData
+public record CompanySsiDetailData
 (
     Guid CredentialId,
     CompanySsiDetailStatusId ParticipationStatus,

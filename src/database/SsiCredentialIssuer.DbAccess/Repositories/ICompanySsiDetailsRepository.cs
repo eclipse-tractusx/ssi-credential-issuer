@@ -32,7 +32,7 @@ public interface ICompanySsiDetailsRepository
     /// <param name="bpnl">Bpnl of the company</param>
     /// <param name="minExpiry">The minimum datetime the expiry date should have</param>
     /// <returns>AsyncEnumerable of UseCaseParticipation</returns>
-    IAsyncEnumerable<UseCaseParticipationTransferData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry);
+    IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry);
 
     /// <summary>
     /// Gets the company credential details for the given company id
@@ -40,7 +40,7 @@ public interface ICompanySsiDetailsRepository
     /// <param name="bpnl">Bpnl of the company</param>
     /// <param name="minExpiry">The minimum datetime the expiry date should have</param>
     /// <returns>AsyncEnumerable of SsiCertificateData</returns>
-    IAsyncEnumerable<SsiCertificateTransferData> GetSsiCertificates(string bpnl, DateTimeOffset minExpiry);
+    IAsyncEnumerable<CertificateParticipationData> GetSsiCertificates(string bpnl, DateTimeOffset minExpiry);
 
     /// <summary>
     /// Creates the credential details

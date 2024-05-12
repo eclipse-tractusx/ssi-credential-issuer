@@ -119,7 +119,7 @@ public class IssuerBusinessLogicTests
         Setup_GetUseCaseParticipationAsync();
 
         // Act
-        var result = await _sut.GetUseCaseParticipationAsync();
+        var result = await _sut.GetUseCaseParticipationAsync().ToListAsync();
 
         // Assert
         result.Should().HaveCount(5);
@@ -136,7 +136,7 @@ public class IssuerBusinessLogicTests
         Setup_GetSsiCertificatesAsync();
 
         // Act
-        var result = await _sut.GetSsiCertificatesAsync();
+        var result = await _sut.GetSsiCertificatesAsync().ToListAsync();
 
         // Assert
         result.Should().HaveCount(5);
@@ -941,17 +941,17 @@ public class IssuerBusinessLogicTests
 
     private void Setup_GetUseCaseParticipationAsync()
     {
-        var verifiedCredentials = _fixture.Build<CompanySsiExternalTypeDetailTransferData>()
-            .With(x => x.SsiDetailData, _fixture.CreateMany<CompanySsiDetailTransferData>(1))
+        var verifiedCredentials = _fixture.Build<CompanySsiExternalTypeDetailData>()
+            .With(x => x.SsiDetailData, _fixture.CreateMany<CompanySsiDetailData>(1))
             .CreateMany(5);
         A.CallTo(() => _companySsiDetailsRepository.GetUseCaseParticipationForCompany(Bpnl, A<DateTimeOffset>._))
-            .Returns(_fixture.Build<UseCaseParticipationTransferData>().With(x => x.VerifiedCredentials, verifiedCredentials).CreateMany(5).ToAsyncEnumerable());
+            .Returns(_fixture.Build<UseCaseParticipationData>().With(x => x.VerifiedCredentials, verifiedCredentials).CreateMany(5).ToAsyncEnumerable());
     }
 
     private void Setup_GetSsiCertificatesAsync()
     {
         A.CallTo(() => _companySsiDetailsRepository.GetSsiCertificates(Bpnl, A<DateTimeOffset>._))
-            .Returns(_fixture.Build<SsiCertificateTransferData>().With(x => x.Credentials, Enumerable.Repeat(new SsiCertificateExternalTypeDetailTransferData(_fixture.Create<ExternalTypeDetailData>(), _fixture.CreateMany<CompanySsiDetailTransferData>(1)), 1)).CreateMany(5).ToAsyncEnumerable());
+            .Returns(_fixture.Build<CertificateParticipationData>().With(x => x.Credentials, Enumerable.Repeat(new CompanySsiExternalTypeDetailData(_fixture.Create<ExternalTypeDetailData>(), _fixture.CreateMany<CompanySsiDetailData>(1)), 1)).CreateMany(5).ToAsyncEnumerable());
     }
 
     private void Setup_GetCredentialsForBpn()
