@@ -59,7 +59,10 @@ public class CredentialErrorMessageContainer : IErrorMessageContainer
         { CredentialErrors.SCHEMA_NOT_FRAMEWORK, "The schema must be a framework credential" },
         { CredentialErrors.CREDENTIAL_NOT_FOUND, "Credential {credentialId} does not exist" },
         { CredentialErrors.COMPANY_NOT_ALLOWED, "Not allowed to display the credential" },
-        { CredentialErrors.SIGNED_CREDENTIAL_NOT_FOUND, "There must be exactly one signed credential" }
+        { CredentialErrors.SIGNED_CREDENTIAL_NOT_FOUND, "There must be exactly one signed credential" },
+        { CredentialErrors.DOCUMENT_NOT_FOUND, "Document {documentId} does not exist" },
+        { CredentialErrors.DOCUMENT_INACTIVE, "Document {documentId} is inactive" },
+        { CredentialErrors.DOCUMENT_OTHER_COMPANY, "Not allowed to access document of another company" }
     }.ToImmutableDictionary(x => (int)x.Key, x => x.Value);
 
     public Type Type { get => typeof(CredentialErrors); }
@@ -100,5 +103,8 @@ public enum CredentialErrors
     SCHEMA_NOT_FRAMEWORK,
     CREDENTIAL_NOT_FOUND,
     COMPANY_NOT_ALLOWED,
-    SIGNED_CREDENTIAL_NOT_FOUND
+    SIGNED_CREDENTIAL_NOT_FOUND,
+    DOCUMENT_NOT_FOUND,
+    DOCUMENT_INACTIVE,
+    DOCUMENT_OTHER_COMPANY
 }

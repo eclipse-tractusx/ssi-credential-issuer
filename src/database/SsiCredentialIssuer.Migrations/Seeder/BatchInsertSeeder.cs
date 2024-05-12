@@ -63,6 +63,7 @@ public class BatchInsertSeeder : ICustomSeeder
         _logger.LogInformation("Start BaseEntityBatch Seeder");
         await SeedBaseEntity(cancellationToken);
         await SeedTable<CompanySsiProcessData>("company_ssi_process_datas", x => x.CompanySsiDetailId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTable<CompanySsiDetailAssignedDocument>("company_ssi_detail_assigned_documents", x => new { x.DocumentId, x.CompanySsiDetailId }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await SeedTable<VerifiedCredentialTypeAssignedKind>("verified_credential_type_assigned_kinds", x => new { x.VerifiedCredentialTypeId, x.VerifiedCredentialTypeKindId }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await SeedTable<VerifiedCredentialTypeAssignedUseCase>("verified_credential_type_assigned_use_cases", x => new { x.VerifiedCredentialTypeId, x.UseCaseId }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await SeedTable<VerifiedCredentialTypeAssignedExternalType>("verified_credential_type_assigned_external_types", x => new { x.VerifiedCredentialTypeId, x.VerifiedCredentialExternalTypeId }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);

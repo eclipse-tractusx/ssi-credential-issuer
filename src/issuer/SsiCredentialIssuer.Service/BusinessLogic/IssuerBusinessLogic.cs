@@ -96,11 +96,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             .GetSsiCertificates(_identity.Bpnl, _dateTimeProvider.OffsetNow);
 
     /// <inheritdoc />
-    public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailSorting? sorting)
+    public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType, CompanySsiDetailSorting? sorting)
     {
         var query = _repositories
             .GetInstance<ICompanySsiDetailsRepository>()
-            .GetAllCredentialDetails(companySsiDetailStatusId, credentialTypeId);
+            .GetAllCredentialDetails(companySsiDetailStatusId, credentialTypeId, approvalType);
         var sortedQuery = sorting switch
         {
             CompanySsiDetailSorting.BpnlAsc or null => query.OrderBy(c => c.Bpnl),

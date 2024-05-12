@@ -19,7 +19,9 @@
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using System.Text.Json;
@@ -58,5 +60,26 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
         var (_, credentialContent) = documents.Single();
         using var stream = new MemoryStream(credentialContent);
         return await JsonDocument.ParseAsync(stream).ConfigureAwait(ConfigureAwaitOptions.None);
+    }
+
+    public async Task<(string FileName, byte[] Content, string MediaType)> GetCredentialDocumentById(Guid documentId)
+    {
+        var (exists, isSameCompany, fileName, documentStatusId, content, mediaTypeId) = await _repositories.GetInstance<ICredentialRepository>().GetDocumentById(documentId, _identityData.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (!exists)
+        {
+            throw NotFoundException.Create(CredentialErrors.DOCUMENT_NOT_FOUND, new[] { new ErrorParameter("documentId", documentId.ToString()) });
+        }
+
+        if (!isSameCompany)
+        {
+            throw ForbiddenException.Create(CredentialErrors.DOCUMENT_OTHER_COMPANY);
+        }
+
+        if (documentStatusId == DocumentStatusId.INACTIVE)
+        {
+            throw ConflictException.Create(CredentialErrors.DOCUMENT_INACTIVE, new[] { new ErrorParameter("documentId", documentId.ToString()) });
+        }
+
+        return (fileName, content, mediaTypeId.MapToMediaType());
     }
 }
