@@ -308,8 +308,8 @@ public class CompanySsiDetailsRepositoryTests
     #region CheckUseCaseCredentialAndExternalTypeDetails
 
     [Theory]
-    [InlineData(VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, "1268a76a-ca19-4dd8-b932-01f24071d560", "2023-09-30 +0")]
-    [InlineData(VerifiedCredentialTypeId.PCF_FRAMEWORK, "1268a76a-ca19-4dd8-b932-01f24071d561", "2023-09-30 +0")]
+    [InlineData(VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, "1268a76a-ca19-4dd8-b932-01f24071d560", "2024-10-24 +0")]
+    [InlineData(VerifiedCredentialTypeId.PCF_FRAMEWORK, "1268a76a-ca19-4dd8-b932-01f24071d561", "2024-10-24 +0")]
 #pragma warning disable xUnit1012
     [InlineData(default, "1268a76a-ca19-6666-b932-01f24071d561", default)]
 #pragma warning restore xUnit1012
@@ -500,7 +500,7 @@ public class CompanySsiDetailsRepositoryTests
     public async Task GetExpiryData_ReturnsExpected()
     {
         // Arrange
-        var now = new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero);
+        var now = new DateTimeOffset(2025, 01, 1, 1, 1, 1, TimeSpan.Zero);
         var inactiveVcsToDelete = now.AddMonths(-12);
         var expiredVcsToDelete = now.AddDays(-42);
         var sut = await CreateSut();
