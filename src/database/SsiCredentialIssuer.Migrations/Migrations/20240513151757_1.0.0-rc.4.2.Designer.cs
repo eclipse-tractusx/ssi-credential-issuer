@@ -32,8 +32,8 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240507092202_97-AddQualityCredential")]
-    partial class _97AddQualityCredential
+    [Migration("20240513151757_1.0.0-rc.4.2")]
+    partial class _100rc42
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
