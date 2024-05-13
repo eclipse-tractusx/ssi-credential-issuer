@@ -24,7 +24,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     /// <inheritdoc />
-    public partial class _97AddQualityCredential : Migration
+    public partial class _100rc42 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
