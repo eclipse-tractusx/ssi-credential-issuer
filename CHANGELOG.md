@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.0-rc.4](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2024-05-13)
+
+
+### Bug Fixes
+
+* adjust multiple ssi detail handling ([#116](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/116)) ([7e8df9d](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/7e8df9dd35953fc5ed3c199dbd6357cc574feec4))
+* **approval:** send mail and notification to requester ([#101](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/101)) ([0fe249c](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/0fe249ceb5728be69055320718ff9b3deb7a3f52))
+* **credential:** remove duplicate credential ([#113](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/113)) ([f2cc13d](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/f2cc13dd810970095c3969a7996c4f00d22f967a))
+* **credentials:** remove quality credential ([#97](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/97)) ([e6a817d](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/e6a817d61ac8a713b9be623a361a26e2e4354964)), closes [#95](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/95)
+* **notification:** adjust notification creation url ([#98](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/98)) ([ae966e9](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/ae966e97395a38e56d88e5479e34c0dac6bc3914))
+* **qualityCredential:** re add quality credential ([#114](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/114)) ([d962baf](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/d962bafd9df92dd5cbaf12a5aa93fa37c4ec29f7)), closes [#107](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/107)
+* return pending credentials ([#117](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/117)) ([21defc7](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/21defc7ab1238c0dd250c0f69cd3c55cc1cf47cf)), closes [#109](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/109)
+* **seeding:** set consortia to seeding paths ([#96](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/96)) ([8e16f04](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/8e16f04ee8310318149d27318cbdf1c1dd4bf8c8))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0-rc.4 ([f159102](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/f1591024624317e403fab442539a1b7a332a4c16))
+
 ## [1.0.0-rc.3](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.1...v1.0.0-rc.3) (2024-04-30)
 
 
