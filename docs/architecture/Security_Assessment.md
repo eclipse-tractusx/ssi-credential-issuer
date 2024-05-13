@@ -4,26 +4,25 @@
 | ------------------------- | ---------------------------------------------------------------------------------------------- |
 | Contact for product       | [@evegufy](https://github.com/evegufy) <br> [@jjeroch](https://github.com/jjeroch)             |
 | Security responsible      | tbd |
-| Version number of product | 0.1.0                                                                                          |
+| Version number of product | 1.0.0                                                                                          |
 | Dates of assessment       | tbd: Assessment                                                                      |
 | Status of assessment      | Assessment Report                                                                            |
 
 ## Product Description
 
-SSI-Credential-Issuer project is an REST API project with two additional Process Worker processes, without implementation of an UI. (Pure Backend Component)
+The SSI Credential Issuer product is an REST API project with two Process Worker processes, so a pure backend component (without implementation of an user interface).
 
-Main purpose of the product is to provide authenticated C-X Users the possibility to create credentials inside the issuer and holder wallet. Furthermore it handles the revocation and expiry handling for credentials.
+The main purpose of the product is to provide authenticated CX Users the possibility to create credentials inside the issuer and holder wallet. Furthermore, it handles the revocation and expiry handling for credentials.
 
-The SSI-Credential-Issuer comprise the technical foundation for interaction, monitoring, auditing and further functionalities.
-They are state of the art in terms of technology portfolio, consist of open-source components whenever possible and are open-sourced themselves 100%.
+The SSI Credential Issuer comprises the technical foundation for functional interaction, monitoring, auditing and further functionalities.
 
-SSI-Credential-Issuer can be run anywhere: it can be deployed as a docker image, e. g. on Kubernetes (platform-independent, cloud, on prem or local).
+The product can be run anywhere: it can be deployed as a docker image, e.g. on Kubernetes (platform-independent, cloud, on prem or local).
 
-The policy hub is using following key frameworks:
+The SSI Credential Issuer is using following key frameworks:
 
 - .Net
 - Entity Framework
-[architecture & development concept](https://github.com/eclipse-tractusx/ssi-credential-issuer/blob/main/docs/technical-documentation/architecture/Development%20Concept.md)
+[Development Concept](/Development%20Concept.md)
 
 ## Data Flow Diagram
 
@@ -49,7 +48,7 @@ flowchart LR
      CU
     end
 
-    subgraph SSI-Issuer-Component Product   
+    subgraph SSI-Issuer-Component Product
      IS
      CS
      RS
@@ -57,15 +56,15 @@ flowchart LR
      PHD
     end
 
-    subgraph External Systems   
+    subgraph External Systems
      P
      IW
      HW
     end
 
-    K-->|"Authentication & Authorization Data \n (Using JWT)"|IS     
-    K-->|"Authentication & Authorization Data \n (Using JWT)"|CS     
-    K-->|"Authentication & Authorization Data \n (Using JWT)"|RS     
+    K-->|"Authentication & Authorization Data \n (Using JWT)"|IS
+    K-->|"Authentication & Authorization Data \n (Using JWT)"|CS
+    K-->|"Authentication & Authorization Data \n (Using JWT)"|RS
     CU-->|"Consumption of central, read-only REST API \n [HTTPS]"|IS
     CU-->|"Consumption of central, read-only REST API \n [HTTPS]"|CS
     CU-->|"Consumption of central, read-only REST API \n [HTTPS]"|RS
@@ -91,7 +90,7 @@ N/A
 
 ## Threats & Risks
 
-All potential threats discussed during the assessment were already mitigated.
+TBD
 
 ### Mitigated Threats
 
@@ -100,12 +99,11 @@ N/A
 ### Performed Security Checks
 
 - Static Application Security Testing (SAST) - CodeQL
-- Dynamic Application Security Testing (DAST) - OWASP ZAP
-- Secret Scanning - GitGuardian
-- Software Composition Analysis (SCA) - SNYK
+- Software Composition Analysis (SCA) - Dependabot
 - Container Scan conducted - Trivy
 - Infrastructure as Code - KICS
-- Securing code, dependencies, containers, IaC and Cloud Deployments - SNYK
+- Secret Scanning - GitGuardian
+- Dynamic Application Security Testing (DAST) - OWASP ZAP (Unauthenticated)
 
 ## NOTICE
 
