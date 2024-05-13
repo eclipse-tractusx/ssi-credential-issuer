@@ -93,9 +93,9 @@ public class PortalServiceTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.Conflict, "{ \"message\": \"Framework test!\" }", "call to external system notification failed with statuscode 409")]
-    [InlineData(HttpStatusCode.BadRequest, "{ \"test\": \"123\" }", "call to external system notification failed with statuscode 400")]
-    [InlineData(HttpStatusCode.BadRequest, "this is no json", "call to external system notification failed with statuscode 400")]
+    [InlineData(HttpStatusCode.Conflict, "{ \"message\": \"Framework test!\" }", "call to external system notification failed with statuscode 409 - Message: { \"message\": \"Framework test!\" }")]
+    [InlineData(HttpStatusCode.BadRequest, "{ \"test\": \"123\" }", "call to external system notification failed with statuscode 400 - Message: { \"test\": \"123\" }")]
+    [InlineData(HttpStatusCode.BadRequest, "this is no json", "call to external system notification failed with statuscode 400 - Message: this is no json")]
     [InlineData(HttpStatusCode.Forbidden, null, "call to external system notification failed with statuscode 403")]
     public async Task AddNotification_WithConflict_ThrowsServiceExceptionWithErrorContent(HttpStatusCode statusCode, string? content, string message)
     {

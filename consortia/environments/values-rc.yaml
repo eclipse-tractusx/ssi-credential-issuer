@@ -63,6 +63,8 @@ issuermigrations:
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
+  seeding:
+    testDataEnvironments: "consortia"
 
 processesworker:
   image:

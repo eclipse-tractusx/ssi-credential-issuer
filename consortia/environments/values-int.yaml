@@ -57,6 +57,8 @@ issuer:
 issuermigrations:
   logging:
     default: "Debug"
+  seeding:
+    testDataEnvironments: "consortia"
 
 processesworker:
   logging:

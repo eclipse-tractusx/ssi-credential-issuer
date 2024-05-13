@@ -63,12 +63,13 @@ public class BatchUpdateSeeder : ICustomSeeder
 
         await SeedTable<VerifiedCredentialExternalTypeDetailVersion>("verified_credential_external_type_detail_versions",
             x => x.Id,
-            x => x.dataEntity.Template != x.dbEntity.Template || x.dataEntity.Expiry != x.dbEntity.Expiry || x.dataEntity.ValidFrom != x.dbEntity.ValidFrom,
+            x => x.dataEntity.Template != x.dbEntity.Template || x.dataEntity.Expiry != x.dbEntity.Expiry || x.dataEntity.ValidFrom != x.dbEntity.ValidFrom || x.dataEntity.Version != x.dbEntity.Version,
             (dbEntry, entry) =>
             {
                 dbEntry.Template = entry.Template;
                 dbEntry.Expiry = entry.Expiry;
                 dbEntry.ValidFrom = entry.ValidFrom;
+                dbEntry.Version = entry.Version;
             }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);

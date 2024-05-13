@@ -36,7 +36,6 @@ public class IssuerErrorMessageContainer : IErrorMessageContainer
         { IssuerErrors.MISSING_AGREEMENTS, "All agreements need to get signed as Active or InActive. Missing consents: [{missingConsents}]" },
         { IssuerErrors.UNASSIGN_ALL_ROLES, "Company can't unassign from all roles, Atleast one Company role need to signed as active" },
         { IssuerErrors.AGREEMENTS_NOT_ASSIGNED_WITH_ROLES, "Agreements not associated with requested companyRoles: [{companyRoles}]" },
-        { IssuerErrors.MULTIPLE_SSI_DETAIL, "There should only be one pending or active ssi detail be assigne" },
         { IssuerErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND, "VerifiedCredentialExternalTypeDetail {verifiedCredentialExternalTypeDetailId} does not exist" },
         { IssuerErrors.EXPIRY_DATE_IN_PAST, "The expiry date must not be in the past" },
         { IssuerErrors.CREDENTIAL_NO_CERTIFICATE, "{credentialTypeId} is not assigned to a certificate" },
@@ -56,7 +55,8 @@ public class IssuerErrorMessageContainer : IErrorMessageContainer
         { IssuerErrors.INVALID_DID_LOCATION, "The did url location must be a valid url" },
         { IssuerErrors.EMPTY_EXTERNAL_TYPE_ID, "External Type ID must be set" },
         { IssuerErrors.SCHEMA_NOT_SET, "The json schema must be set when approving a credential" },
-        { IssuerErrors.SCHEMA_NOT_FRAMEWORK, "The schema must be a framework credential" }
+        { IssuerErrors.SCHEMA_NOT_FRAMEWORK, "The schema must be a framework credential" },
+        { IssuerErrors.PENDING_CREDENTIAL_ALREADY_EXISTS, "Pending Credential request for version {versionId} and framework {frameworkId} does already exist" }
     }.ToImmutableDictionary(x => (int)x.Key, x => x.Value);
 
     public Type Type { get => typeof(IssuerErrors); }
@@ -74,7 +74,6 @@ public enum IssuerErrors
     MISSING_AGREEMENTS,
     UNASSIGN_ALL_ROLES,
     AGREEMENTS_NOT_ASSIGNED_WITH_ROLES,
-    MULTIPLE_SSI_DETAIL,
     EXTERNAL_TYPE_DETAIL_NOT_FOUND,
     EXPIRY_DATE_IN_PAST,
     CREDENTIAL_NO_CERTIFICATE,
@@ -94,5 +93,6 @@ public enum IssuerErrors
     INVALID_DID_LOCATION,
     EMPTY_EXTERNAL_TYPE_ID,
     SCHEMA_NOT_SET,
-    SCHEMA_NOT_FRAMEWORK
+    SCHEMA_NOT_FRAMEWORK,
+    PENDING_CREDENTIAL_ALREADY_EXISTS
 }

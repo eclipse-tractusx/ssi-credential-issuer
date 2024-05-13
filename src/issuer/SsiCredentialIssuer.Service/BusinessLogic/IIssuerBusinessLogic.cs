@@ -26,9 +26,9 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
 public interface IIssuerBusinessLogic
 {
-    Task<IEnumerable<UseCaseParticipationData>> GetUseCaseParticipationAsync();
+    IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationAsync();
 
-    Task<IEnumerable<CertificateParticipationData>> GetSsiCertificatesAsync();
+    IAsyncEnumerable<CertificateParticipationData> GetSsiCertificatesAsync();
 
     Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailSorting? sorting);
     IAsyncEnumerable<OwnedVerifiedCredentialData> GetCredentialsForBpn();
