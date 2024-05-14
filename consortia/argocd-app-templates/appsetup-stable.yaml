@@ -29,7 +29,7 @@ spec:
   source:
     path: ''
     repoURL: 'https://eclipse-tractusx.github.io/charts/dev'
-    targetRevision: ssi-credential-issuer-1.0.0-rc.3
+    targetRevision: ssi-credential-issuer-1.0.0-rc.4
     plugin:
       env:
         - name: HELM_VALUES

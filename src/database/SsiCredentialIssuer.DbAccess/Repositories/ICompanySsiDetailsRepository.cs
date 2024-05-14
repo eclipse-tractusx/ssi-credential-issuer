@@ -32,7 +32,7 @@ public interface ICompanySsiDetailsRepository
     /// <param name="bpnl">Bpnl of the company</param>
     /// <param name="minExpiry">The minimum datetime the expiry date should have</param>
     /// <returns>AsyncEnumerable of UseCaseParticipation</returns>
-    IAsyncEnumerable<UseCaseParticipationTransferData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry);
+    IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry);
 
     /// <summary>
     /// Gets the company credential details for the given company id
@@ -40,7 +40,7 @@ public interface ICompanySsiDetailsRepository
     /// <param name="bpnl">Bpnl of the company</param>
     /// <param name="minExpiry">The minimum datetime the expiry date should have</param>
     /// <returns>AsyncEnumerable of SsiCertificateData</returns>
-    IAsyncEnumerable<SsiCertificateTransferData> GetSsiCertificates(string bpnl, DateTimeOffset minExpiry);
+    IAsyncEnumerable<CertificateParticipationData> GetSsiCertificates(string bpnl, DateTimeOffset minExpiry);
 
     /// <summary>
     /// Creates the credential details
@@ -69,8 +69,9 @@ public interface ICompanySsiDetailsRepository
     /// </summary>
     /// <param name="verifiedCredentialExternalTypeUseCaseDetailId">Id of vc external type use case detail id</param>
     /// <param name="verifiedCredentialTypeId">Id of the vc type</param>
+    /// <param name="bpnl">The business partner number of the current user</param>
     /// <returns>Returns a valueTuple with identifiers if the externalTypeUseCaseDetailId exists and the corresponding credentialTypeId</returns>
-    Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId);
+    Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry, bool PendingCredentialRequestExists)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId, string bpnl);
 
     /// <summary>
     /// Checks whether the given credentialTypeId is a <see cref="VerifiedCredentialTypeKindId"/> Certificate
@@ -94,7 +95,7 @@ public interface ICompanySsiDetailsRepository
     IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl);
 
     Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId);
-    Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId);
+    Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, string UserId, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId);
     void AttachAndModifyCompanySsiDetails(Guid id, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields);
     IAsyncEnumerable<VerifiedCredentialTypeId> GetCertificateTypes(string bpnl);
     IAsyncEnumerable<CredentialExpiryData> GetExpiryData(DateTimeOffset now, DateTimeOffset inactiveVcsToDelete, DateTimeOffset expiredVcsToDelete);

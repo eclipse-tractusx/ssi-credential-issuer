@@ -45,6 +45,7 @@ public class IssuerBusinessLogicTests
     private static readonly Guid CredentialId = Guid.NewGuid();
     private static readonly string Bpnl = "BPNL00000001TEST";
     private static readonly string IssuerBpnl = "BPNL000001ISSUER";
+    private static readonly Guid CompanyUserId = Guid.NewGuid();
 
     private readonly IFixture _fixture;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
@@ -118,7 +119,7 @@ public class IssuerBusinessLogicTests
         Setup_GetUseCaseParticipationAsync();
 
         // Act
-        var result = await _sut.GetUseCaseParticipationAsync();
+        var result = await _sut.GetUseCaseParticipationAsync().ToListAsync();
 
         // Assert
         result.Should().HaveCount(5);
@@ -135,7 +136,7 @@ public class IssuerBusinessLogicTests
         Setup_GetSsiCertificatesAsync();
 
         // Act
-        var result = await _sut.GetSsiCertificatesAsync();
+        var result = await _sut.GetSsiCertificatesAsync().ToListAsync();
 
         // Assert
         result.Should().HaveCount(5);
@@ -204,28 +205,6 @@ public class IssuerBusinessLogicTests
     }
 
     [Fact]
-    public async Task ApproveCredential_WithBpnNotSetActiveSsiDetail_ThrowsConflictException()
-    {
-        // Arrange
-        var alreadyActiveId = Guid.NewGuid();
-        var approvalData = _fixture.Build<SsiApprovalData>()
-            .With(x => x.Status, CompanySsiDetailStatusId.PENDING)
-            .With(x => x.Bpn, (string?)null)
-            .Create();
-        A.CallTo(() => _companySsiDetailsRepository.GetSsiApprovalData(alreadyActiveId))
-            .Returns((true, approvalData));
-        Task Act() => _sut.ApproveCredential(alreadyActiveId, CancellationToken.None);
-
-        // Act
-        var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(Act);
-
-        // Assert
-        ex.Message.Should().Be(IssuerErrors.BPN_NOT_SET.ToString());
-        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
-        A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
-    }
-
-    [Fact]
     public async Task ApproveCredential_WithExpiryInThePast_ReturnsExpected()
     {
         // Arrange
@@ -245,6 +224,7 @@ public class IssuerBusinessLogicTests
             null,
             VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
+            CompanyUserId.ToString(),
             JsonDocument.Parse(schema),
             detailData
         );
@@ -284,6 +264,7 @@ public class IssuerBusinessLogicTests
             null,
             VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
+            CompanyUserId.ToString(),
             JsonDocument.Parse(schema),
             useCaseData
         );
@@ -311,6 +292,7 @@ public class IssuerBusinessLogicTests
             null,
             VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
+            CompanyUserId.ToString(),
             null,
             null
         );
@@ -343,6 +325,7 @@ public class IssuerBusinessLogicTests
             Guid.NewGuid(),
             VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
+            CompanyUserId.ToString(),
             null,
             new DetailData(
                 VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
@@ -369,16 +352,15 @@ public class IssuerBusinessLogicTests
         ex.Message.Should().Be(IssuerErrors.ALREADY_LINKED_PROCESS.ToString());
     }
 
-    [Theory]
-    [InlineData(VerifiedCredentialTypeKindId.FRAMEWORK, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL)]
-    public async Task ApproveCredential_WithValid_ReturnsExpected(VerifiedCredentialTypeKindId kindId, VerifiedCredentialTypeId typeId, VerifiedCredentialExternalTypeId externalTypeId)
+    [Fact]
+    public async Task ApproveCredential_WithValid_ReturnsExpected()
     {
         // Arrange
         var schema = CreateSchema();
         var processData = new CompanySsiProcessData(CredentialId, JsonDocument.Parse(schema), VerifiedCredentialTypeKindId.FRAMEWORK);
         var now = DateTimeOffset.UtcNow;
         var detailData = new DetailData(
-            externalTypeId,
+            VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
             "test",
             "1.0.0",
             DateTimeOffset.UtcNow
@@ -386,15 +368,16 @@ public class IssuerBusinessLogicTests
 
         var data = new SsiApprovalData(
             CompanySsiDetailStatusId.PENDING,
-            typeId,
+            VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
             null,
-            kindId,
+            VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
+            CompanyUserId.ToString(),
             JsonDocument.Parse(schema),
             detailData
         );
 
-        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, typeId, CompanySsiDetailStatusId.PENDING, "", Guid.NewGuid().ToString(), DateTimeOffset.Now);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, "", Guid.NewGuid().ToString(), DateTimeOffset.Now);
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetSsiApprovalData(CredentialId))
             .Returns((true, data));
@@ -417,6 +400,63 @@ public class IssuerBusinessLogicTests
         // Assert
         A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, NotificationTypeId.CREDENTIAL_APPROVAL, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
+            .MustHaveHappenedOnceExactly();
+
+        detail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.ACTIVE);
+        detail.DateLastChanged.Should().Be(now);
+        processData.Schema.Deserialize<FrameworkCredential>()!.IssuanceDate.Should().Be(now);
+    }
+
+    [Fact]
+    public async Task ApproveCredential_WithValidWithoutCompanyUserRequester_DoesNotSendMailAndNotification()
+    {
+        // Arrange
+        var schema = CreateSchema();
+        var processData = new CompanySsiProcessData(CredentialId, JsonDocument.Parse(schema), VerifiedCredentialTypeKindId.FRAMEWORK);
+        var now = DateTimeOffset.UtcNow;
+        var detailData = new DetailData(
+            VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
+            "test",
+            "1.0.0",
+            DateTimeOffset.UtcNow
+        );
+
+        var data = new SsiApprovalData(
+            CompanySsiDetailStatusId.PENDING,
+            VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+            null,
+            VerifiedCredentialTypeKindId.FRAMEWORK,
+            Bpnl,
+            "test123",
+            JsonDocument.Parse(schema),
+            detailData
+        );
+
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, "", "test123", DateTimeOffset.Now);
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        A.CallTo(() => _companySsiDetailsRepository.GetSsiApprovalData(CredentialId))
+            .Returns((true, data));
+        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(CredentialId, A<Action<CompanySsiDetail>?>._, A<Action<CompanySsiDetail>>._!))
+            .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields) =>
+            {
+                initialize?.Invoke(detail);
+                updateFields.Invoke(detail);
+            });
+        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyProcessData(CredentialId, A<Action<CompanySsiProcessData>?>._, A<Action<CompanySsiProcessData>>._!))
+            .Invokes((Guid _, Action<CompanySsiProcessData>? initialize, Action<CompanySsiProcessData> updateFields) =>
+            {
+                initialize?.Invoke(processData);
+                updateFields.Invoke(processData);
+            });
+
+        // Act
+        await _sut.ApproveCredential(CredentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, NotificationTypeId.CREDENTIAL_APPROVAL, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.TriggerMail("CredentialApproval", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
             .MustHaveHappenedOnceExactly();
@@ -464,7 +504,7 @@ public class IssuerBusinessLogicTests
         // Arrange
         var notExistingId = Guid.NewGuid();
         A.CallTo(() => _companySsiDetailsRepository.GetSsiRejectionData(notExistingId))
-            .Returns(default((bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, Guid?, IEnumerable<Guid>)));
+            .Returns(default((bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, string, Guid?, IEnumerable<Guid>)));
         Task Act() => _sut.RejectCredential(notExistingId, CancellationToken.None);
 
         // Act
@@ -488,6 +528,7 @@ public class IssuerBusinessLogicTests
                 true,
                 status,
                 VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                CompanyUserId.ToString(),
                 null,
                 Enumerable.Empty<Guid>()
                 ));
@@ -514,6 +555,7 @@ public class IssuerBusinessLogicTests
                 true,
                 CompanySsiDetailStatusId.PENDING,
                 VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                CompanyUserId.ToString(),
                 null,
                 Enumerable.Empty<Guid>()));
         A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(CredentialId, A<Action<CompanySsiDetail>?>._, A<Action<CompanySsiDetail>>._!))
@@ -547,6 +589,7 @@ public class IssuerBusinessLogicTests
                 true,
                 CompanySsiDetailStatusId.PENDING,
                 VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                CompanyUserId.ToString(),
                 Guid.NewGuid(),
                 Enumerable.Repeat<Guid>(Guid.NewGuid(), 1)));
         A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(CredentialId, A<Action<CompanySsiDetail>?>._, A<Action<CompanySsiDetail>>._!))
@@ -562,6 +605,41 @@ public class IssuerBusinessLogicTests
         // Assert
         A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, NotificationTypeId.CREDENTIAL_REJECTED, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._)).MustHaveHappenedOnceExactly();
+
+        detail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.INACTIVE);
+        detail.DateLastChanged.Should().Be(now);
+    }
+
+    [Fact]
+    public async Task RejectCredential_WithValidWithoutCompanyUserRequester_DoesNotSendMailAndNotification()
+    {
+        // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, "test123", DateTimeOffset.Now);
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        A.CallTo(() => _companySsiDetailsRepository.GetSsiRejectionData(CredentialId))
+            .Returns((
+                true,
+                CompanySsiDetailStatusId.PENDING,
+                VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                "test123",
+                Guid.NewGuid(),
+                Enumerable.Repeat(Guid.NewGuid(), 1)));
+        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(CredentialId, A<Action<CompanySsiDetail>?>._, A<Action<CompanySsiDetail>>._!))
+            .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields) =>
+            {
+                initialize?.Invoke(detail);
+                updateFields.Invoke(detail);
+            });
+
+        // Act
+        await _sut.RejectCredential(CredentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _portalService.TriggerMail(A<string>._, A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, A<NotificationTypeId>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._)).MustHaveHappenedOnceExactly();
 
@@ -700,8 +778,8 @@ public class IssuerBusinessLogicTests
         // Arrange
         var useCaseId = Guid.NewGuid();
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns(default((bool, string?, string?, IEnumerable<VerifiedCredentialExternalTypeId>, DateTimeOffset)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns(default((bool, string?, string?, IEnumerable<VerifiedCredentialExternalTypeId>, DateTimeOffset, bool)));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -719,8 +797,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, null, null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(-5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, null, null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(-5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -738,8 +816,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, null, null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, null, null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -757,8 +835,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, "1.0.0", null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", null, Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -776,8 +854,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, "1.0.0", "https://example.org/tempalte", new[] { VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL }, now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", "https://example.org/tempalte", new[] { VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL }, now.AddDays(5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -795,8 +873,8 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("BPNL0012HOLDER", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Empty<VerifiedCredentialExternalTypeId>(), now.AddDays(5), false));
         Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Act
@@ -804,6 +882,25 @@ public class IssuerBusinessLogicTests
 
         // Assert
         ex.Message.Should().Be(IssuerErrors.MULTIPLE_USE_CASES.ToString());
+    }
+
+    [Fact]
+    public async Task CreateFrameworkCredential_WithAlreadyPendingRequest_ThrowsConflictException()
+    {
+        // Arrange
+        var useCaseId = Guid.NewGuid();
+        var now = DateTimeOffset.Now;
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        var data = new CreateFrameworkCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Repeat(VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, 1), now.AddDays(5), true));
+        Task Act() => _sut.CreateFrameworkCredential(data, CancellationToken.None);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+
+        // Assert
+        ex.Message.Should().Be(IssuerErrors.PENDING_CREDENTIAL_ALREADY_EXISTS.ToString());
     }
 
     [Fact]
@@ -817,8 +914,8 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
         HttpRequestMessage? request = null;
-        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK))
-            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Repeat(VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, 1), now.AddDays(5)));
+        A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
+            .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Repeat(VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, 1), now.AddDays(5), false));
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
@@ -844,17 +941,17 @@ public class IssuerBusinessLogicTests
 
     private void Setup_GetUseCaseParticipationAsync()
     {
-        var verifiedCredentials = _fixture.Build<CompanySsiExternalTypeDetailTransferData>()
-            .With(x => x.SsiDetailData, _fixture.CreateMany<CompanySsiDetailTransferData>(1))
+        var verifiedCredentials = _fixture.Build<CompanySsiExternalTypeDetailData>()
+            .With(x => x.SsiDetailData, _fixture.CreateMany<CompanySsiDetailData>(1))
             .CreateMany(5);
         A.CallTo(() => _companySsiDetailsRepository.GetUseCaseParticipationForCompany(Bpnl, A<DateTimeOffset>._))
-            .Returns(_fixture.Build<UseCaseParticipationTransferData>().With(x => x.VerifiedCredentials, verifiedCredentials).CreateMany(5).ToAsyncEnumerable());
+            .Returns(_fixture.Build<UseCaseParticipationData>().With(x => x.VerifiedCredentials, verifiedCredentials).CreateMany(5).ToAsyncEnumerable());
     }
 
     private void Setup_GetSsiCertificatesAsync()
     {
         A.CallTo(() => _companySsiDetailsRepository.GetSsiCertificates(Bpnl, A<DateTimeOffset>._))
-            .Returns(_fixture.Build<SsiCertificateTransferData>().With(x => x.Credentials, Enumerable.Repeat(new SsiCertificateExternalTypeDetailTransferData(_fixture.Create<ExternalTypeDetailData>(), _fixture.CreateMany<CompanySsiDetailTransferData>(1)), 1)).CreateMany(5).ToAsyncEnumerable());
+            .Returns(_fixture.Build<CertificateParticipationData>().With(x => x.Credentials, Enumerable.Repeat(new CompanySsiExternalTypeDetailData(_fixture.Create<ExternalTypeDetailData>(), _fixture.CreateMany<CompanySsiDetailData>(1)), 1)).CreateMany(5).ToAsyncEnumerable());
     }
 
     private void Setup_GetCredentialsForBpn()
