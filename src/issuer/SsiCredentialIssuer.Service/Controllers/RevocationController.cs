@@ -41,7 +41,7 @@ public static class RevocationController
                 "Id of the credential that should be revoked")
             .RequireAuthorization(r =>
             {
-                // r.RequireRole("revoke_credentials_issuer");
+                r.RequireRole("revoke_credentials_issuer");
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
             })
