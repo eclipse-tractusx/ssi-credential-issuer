@@ -32,12 +32,12 @@ flowchart LR
     CU(Company user or Service Account)
     K("Keycloak (REST API)")
     IS(Issuer Service)
-    CS(Credential Service)
-    RS(Revocation Service)
     EW(Expiry Worker)
     IW(Issuer Wallet)
+    PW(Process Worker)
     HW(3rd Party Holder Wallets)
-    P(Portal Backend)
+    PB(Portal Backend)
+    PF(Portal Frontend)
     PHD[(Issuer DB \n Postgres \n EF Core for mapping \n objects to SQL)]
 
     subgraph centralidp[centralidp Keycloak]
@@ -50,33 +50,29 @@ flowchart LR
 
     subgraph SSI-Issuer-Component Product
      IS
-     CS
-     RS
+     PW
      EW
      PHD
     end
 
     subgraph External Systems
-     P
+     PB
+     PF
      IW
      HW
     end
 
     K-->|"Authentication & Authorization Data \n (Using JWT)"|IS
-    K-->|"Authentication & Authorization Data \n (Using JWT)"|CS
-    K-->|"Authentication & Authorization Data \n (Using JWT)"|RS
-    CU-->|"Consumption of central, read-only REST API \n [HTTPS]"|IS
-    CU-->|"Consumption of central, read-only REST API \n [HTTPS]"|CS
-    CU-->|"Consumption of central, read-only REST API \n [HTTPS]"|RS
-    IS-->|"Read and write credentials"|PHD
-    IS-->|"Read and write credentials"|IW
-    IS-->|"Read and write credentials"|HW
-    EW-->|"Read and write credentials"|IW
-    RS-->|"Read and write credentials"|IW
-    P-->|"Create and revoke credentials"|IS
-    IS-->|"Create notifications and mails"|P
-    CS-->|"Read credentials and document"|PHD
-    RS-->|"Read and update credential data"|PHD
+    IS-->|"Read and write credential data"|PHD
+    PF-->|"Read and Write Credentials"|IS
+    PW-->|"Read and Write Credentials"|HW
+    PW-->|"Write Credentials"|IW
+    PW-->|"Creates Mails & Notifications"|PB
+    PW-->|"Revoke Credential"|IW
+    EW-->|"Read credentials \n write process data"|PHD
+    PB-->|"Create and revoke credentials"|IS
+    PF-->|"Read and Write Credentials"|IS
+    IS-->|"Create notifications and mails"|PB
     CU-->|"IAM with OIDC \n [HTTPS]"|K
 ```
 

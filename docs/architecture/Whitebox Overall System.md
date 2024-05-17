@@ -10,8 +10,6 @@ flowchart LR
     C(Customer)
     ING(Ingress)
     IS(Issuer Service)
-    CS(Credential Service)
-    RS(Revocation Service)
     ES(Expiry Service)
     PW(Process Worker)
     P(Portal)
@@ -23,8 +21,6 @@ flowchart LR
         ING
         PHD
         IS
-        CS
-        RS
         ES
         PW
     end
@@ -37,18 +33,16 @@ flowchart LR
 
     C-->|"Authentication & Authorization Data \n (Using JWT)"|ING
     ING-->|"Forward Request"|IS
-    ING-->|"Forward Request"|CS
-    ING-->|"Forward Request"|RS
     ES-->|"Revokes Credentials"|IW
     ES-->|"Revokes Credentials"|HW
     ES-->|"Creates Mails & Notifications"|P
+    ES-->|"Reads & updates credentials"|PHD
     PW-->|"Read, Write & Sign Credentials"|IW
-    PW-->|"Read & Write Credentials"|HW
+    PW-->|"Write Credentials"|HW
     PW-->|"Creates Mails & Notifications"|P
-    IS-->|"Read credentialTypes and versions, \n saves credential requests"|PHD
-    ES-->|"Updates credentials"|PHD
-    CS-->|"Read credentials & documents"|PHD
     PW-->|"Reads credential requests, \n saves documents"|PHD
+    IS-->|"Read credentialTypes and versions, \n saves credential requests, \n revokes credential"|PHD
+    ES-->|"Updates credentials"|PHD
 
 ```
 
