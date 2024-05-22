@@ -23,7 +23,7 @@ The SSI Credential Issuer is using following key frameworks:
 - .Net
 - Entity Framework
 
-[Development Concept](/Development%20Concept.md)
+[Development Concept](./Development%20Concept.md)
 
 ## Data Flow Diagram
 
@@ -81,13 +81,14 @@ flowchart LR
     CU-->|"IAM with OIDC \n [HTTPS]"|K
 ```
 
-### Additional information:
+### Additional information
+
 * The issuer stores the signed credentials in the database for holders to download their own credentials at any time.
-  * Unsigned credentials are stored to be compared with signed credentials before providing them to holders
+  * Unsigned credentials are stored to be compared with signed credentials before providing them to holders.
 * The signing of credentials is done externally, in the "Issuer Wallet". This application does not hold its own private signing key.
 * The issuer’s DID document is created by Issuer Wallet and published by the Portal itself, not the SSI Credential Issuer application.
 * The "Credential Service" can be used by a 3rd party (e.g., certificate holder) to retrieve the status of credential issuance. The "Issuer Service" is used as a starting point for requesting the issuance of a credential.
-* Credentials of technical users are encrypted
+* Credentials of technical users are stored in an encrypted manner.
 * All actions are logged within the Issuer DB.
 
 ### Changes compared to last Security Assessment
