@@ -28,7 +28,7 @@ The project maintains the following source code repositories in the GitHub organ
 
 This project leverages the following third party content.
 
-See DEPENDENCIES file.
+See [DEPENDENCIES](./DEPENDENCIES) file.
 
 ## Cryptography
 

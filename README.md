@@ -30,6 +30,10 @@ See Docker notice files for more information:
 - [credential-expiry-app](./docker/notice-credential-expiry-app.md)
 - [credential-issuer-migrations](./docker/notice-credential-issuer-migrations.md)
 
+## Contributing
+
+See [Contribution details](/docs/technical-documentation/dev-process/How%20to%20contribute.md).
+
 ## License
 
 Distributed under the Apache 2.0 License.
