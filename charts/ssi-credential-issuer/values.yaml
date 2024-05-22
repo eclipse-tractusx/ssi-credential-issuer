@@ -251,12 +251,11 @@ ingress:
   #   nginx.ingress.kubernetes.io/proxy-body-size: "8m"
   #   # -- Provide CORS allowed origin.
   #   nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.example.org"
-  tls:
-    # -- Provide tls secret.
-    - secretName: ""
-      # -- Provide host for tls secret.
-      hosts:
-        - ""
+  # -- Ingress TLS configuration
+  tls: []
+    # - secretName: ""
+    #   hosts:
+    #     - ""
   hosts:
     # -- Provide default path for the ingress record.
     - host: ""
