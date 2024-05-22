@@ -1,6 +1,6 @@
 # Audit Logging
 
-For db audit logs, the following approache is used
+For db audit logs, the following approach is used
 
 - Application Logging
 

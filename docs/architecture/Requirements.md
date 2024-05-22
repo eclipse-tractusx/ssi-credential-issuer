@@ -6,7 +6,7 @@ The SSI Credential Issuer is a central API for the handling of credentials. It h
 
 ## Requirements
 
-<!-- TODO (JJ): could you please add the requrirements -->
+<!-- TODO (JJ): could you please add the requirements -->
 For Catena-X Member Companies
 |ID|Title|Requirement|
 |--------|--------|--------|

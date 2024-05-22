@@ -6,7 +6,7 @@ Details to the build, test and deploy process can get found under the following 
 
 ## Development Guidelines
 
-The ssi credential issuer is using following key frameworks:
+The SSI credential issuer is using following key frameworks:
 
 - .Net
 - Entity Framework
@@ -127,7 +127,7 @@ An API manager or gateway tool will handle or help address the API security guid
 
 ## Migration
 
-To run the ssi credential issuer, migrations are needed to load the initial data inside the ssi credential issuer db to enable the ssi credential issuer to work.
+To run the SSI credential issuer, migrations are needed to load the initial data inside the SSI credential issuer db to enable the SSI credential issuer to work.
 The migration will consist of an initial migration as well as delta migration files with future releases. As part of a new release, a migration file (if applicable) will get released and can get loaded via a delta load.
 
 ## Configurability
