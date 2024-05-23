@@ -180,6 +180,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
         _context.CompanySsiDetails.AsNoTracking()
             .Where(c => c.Bpnl == bpnl)
             .Select(c => new OwnedVerifiedCredentialData(
+                c.Id,
                 c.VerifiedCredentialTypeId,
                 c.CompanySsiDetailStatusId,
                 c.ExpiryDate,
