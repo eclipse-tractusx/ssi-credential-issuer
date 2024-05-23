@@ -7,6 +7,7 @@
     "credential_type_kind_id": 1,
     "encryption_mode": 1,
     "holder_wallet_url": "https://example.org/wallet",
-    "client_id": "c123"
+    "client_id": "c123",
+    "callback_url": "https://example.org/callback"
   }
 ]

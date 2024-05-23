@@ -92,11 +92,12 @@ public class MandatoryIdentityClaimHandler : AuthorizationHandler<MandatoryIdent
         }
 
         _identityDataBuilder.AddIdentityId(preferredUserName ?? clientId!);
-        bool isCompanyUser;
-        if (isCompanyUser = Guid.TryParse(preferredUserName, out var companyUserId))
+        var isCompanyUser = Guid.TryParse(preferredUserName, out var companyUserId);
+        if (isCompanyUser)
         {
             _identityDataBuilder.AddCompanyUserId(companyUserId);
         }
+
         _identityDataBuilder.AddIsServiceAccount(!isCompanyUser);
         _identityDataBuilder.Status = IClaimsIdentityDataBuilderStatus.Complete;
     }

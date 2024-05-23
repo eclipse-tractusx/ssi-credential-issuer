@@ -113,7 +113,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(null, null).ToListAsync();
+        var result = await sut.GetAllCredentialDetails(null, null, null).ToListAsync();
 
         // Assert
         result.Should().NotBeNull();
@@ -138,7 +138,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(CompanySsiDetailStatusId.PENDING, null).ToListAsync();
+        var result = await sut.GetAllCredentialDetails(CompanySsiDetailStatusId.PENDING, null, null).ToListAsync();
 
         // Assert
         result.Should().NotBeNull().And.HaveCount(4);
@@ -159,7 +159,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(null, VerifiedCredentialTypeId.PCF_FRAMEWORK).ToListAsync();
+        var result = await sut.GetAllCredentialDetails(null, VerifiedCredentialTypeId.PCF_FRAMEWORK, null).ToListAsync();
 
         // Assert
         result.Should().NotBeNull().And.ContainSingle().Which.Bpnl.Should().Be(ValidBpnl);

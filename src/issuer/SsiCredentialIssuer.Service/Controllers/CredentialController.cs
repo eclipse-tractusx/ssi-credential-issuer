@@ -45,6 +45,23 @@ public static class CredentialController
             .Produces(StatusCodes.Status200OK, typeof(JsonDocument), Constants.JsonContentType)
             .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
 
+        issuer.MapGet("/documents/{documentId}", async ([FromRoute] Guid documentId, [FromServices] ICredentialBusinessLogic logic) =>
+            {
+                var (fileName, content, mediaType) = await logic.GetCredentialDocumentById(documentId);
+                return Results.File(content, contentType: mediaType, fileDownloadName: fileName);
+            })
+            .WithSwaggerDescription("The endpoint enables users to download the credential (full json) of their own company.",
+                "Example: GET: api/credential/documents/{documentId}")
+            .RequireAuthorization(r =>
+            {
+                r.RequireRole("view_credential_requests");
+                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
+                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
+            })
+            .WithDefaultResponses()
+            .Produces(StatusCodes.Status200OK, typeof(FileContentResult), Constants.JsonContentType)
+            .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
+
         return issuer;
     }
 }

@@ -17,12 +17,22 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using System.Text.Json;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
-public interface ICredentialBusinessLogic
+/// <summary>
+/// Possible filter options for the <see cref="CompanySsiDetail"/> pagination
+/// </summary>
+public enum CompanySsiDetailApprovalType
 {
-    Task<JsonDocument> GetCredentialDocument(Guid credentialId);
-    Task<(string FileName, byte[] Content, string MediaType)> GetCredentialDocumentById(Guid documentId);
+    /// <summary>
+    /// The credential request will be automatically approved
+    /// </summary>
+    Automatic = 1,
+
+    /// <summary>
+    /// The operator needs to approve the credential request
+    /// </summary>
+    Manual = 2,
 }

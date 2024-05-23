@@ -80,8 +80,9 @@ public static class IssuerController
                 [FromQuery] int? size,
                 [FromQuery] CompanySsiDetailStatusId? companySsiDetailStatusId,
                 [FromQuery] VerifiedCredentialTypeId? credentialTypeId,
+                [FromQuery] CompanySsiDetailApprovalType? approvalType,
                 [FromQuery] CompanySsiDetailSorting? sorting) => logic.GetCredentials(page ?? 0, size ?? 15,
-                companySsiDetailStatusId, credentialTypeId, sorting))
+                companySsiDetailStatusId, credentialTypeId, approvalType, sorting))
             .WithSwaggerDescription("Gets all outstanding, existing and inactive credentials",
                 "Example: GET: /api/issuer",
                 "The page to get",

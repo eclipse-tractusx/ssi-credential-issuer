@@ -19,6 +19,7 @@
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
@@ -26,6 +27,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using System.Text;
 using System.Text.Json;
+using System.Text.Unicode;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.BusinessLogic;
 
@@ -33,6 +35,7 @@ public class CredentialBusinessLogicTests
 {
     private static readonly string Bpnl = "BPNL00000001TEST";
     private readonly Guid CredentialId = Guid.NewGuid();
+    private readonly Guid DocumentId = Guid.NewGuid();
 
     private readonly IFixture _fixture;
 
@@ -63,6 +66,8 @@ public class CredentialBusinessLogicTests
 
         _sut = new CredentialBusinessLogic(_issuerRepositories, _identityService);
     }
+
+    #region GetCredentialDocument
 
     [Fact]
     public async Task GetCredentialDocument_WithNotExisting_ThrowsNotFoundException()
@@ -124,4 +129,72 @@ public class CredentialBusinessLogicTests
         // Assert
         doc.RootElement.GetRawText().Should().Be("{\"test\":\"test\"}");
     }
+
+    #endregion
+
+    #region GetCredentialDocumentById
+
+    [Fact]
+    public async Task GetCredentialDocumentById_WithNotExisting_ThrowsNotFoundException()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetDocumentById(DocumentId, Bpnl))
+            .Returns(default((bool, bool, string, DocumentStatusId, byte[], MediaTypeId)));
+        async Task Act() => await _sut.GetCredentialDocumentById(DocumentId);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<NotFoundException>(Act);
+
+        // Assert
+        ex.Message.Should().Be(CredentialErrors.DOCUMENT_NOT_FOUND.ToString());
+    }
+
+    [Fact]
+    public async Task GetCredentialDocumentById_WithDifferentCompany_ThrowsForbiddenException()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetDocumentById(DocumentId, Bpnl))
+            .Returns((true, false, string.Empty, DocumentStatusId.ACTIVE, null!, MediaTypeId.JSON));
+        async Task Act() => await _sut.GetCredentialDocumentById(DocumentId);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<ForbiddenException>(Act);
+
+        // Assert
+        ex.Message.Should().Be(CredentialErrors.DOCUMENT_OTHER_COMPANY.ToString());
+    }
+
+    [Fact]
+    public async Task GetCredentialDocumentById_WithoutInactiveDocument_ThrowsConflictException()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetDocumentById(DocumentId, Bpnl))
+            .Returns((true, true, string.Empty, DocumentStatusId.INACTIVE, null!, MediaTypeId.JSON));
+        async Task Act() => await _sut.GetCredentialDocumentById(DocumentId);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+
+        // Assert
+        ex.Message.Should().Be(CredentialErrors.DOCUMENT_INACTIVE.ToString());
+    }
+
+    [Fact]
+    public async Task GetCredentialDocumentById_WithValid_ReturnsExpected()
+    {
+        // Arrange
+        var json = JsonDocument.Parse("{\"test\":\"test\"}");
+        var schema = JsonSerializer.Serialize(json, JsonSerializerOptions.Default);
+        A.CallTo(() => _credentialRepository.GetDocumentById(DocumentId, Bpnl))
+            .Returns((true, true, "test.json", DocumentStatusId.ACTIVE, Encoding.UTF8.GetBytes(schema), MediaTypeId.JSON));
+
+        // Act
+        var doc = await _sut.GetCredentialDocumentById(DocumentId);
+
+        // Assert
+        doc.MediaType.Should().Be(MediaTypeId.JSON.MapToMediaType());
+        doc.FileName.Should().Be("test.json");
+    }
+
+    #endregion
 }
