@@ -2,6 +2,10 @@
 
 This repository contains the backend code for the SSI Credential Issuer written in C#.
 
+For **information about the SSI Credential Issuer**, please refer to the documentation, especially the context and scope section in the [architecture documentation](./docs/architecture).
+
+For **installation** details, please refer to the [README.md](./charts/ssi-credential-issuer/README.md) of the provided helm chart.
+
 ## How to build and run
 
 Install the [.NET 8.0 SDK](https://www.microsoft.com/net/download).

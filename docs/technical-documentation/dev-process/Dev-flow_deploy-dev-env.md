@@ -17,9 +17,7 @@ flowchart LR
 
 Note\* Every pull request (PR) requires at least one approving review by a committer
 
-Note\*\* Unit tests and Sonarcloud runs at pull request, Trivy and KICS scans at merge as well as daily and Veracode scan runs weekly
-
-Note\*\* Trivy and KICS scans are scheduled to daily
+Note\*\* Unit tests and code analysis checks run at pull request
 
 ## NOTICE
 

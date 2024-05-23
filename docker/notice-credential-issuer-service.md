@@ -4,7 +4,7 @@ DockerHub: [https://hub.docker.com/r/tractusx/ssi-credential-issuer-service](htt
 
 Eclipse Tractus-X product(s) installed within the image:
 
-__Policy Hub Service__
+__SSI Credential Issuer Service__
 
 - GitHub: https://github.com/eclipse-tractusx/ssi-credential-issuer
 - Project home: https://projects.eclipse.org/projects/automotive.tractusx
