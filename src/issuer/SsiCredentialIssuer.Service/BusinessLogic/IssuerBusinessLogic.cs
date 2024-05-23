@@ -395,7 +395,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         }
 
         var companyCredentialDetailsRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId, _identity.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
+        var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId, requestData.HolderBpn).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!result.Exists)
         {
             throw ControllerArgumentException.Create(IssuerErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialExternalTypeDetailId", requestData.UseCaseFrameworkId.ToString()) });
