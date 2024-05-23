@@ -47,7 +47,7 @@ public enum VerifiedCredentialExternalTypeId
     [EnumMember(Value = "DemandCapacityCredential")]
     DEMAND_AND_CAPACITY_MANAGEMENT = 8,
 
-    [EnumMember(Value = "DemandCapacityCredential")]
+    [EnumMember(Value = "PurisCredential")]
     DEMAND_AND_CAPACITY_MANAGEMENT_PURIS = 9,
 
     [EnumMember(Value = "BusinessPartnerCredential")]

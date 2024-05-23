@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.0-rc.5](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.4...v1.0.0-rc.5) (2024-05-23)
+
+
+### Features
+
+* **issuer:** add filter to /api/issuer ([#120](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/120)) ([ea5d91a](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/ea5d91a30b18d70c0bcc46555141db6762f6af56))
+
+### Bug Fixes
+
+* **credential:** adjust puris credential naming ([#148](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/148)) ([57c36b1](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/57c36b15f126a32a5d20321b7d7d72910d2f5f3c)), closes [#147](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/147)
+* **framework:** adjust framework credential creation ([#138](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/138)) ([d07abc5](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/d07abc51da218889eb9c09869b7659a878a9166a))
+* **helm:** change ingress to work without tls enabled ([377cd66](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/377cd6634245e9f6a7f650e61064c97f46e10a37))
+* **ownedCredential:** add credential id to response ([#149](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/149)) ([f4c1bca](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/f4c1bca5374e40900e45969b5b1a2a56a5879f56))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0-rc.5 ([46e479e](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/46e479efeed064503484d74b94ac13d9e1951bb1))
+
 ## [1.0.0-rc.4](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2024-05-13)
 
 

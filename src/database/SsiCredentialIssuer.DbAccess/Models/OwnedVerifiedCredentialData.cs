@@ -22,6 +22,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
 public record OwnedVerifiedCredentialData(
+    Guid CredentialDetailId,
     VerifiedCredentialTypeId CredentialType,
     CompanySsiDetailStatusId Status,
     DateTimeOffset? ExpiryDate,

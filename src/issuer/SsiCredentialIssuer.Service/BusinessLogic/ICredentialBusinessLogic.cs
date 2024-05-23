@@ -24,4 +24,5 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 public interface ICredentialBusinessLogic
 {
     Task<JsonDocument> GetCredentialDocument(Guid credentialId);
+    Task<(string FileName, byte[] Content, string MediaType)> GetCredentialDocumentById(Guid documentId);
 }

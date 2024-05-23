@@ -96,11 +96,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             .GetSsiCertificates(_identity.Bpnl, _dateTimeProvider.OffsetNow);
 
     /// <inheritdoc />
-    public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailSorting? sorting)
+    public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType, CompanySsiDetailSorting? sorting)
     {
         var query = _repositories
             .GetInstance<ICompanySsiDetailsRepository>()
-            .GetAllCredentialDetails(companySsiDetailStatusId, credentialTypeId);
+            .GetAllCredentialDetails(companySsiDetailStatusId, credentialTypeId, approvalType);
         var sortedQuery = sorting switch
         {
             CompanySsiDetailSorting.BpnlAsc or null => query.OrderBy(c => c.Bpnl),
@@ -395,7 +395,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         }
 
         var companyCredentialDetailsRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId, _identity.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
+        var result = await companyCredentialDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(requestData.UseCaseFrameworkVersionId, requestData.UseCaseFrameworkId, requestData.HolderBpn).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!result.Exists)
         {
             throw ControllerArgumentException.Create(IssuerErrors.EXTERNAL_TYPE_DETAIL_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialExternalTypeDetailId", requestData.UseCaseFrameworkId.ToString()) });

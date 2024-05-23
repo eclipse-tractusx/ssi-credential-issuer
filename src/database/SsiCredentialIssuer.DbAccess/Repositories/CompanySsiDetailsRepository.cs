@@ -169,17 +169,19 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
             .SingleOrDefaultAsync();
 
     /// <inheritdoc />
-    public IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId) =>
+    public IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType) =>
         _context.CompanySsiDetails.AsNoTracking()
             .Where(c =>
                 (!companySsiDetailStatusId.HasValue || c.CompanySsiDetailStatusId == companySsiDetailStatusId.Value) &&
-                (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId));
+                (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId) &&
+                (!approvalType.HasValue || (approvalType.Value == CompanySsiDetailApprovalType.Automatic && c.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.FRAMEWORK) || (approvalType.Value == CompanySsiDetailApprovalType.Manual && c.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId != VerifiedCredentialTypeKindId.FRAMEWORK)));
 
     /// <inheritdoc />
     public IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl) =>
         _context.CompanySsiDetails.AsNoTracking()
             .Where(c => c.Bpnl == bpnl)
             .Select(c => new OwnedVerifiedCredentialData(
+                c.Id,
                 c.VerifiedCredentialTypeId,
                 c.CompanySsiDetailStatusId,
                 c.ExpiryDate,

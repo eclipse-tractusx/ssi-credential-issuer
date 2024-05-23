@@ -41,17 +41,16 @@ public static class RevocationController
                 "Id of the credential that should be revoked")
             .RequireAuthorization(r =>
             {
-                // r.RequireRole("revoke_credentials_issuer");
+                r.RequireRole("revoke_credentials_issuer");
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
             })
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(Guid));
         revocation.MapPost("credentials/{credentialId}", ([FromRoute] Guid credentialId, CancellationToken cancellationToken, [FromServices] IRevocationBusinessLogic logic) => logic.RevokeCredential(credentialId, false, cancellationToken))
-            .WithSwaggerDescription("Revokes an credential of an holder",
+            .WithSwaggerDescription("Credential Revocation by holder",
                 "POST: api/revocation/credentials/{credentialId}",
                 "Id of the credential that should be revoked",
-                "The information for the holder wallet",
                 "CancellationToken")
             .RequireAuthorization(r =>
             {

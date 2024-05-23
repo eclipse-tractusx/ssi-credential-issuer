@@ -138,6 +138,71 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     #endregion
 
+    #region GetCallbackUrl
+
+    [Fact]
+    public async Task GetCallbackUrl_ReturnsExpectedDocument()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetCallbackUrl(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"));
+
+        // Assert
+        result.Bpn.Should().Be("BPNL00000003AYRE");
+        result.CallbackUrl.Should().Be("https://example.org/callback");
+    }
+
+    #endregion
+
+    #region GetRevocationDataById
+
+    [Fact]
+    public async Task GetRevocationDataById_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetRevocationDataById(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"), "BPNL00000003AYRE");
+
+        // Assert
+        result.Exists.Should().BeTrue();
+        result.IsSameBpnl.Should().BeTrue();
+        result.StatusId.Should().Be(CompanySsiDetailStatusId.PENDING);
+        result.ExternalCredentialId.Should().Be(new Guid("bd474c60-e7ce-450f-bdf4-73604546fc5e"));
+    }
+
+    [Fact]
+    public async Task GetRevocationDataById_WithoutExisting_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetRevocationDataById(Guid.NewGuid(), "BPNL00000003AYRE");
+
+        // Assert
+        result.Exists.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetRevocationDataById_WithNotMatchingBpnl_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetRevocationDataById(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"), "BPNL000000WRONG");
+
+        // Assert
+        result.Exists.Should().BeTrue();
+        result.IsSameBpnl.Should().BeFalse();
+    }
+
+    #endregion
+
     #region AttachAndModifyCredential
 
     [Fact]
@@ -157,6 +222,54 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
         var entity = changedEntries.Single();
         entity.State.Should().Be(EntityState.Modified);
         ((CompanySsiDetail)entity.Entity).CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.PENDING);
+    }
+
+    #endregion
+
+    #region GetDocumentById
+
+    [Fact]
+    public async Task GetDocumentById_ReturnsExpectedDocument()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetDocumentById(new Guid("e020787d-1e04-4c0b-9c06-bd1cd44724b1"), "BPNL00000003AYRE");
+
+        // Assert
+        result.Exists.Should().BeTrue();
+        result.IsSameCompany.Should().BeTrue();
+        result.MediaTypeId.Should().Be(MediaTypeId.PNG);
+    }
+
+    [Fact]
+    public async Task GetDocumentById_WithWrongBpn_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetDocumentById(new Guid("e020787d-1e04-4c0b-9c06-bd1cd44724b1"), "BPNL0000000WRONG");
+
+        // Assert
+        result.Exists.Should().BeTrue();
+        result.IsSameCompany.Should().BeFalse();
+        result.MediaTypeId.Should().Be(MediaTypeId.PNG);
+    }
+
+    [Fact]
+    public async Task GetDocumentById_WithNotExisting_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetDocumentById(Guid.NewGuid(), "BPNL00000003AYRE");
+
+        // Assert
+        result.Exists.Should().BeFalse();
+        result.IsSameCompany.Should().BeFalse();
     }
 
     #endregion
