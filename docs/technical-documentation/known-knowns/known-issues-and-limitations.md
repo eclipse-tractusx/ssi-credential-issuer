@@ -1,4 +1,4 @@
-## Known Issues and Limitations
+# Known Issues and Limitations
 
 - The database is capable of storing documents of type `PRESENTATION` through a POST API call, even though this functionality is not exposed through any specific API endpoint, indicating an undocumented feature or a future use case not yet realized.
 
