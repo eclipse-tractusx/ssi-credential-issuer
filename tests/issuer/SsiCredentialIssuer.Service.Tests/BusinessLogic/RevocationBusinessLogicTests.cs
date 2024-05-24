@@ -24,6 +24,7 @@ public class RevocationBusinessLogicTests
     private readonly IWalletService _walletService;
     private readonly IIdentityService _identityService;
     private readonly IIdentityData _identityData;
+    private readonly IIssuerRepositories _issuerRepositories;
 
     public RevocationBusinessLogicTests()
     {
@@ -32,7 +33,7 @@ public class RevocationBusinessLogicTests
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        var issuerRepositories = A.Fake<IIssuerRepositories>();
+        _issuerRepositories = A.Fake<IIssuerRepositories>();
         _documentRepository = A.Fake<IDocumentRepository>();
         _credentialRepository = A.Fake<ICredentialRepository>();
         _walletService = A.Fake<IWalletService>();
@@ -41,10 +42,10 @@ public class RevocationBusinessLogicTests
         A.CallTo(() => _identityData.Bpnl).Returns(Bpnl);
         A.CallTo(() => _identityService.IdentityData).Returns(_identityData);
 
-        A.CallTo(() => issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
-        A.CallTo(() => issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
+        A.CallTo(() => _issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
+        A.CallTo(() => _issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
 
-        _sut = new RevocationBusinessLogic(issuerRepositories, _walletService, _identityService);
+        _sut = new RevocationBusinessLogic(_issuerRepositories, _walletService, _identityService);
     }
 
     #region RevokeIssuerCredential
@@ -155,6 +156,7 @@ public class RevocationBusinessLogicTests
         A.CallTo(() => _walletService.RevokeCredentialForIssuer(A<Guid>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         document.DocumentStatusId.Should().Be(DocumentStatusId.INACTIVE);
         credential.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.REVOKED);
+        A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
     }
 
     #endregion
