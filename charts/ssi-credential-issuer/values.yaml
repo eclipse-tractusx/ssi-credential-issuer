@@ -260,7 +260,7 @@ ingress:
     # -- Provide default path for the ingress record.
     - host: ""
       paths:
-        - path: "/api/issuer"
+        - path: "/api"
           pathType: "Prefix"
           backend:
             port: 8080

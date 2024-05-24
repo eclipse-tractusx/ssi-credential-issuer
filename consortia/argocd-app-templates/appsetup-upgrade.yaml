@@ -28,7 +28,7 @@ spec:
   source:
     path: charts/ssi-credential-issuer
     repoURL: 'https://github.com/eclipse-tractusx/ssi-credential-issuer.git'
-    targetRevision: ssi-credential-issuer-1.0.0-rc.5
+    targetRevision: ssi-credential-issuer-1.0.0-rc.6
     plugin:
       env:
         - name: AVP_SECRET

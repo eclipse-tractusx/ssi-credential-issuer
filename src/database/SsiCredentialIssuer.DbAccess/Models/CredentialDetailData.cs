@@ -21,8 +21,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
-public record CredentialDetailData
-(
+public record CredentialDetailData(
     Guid CredentialDetailId,
     string Bpnl,
     VerifiedCredentialTypeId CredentialType,

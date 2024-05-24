@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.0-rc.6](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.5...v1.0.0-rc.6) (2024-05-24)
+
+
+### Bug Fixes
+
+* **ingress:** adjust api path ([#157](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/157)) ([8b9bffa](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/8b9bffa23dffdaf6bb0afc9a30ad401f8e4a507e))
+* **revocation:** save database changes after revocation ([#159](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/159)) ([41cb14d](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/41cb14dff374b16199c888fbf1145e9f28af66bc))
+
+
+### Miscellaneous Chores
+
+* release 1.0.0-rc.6 ([2a609eb](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/2a609ebbf591f99bd602646122751fcb82979241))
+
 ## [1.0.0-rc.5](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.0.0-rc.4...v1.0.0-rc.5) (2024-05-23)
 
 
