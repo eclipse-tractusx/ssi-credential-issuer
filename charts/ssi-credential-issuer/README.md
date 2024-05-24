@@ -27,7 +27,7 @@ To use the helm chart as a dependency:
 dependencies:
   - name: ssi-credential-issuer
     repository: https://eclipse-tractusx.github.io/charts/dev
-    version: 1.0.0-rc.5
+    version: 1.0.0-rc.6
 ```
 
 ## Requirements
@@ -135,7 +135,7 @@ dependencies:
 | centralidp.useAuthTrail | bool | `true` | Flag if the api should be used with an leading /auth path |
 | ingress.enabled | bool | `false` | SSI Credential Issuer ingress parameters, enable ingress record generation for ssi-credential-issuer. |
 | ingress.tls | list | `[]` | Ingress TLS configuration |
-| ingress.hosts[0] | object | `{"host":"","paths":[{"backend":{"port":8080},"path":"/api/issuer","pathType":"Prefix"}]}` | Provide default path for the ingress record. |
+| ingress.hosts[0] | object | `{"host":"","paths":[{"backend":{"port":8080},"path":"/api","pathType":"Prefix"}]}` | Provide default path for the ingress record. |
 | portContainer | int | `8080` |  |
 | portService | int | `8080` |  |
 | replicaCount | int | `3` |  |
