@@ -78,5 +78,7 @@ public class RevocationBusinessLogic : IRevocationBusinessLogic
         credentialRepository.AttachAndModifyCredential(credentialId,
             x => x.CompanySsiDetailStatusId = data.StatusId,
             x => x.CompanySsiDetailStatusId = CompanySsiDetailStatusId.REVOKED);
+
+        await _repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
     }
 }
