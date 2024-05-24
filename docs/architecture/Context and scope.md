@@ -2,12 +2,15 @@
 
 ## Business Context
 
-The SSI credential issuer is created to enable the communication with wallets and handle the creation, revocation and expiry of credentials.
-Additionally it gives the user a overview of available use case credentials.
+The Self-Sovereign Identity (SSI) credential issuer core purpose is to facilitate seamless communication with digital wallets, which are essential tools for managing digital identities. Being responsible for the critical functions of creating, revoking, and managing the expiry of credentials. This ensures that issuers maintain control over their issues digital identities.
+
+To further enhance the user experience, the SSI credential issuer provides users with a comprehensive overview of available use case credentials. By doing so, it empowers users to make informed decisions about which credentials to acquire and use. The business context of the SSI credential issuer is thus centered around providing a robust, user-friendly, and secure mechanism for identity management.
 
 ## Technical Context
 
-The SSI credential issuer comprise the technical foundation for interaction, monitoring, auditing and further functionalities. They are state of the art in terms of technology portfolio, consist of open-source components whenever possible and are open-sourced themselves 100%.
+From a technical standpoint, the SSI credential issuer is built on a foundation that promotes interaction, monitoring, auditing, and a host of other functionalities that are crucial for maintaining a secure and reliable identity management system.
+
+A key aspect of the technical context is the commitment to open-source principles. The SSI credential issuer is constructed with open-source components to the greatest extent possible, fostering a collaborative and transparent development environment. Moreover, the entire codebase of the SSI credential issuer is open-sourced, reflecting a 100% commitment to the open-source community.
 
 ## NOTICE
 

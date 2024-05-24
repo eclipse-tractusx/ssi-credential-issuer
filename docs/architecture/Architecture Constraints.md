@@ -1,33 +1,53 @@
-# Architecture Constraints
+# Architecture Constraints Documentation
 
-## General
+## Overview
 
-- The SSI Credential Issuer is a central API for the handling of credentials. It handles the wallet communication for the creation and revocation of credentials of the issuer and holder. Another purpose is the expiry handling and automatic revocation of already expired credentials. There is no plan to implement an UI at the current stage.
+The following document outlines the architecture constraints for the SSI Credential Issuer App. This App serves as a central point for credential handling, including creation, revocation, and expiration management. The constraints outlined in this document are intended to guide the development and deployment of the system to ensure it meets the specified requirements and adheres to the defined standards.
 
-- Run anywhere: can be deployed as a docker image, e. g. on Kubernetes (platform-independent, cloud, on prem or local).
+## General Constraints
 
-## Developer
+### System Purpose
 
-- OpenSource software first - FOSS licenses approved by the eclipse foundation has to be used. It could represent the initial set that the CX community agrees on to regulate the content contribution under FOSS licenses.
+- **Credential Management**: The SSI Credential Issuer App is designed to manage digital credentials, handling tasks such as creation, revocation, and automatic expiration of credentials for both issuers and holders.
+- **Communication**: The App facilitates communication with wallets, enabling the management of credentials.
+- **No User Interface (UI)**: The current development plan does not include the implementation of a user interface. However an user interface interaction got implemented as part of the portal project.
 
-- Coding guidelines for FE and BE are defined and are to be followed for all portal related developments.
+### Deployment
 
-- Apache License 2.0 - Apache License 2.0 is one of the approved licenses which should be used to respect and guarantee Intellectual property (IP).
+- **Run Anywhere**: The system is designed to be containerized and deployable as a Docker image. This ensures it can run on various platforms, including cloud environments, on-premises infrastructure, or locally.
+- **Platform-Independent**: The application is platform-independent, capable of running on Kubernetes or similar orchestration platforms.
 
-- Code Analysis, Linting and Code Coverage - Consistent style increases readability and maintainability of the code base. Hence, we use analyzers to enforce consistency and style rules. We enforce the code style and rules in the CI to avoid merging code that does not comply with standards.
+## Developer Constraints
 
-## Code analysis, linting and code coverage
+### Open Source Software
 
-As part of the standard reviews, following code analysis and security checks have been executed:
+- **FOSS Licenses**: All software used must be open-source, with licenses approved by the Eclipse Foundation. These licenses form the initial set agreed upon by the CX community to regulate content contributions.
+- **Apache License 2.0**: The Apache License 2.0 is selected as the approved license to respect and guarantee intellectual property rights.
 
-- SonarCloud Code Analysis
-- Thread Modelling Analysis
-- Static Application Security Testing (SAST)
-- Dynamic Application Security Testing (DAST)
-- Secret Scans
-- Software Composition Analysis (SCA)
-- Container Scans
-- Infrastructure as Code (IaC)
+### Development Standards
+
+- **Coding Guidelines**: Defined coding guidelines for frontend (FE) and backend (BE) development must be followed for all portal-related developments.
+- **Consistency Enforcement**: Code analysis tools, linters, and code coverage metrics are used to enforce coding standards and maintain a consistent style. These standards are enforced through the Continuous Integration (CI) process to prevent the merging of non-compliant code.
+
+## Code Analysis and Security
+
+To ensure code quality and security, the following analyses and checks are performed during standard reviews:
+
+### Code Quality Checks
+
+- **SonarCloud Code Analysis**: Automated code review tool to detect code quality issues.
+- **Code Linting**: Tools to enforce coding style and detect syntax errors.
+- **Code Coverage**: Metrics to ensure a sufficient percentage of the codebase is covered by automated tests.
+
+### Security Checks
+
+- **Thread Modelling Analysis**: Assessment of potential security threats and vulnerabilities.
+- **Static Application Security Testing (SAST)**: Analysis of source code for security vulnerabilities.
+- **Dynamic Application Security Testing (DAST)**: Testing of the application in its running state to find security vulnerabilities.
+- **Secret Scans**: Detection of sensitive information such as passwords or API keys in the codebase.
+- **Software Composition Analysis (SCA)**: Evaluation of open-source components for security risks.
+- **Container Scans**: Analysis of Docker container images for vulnerabilities.
+- **Infrastructure as Code (IaC)**: Analysis of infrastructure definitions for security and compliance.
 
 ## NOTICE
 
