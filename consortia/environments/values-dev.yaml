@@ -36,7 +36,7 @@ ingress:
   hosts:
     - host: "ssi-credential-issuer.dev.demo.catena-x.net"
       paths:
-        - path: "/api/issuer"
+        - path: "/api"
           pathType: "Prefix"
           backend:
             port: 8080
