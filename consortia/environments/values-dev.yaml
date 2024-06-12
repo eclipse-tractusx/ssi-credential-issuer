@@ -41,7 +41,7 @@ ingress:
           backend:
             port: 8080
 
-issuer:
+service:
   image:
     tag: "dev"
   imagePullPolicy: "Always"
@@ -57,7 +57,7 @@ issuer:
     clientId: "<path:portal/data/ssi-credential-issuer/portal#clientId>"
     clientSecret: "<path:portal/data/ssi-credential-issuer/dev/portal#clientSecret>"
 
-issuermigrations:
+migrations:
   image:
     tag: "dev"
   imagePullPolicy: "Always"

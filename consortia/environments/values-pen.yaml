@@ -41,7 +41,7 @@ ingress:
           backend:
             port: 8080
 
-issuer:
+service:
   swaggerEnabled: true
   credential:
     issuerDid: "did:web:dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com:dim-hosted:2f45795c-d6cc-4038-96c9-63cedc0cd266:holder-iatp"
@@ -54,7 +54,7 @@ issuer:
     clientId: "<path:portal/data/ssi-credential-issuer/portal#clientId>"
     clientSecret: "<path:portal/data/ssi-credential-issuer/pen/portal#clientSecret>"
 
-issuermigrations:
+migrations:
   logging:
     default: "Debug"
   seeding:
