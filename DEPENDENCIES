@@ -12,7 +12,7 @@ nuget/nuget/-/JsonPointer.Net/4.0.0, MIT, approved, clearlydefined
 nuget/nuget/-/JsonSchema.Net/6.1.2, MIT AND OFL-1.1 AND CC-BY-SA-4.0, approved, #14591
 nuget/nuget/-/Laraue.EfCoreTriggers.Common/8.0.3, MIT, approved, #13968
 nuget/nuget/-/Laraue.EfCoreTriggers.PostgreSql/8.0.3, MIT, approved, #13984
-nuget/nuget/-/Mono.TextTemplating/2.2.1, MIT, approved, clearlydefined
+nuget/nuget/-/Mono.TextTemplating/2.2.1, MIT, approved, #15073
 nuget/nuget/-/Newtonsoft.Json/13.0.1, MIT AND BSD-3-Clause, approved, #3266
 nuget/nuget/-/Newtonsoft.Json/13.0.3, MIT AND BSD-3-Clause, approved, #3266
 nuget/nuget/-/Npgsql.EntityFrameworkCore.PostgreSQL/8.0.4, PostgreSQL AND MIT, approved, #13972
