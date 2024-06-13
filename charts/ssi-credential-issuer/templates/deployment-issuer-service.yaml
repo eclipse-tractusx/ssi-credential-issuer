@@ -45,8 +45,8 @@ spec:
             - ALL
           readOnlyRootFilesystem: true
           runAsNonRoot: true
-        image: "{{ .Values.issuer.image.name }}:{{ .Values.issuer.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: "{{ .Values.issuer.imagePullPolicy }}"
+        image: "{{ .Values.service.image.name }}:{{ .Values.service.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: "{{ .Values.service.imagePullPolicy }}"
         env:
         - name: DOTNET_ENVIRONMENT
           value: "{{ .Values.dotnetEnvironment }}"
@@ -69,14 +69,14 @@ spec:
           value: "Server={{ .Values.externalDatabase.host }};Database={{ .Values.externalDatabase.database }};Port={{ .Values.externalDatabase.port }};User Id={{ .Values.externalDatabase.username }};Password=$(ISSUER_PASSWORD);Ssl Mode={{ .Values.dbConnection.sslMode }};"
         {{- end }}
         - name: "HEALTHCHECKS__0__PATH"
-          value: "{{ .Values.issuer.healthChecks.startup.path}}"
-        {{- if .Values.issuer.healthChecks.startup.tags }}
-        {{- toYaml .Values.issuer.healthChecks.startup.tags | nindent 8 }}
+          value: "{{ .Values.service.healthChecks.startup.path}}"
+        {{- if .Values.service.healthChecks.startup.tags }}
+        {{- toYaml .Values.service.healthChecks.startup.tags | nindent 8 }}
         {{- end }}
         - name: "HEALTHCHECKS__1__PATH"
-          value: "{{ .Values.issuer.healthChecks.readyness.path}}"
+          value: "{{ .Values.service.healthChecks.readyness.path}}"
         - name: "HEALTHCHECKS__2__PATH"
-          value: "{{ .Values.issuer.healthChecks.liveness.path}}"
+          value: "{{ .Values.service.healthChecks.liveness.path}}"
         - name: "JWTBEAREROPTIONS__METADATAADDRESS"
           value: "{{ .Values.centralidp.address }}{{ .Values.centralidp.jwtBearerOptions.metadataPath }}"
         - name: "JWTBEAREROPTIONS__REQUIREHTTPSMETADATA"
@@ -88,20 +88,20 @@ spec:
         - name: "JWTBEAREROPTIONS__REFRESHINTERVAL"
           value: "{{ .Values.centralidp.jwtBearerOptions.refreshInterval }}"
         - name: "SERILOG__MINIMUMLEVEL__Default"
-          value: "{{ .Values.issuer.logging.default }}"
+          value: "{{ .Values.service.logging.default }}"
         - name: "SERILOG__MINIMUMLEVEL__OVERRIDE__Org.Eclipse.TractusX.SsiCredentialIssuer.Service"
-          value: "{{ .Values.issuer.logging.businessLogic }}"
+          value: "{{ .Values.service.logging.businessLogic }}"
         - name: "SWAGGERENABLED"
-          value: "{{ .Values.issuer.swaggerEnabled }}"
+          value: "{{ .Values.service.swaggerEnabled }}"
         - name: "PORTAL__CLIENTID"
-          value: "{{ .Values.issuer.portal.clientId }}"
+          value: "{{ .Values.service.portal.clientId }}"
         - name: "PORTAL__CLIENTSECRET"
           valueFrom:
             secretKeyRef:
               name: "{{ template "issuer.secretName" . }}"
               key: "portal-client-secret"
         - name: "PORTAL__GRANTTYPE"
-          value: "{{ .Values.issuer.portal.grantType }}"
+          value: "{{ .Values.service.portal.grantType }}"
         - name: "PORTAL__TOKENADDRESS"
           value: "{{ .Values.centralidp.address }}{{ .Values.centralidp.tokenPath }}"
         - name: "PORTAL__BASEADDRESS"
@@ -109,23 +109,23 @@ spec:
         - name: "PORTAL__PASSWORD"
           value: "empty"
         - name: "PORTAL__SCOPE"
-          value: "{{ .Values.issuer.portal.scope }}"
+          value: "{{ .Values.service.portal.scope }}"
         - name: "PORTAL__USERNAME"
           value: "empty"
         - name: "CREDENTIAL__ISSUERDID"
-          value: "{{ .Values.issuer.credential.issuerDid }}"
+          value: "{{ .Values.service.credential.issuerDid }}"
         - name: "CREDENTIAL__ISSUERBPN"
-          value: "{{ .Values.issuer.credential.issuerBpn }}"
+          value: "{{ .Values.service.credential.issuerBpn }}"
         - name: "CREDENTIAL__STATUSLISTURL"
-          value: "{{ .Values.issuer.credential.statusListUrl }}"
+          value: "{{ .Values.service.credential.statusListUrl }}"
         - name: "CREDENTIAL__ENCRYPTIONCONFIG__ENCRYPTIONCONFIGINDEX"
-          value: "{{ .Values.issuer.credential.encryptionConfigIndex }}"
+          value: "{{ .Values.service.credential.encryptionConfigIndex }}"
         - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__INDEX"
-          value: "{{ .Values.issuer.credential.encryptionConfigs.index0.index}}"
+          value: "{{ .Values.service.credential.encryptionConfigs.index0.index}}"
         - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__CIPHERMODE"
-          value: "{{ .Values.issuer.credential.encryptionConfigs.index0.cipherMode}}"
+          value: "{{ .Values.service.credential.encryptionConfigs.index0.cipherMode}}"
         - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__PADDINGMODE"
-          value: "{{ .Values.issuer.credential.encryptionConfigs.index0.paddingMode}}"
+          value: "{{ .Values.service.credential.encryptionConfigs.index0.paddingMode}}"
         - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__ENCRYPTIONKEY"
           valueFrom:
             secretKeyRef:
@@ -169,7 +169,7 @@ spec:
           protocol: TCP
         startupProbe:
           httpGet:
-            path: {{ .Values.issuer.healthChecks.startup.path }}
+            path: {{ .Values.service.healthChecks.startup.path }}
             port: {{ .Values.portContainer }}
             scheme: HTTP
           initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
@@ -179,7 +179,7 @@ spec:
           failureThreshold: {{ .Values.startupProbe.failureThreshold }}
         livenessProbe:
           httpGet:
-            path: {{ .Values.issuer.healthChecks.liveness.path }}
+            path: {{ .Values.service.healthChecks.liveness.path }}
             port: {{ .Values.portContainer }}
             scheme: HTTP
           initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
@@ -189,7 +189,7 @@ spec:
           failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
         readinessProbe:
           httpGet:
-            path: {{ .Values.issuer.healthChecks.readyness.path }}
+            path: {{ .Values.service.healthChecks.readyness.path }}
             port: {{ .Values.portContainer }}
             scheme: HTTP
           initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
@@ -198,7 +198,7 @@ spec:
           successThreshold: {{ .Values.readinessProbe.successThreshold }}
           failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
         resources:
-          {{- toYaml .Values.issuer.resources | nindent 10 }}
+          {{- toYaml .Values.service.resources | nindent 10 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
