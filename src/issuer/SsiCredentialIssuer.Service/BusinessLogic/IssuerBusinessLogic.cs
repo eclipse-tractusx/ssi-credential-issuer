@@ -440,7 +440,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             externalTypeId,
             $"Framework Credential for UseCase {externalTypeId}",
             DateTimeOffset.UtcNow,
-            result.Expiry,
+            GetExpiryDate(result.Expiry),
             _settings.IssuerDid,
             new FrameworkCredentialSubject(
                 holderDid,
