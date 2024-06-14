@@ -32,8 +32,8 @@ public enum VerifiedCredentialExternalTypeId
     [EnumMember(Value = "BehaviorTwinCredential")]
     BEHAVIOR_TWIN_CREDENTIAL = 3,
 
-    [EnumMember(Value = "vehicleDismantle")]
-    VEHICLE_DISMANTLE = 4,
+    [EnumMember(Value = "MembershipCredential")]
+    MEMBERSHIP_CREDENTIAL = 4,
 
     [EnumMember(Value = "CircularEconomyCredential")]
     CIRCULAR_ECONOMY = 5,

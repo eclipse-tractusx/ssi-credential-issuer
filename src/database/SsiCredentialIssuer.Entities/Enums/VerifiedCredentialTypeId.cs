@@ -32,8 +32,8 @@ public enum VerifiedCredentialTypeId
     [EnumMember(Value = "Behavior Twin Framework")]
     BEHAVIOR_TWIN_FRAMEWORK = 3,
 
-    [EnumMember(Value = "Dismantler Certificate")]
-    DISMANTLER_CERTIFICATE = 4,
+    [EnumMember(Value = "Membership Certificate")]
+    MEMBERSHIP_CERTIFICATE = 4,
 
     [EnumMember(Value = "Circular Economy")]
     CIRCULAR_ECONOMY = 5,

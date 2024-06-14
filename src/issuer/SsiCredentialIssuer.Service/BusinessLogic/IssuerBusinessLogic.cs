@@ -22,7 +22,6 @@ using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Linq;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Encryption;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
@@ -384,7 +383,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     public async Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken)

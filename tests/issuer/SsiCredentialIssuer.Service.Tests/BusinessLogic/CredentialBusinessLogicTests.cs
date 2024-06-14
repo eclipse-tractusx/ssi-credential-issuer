@@ -27,7 +27,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using System.Text;
 using System.Text.Json;
-using System.Text.Unicode;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.BusinessLogic;
 

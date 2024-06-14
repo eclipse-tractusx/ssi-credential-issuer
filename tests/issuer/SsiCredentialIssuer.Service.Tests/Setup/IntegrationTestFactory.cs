@@ -37,7 +37,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Seeder;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
-using System.Reflection;
 using System.Text.Json.Serialization;
 using Testcontainers.PostgreSql;
 
