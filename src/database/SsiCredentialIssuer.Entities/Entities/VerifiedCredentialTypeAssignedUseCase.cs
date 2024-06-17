@@ -21,16 +21,10 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 
-public class VerifiedCredentialTypeAssignedUseCase
+public class VerifiedCredentialTypeAssignedUseCase(VerifiedCredentialTypeId verifiedCredentialTypeId, Guid useCaseId)
 {
-    public VerifiedCredentialTypeAssignedUseCase(VerifiedCredentialTypeId verifiedCredentialTypeId, Guid useCaseId)
-    {
-        VerifiedCredentialTypeId = verifiedCredentialTypeId;
-        UseCaseId = useCaseId;
-    }
-
-    public VerifiedCredentialTypeId VerifiedCredentialTypeId { get; set; }
-    public Guid UseCaseId { get; set; }
+    public VerifiedCredentialTypeId VerifiedCredentialTypeId { get; set; } = verifiedCredentialTypeId;
+    public Guid UseCaseId { get; set; } = useCaseId;
 
     // Navigation Properties
     public virtual VerifiedCredentialType? VerifiedCredentialType { get; set; }
