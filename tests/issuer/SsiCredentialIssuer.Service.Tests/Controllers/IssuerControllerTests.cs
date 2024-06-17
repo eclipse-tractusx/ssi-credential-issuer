@@ -48,7 +48,7 @@ public class IssuerControllerTests(IntegrationTestFactory factory) : IClassFixtu
 
         // Assert
         types.Should().NotBeNull().And.HaveCount(2).And.Satisfy(
-            x => x == VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE,
+            x => x == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE,
             x => x == VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER
         );
     }
