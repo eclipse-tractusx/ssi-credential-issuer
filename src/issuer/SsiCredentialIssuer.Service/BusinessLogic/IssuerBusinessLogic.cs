@@ -489,7 +489,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var documentContent = Encoding.UTF8.GetBytes(schema);
         var hash = SHA512.HashData(documentContent);
         var documentRepository = _repositories.GetInstance<IDocumentRepository>();
-        var docId = documentRepository.CreateDocument("schema.json", documentContent,
+        var docId = documentRepository.CreateDocument($"{typeId}.json", documentContent,
             hash, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, x =>
             {
                 x.IdentityId = _identity.IdentityId;
