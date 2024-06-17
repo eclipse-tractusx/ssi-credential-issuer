@@ -43,7 +43,7 @@ ingress:
 
 issuer:
   image:
-    tag: "dev"
+    tag: "main"
   imagePullPolicy: "Always"
   swaggerEnabled: true
   credential:
@@ -59,7 +59,7 @@ issuer:
 
 issuermigrations:
   image:
-    tag: "dev"
+    tag: "main"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
@@ -68,7 +68,7 @@ issuermigrations:
 
 processesworker:
   image:
-    tag: "dev"
+    tag: "main"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
@@ -84,7 +84,7 @@ processesworker:
 
 credentialExpiry:
   image:
-    tag: "dev"
+    tag: "main"
   imagePullPolicy: "Always"
   logging:
     default: "Debug"
