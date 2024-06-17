@@ -25,7 +25,9 @@ on:
     paths:
       - 'charts/**'
     branches:
-      - main
+      - 'main'
+      - 'release/v*.*.*'
+
 
 jobs:
   release-helm-chart:

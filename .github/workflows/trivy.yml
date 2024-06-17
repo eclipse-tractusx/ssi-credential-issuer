@@ -24,7 +24,7 @@ name: "Trivy Stable"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   # pull_request:
   # The branches below must be a subset of the branches above
   # branches: [ main, master ]
@@ -92,14 +92,14 @@ jobs:
           # Path to Docker image
           image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-service:latest"
           format: "sarif"
-          output: "trivy-results3.sarif"
+          output: "trivy-results2.sarif"
           vuln-type: "os,library"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@b7cec7526559c32f1616476ff32d17ba4c59b2d6 # v3.25.5
         with:
-          sarif_file: "trivy-results3.sarif"
+          sarif_file: "trivy-results2.sarif"
 
   analyze-ssi-credential-issuer-migrations:
     runs-on: ubuntu-latest
@@ -124,14 +124,14 @@ jobs:
           # Path to Docker image
           image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-migrations:latest"
           format: "sarif"
-          output: "trivy-results9.sarif"
+          output: "trivy-results3.sarif"
           vuln-type: "os,library"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@b7cec7526559c32f1616476ff32d17ba4c59b2d6 # v3.25.5
         with:
-          sarif_file: "trivy-results9.sarif"
+          sarif_file: "trivy-results3.sarif"
 
   analyze-ssi-credential-expiry-app:
     runs-on: ubuntu-latest
@@ -156,15 +156,15 @@ jobs:
           # Path to Docker image
           image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-expiry-app:latest"
           format: "sarif"
-          output: "trivy-results9.sarif"
+          output: "trivy-results4.sarif"
           vuln-type: "os,library"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@b7cec7526559c32f1616476ff32d17ba4c59b2d6 # v3.25.5
         with:
-          sarif_file: "trivy-results9.sarif"
-        
+          sarif_file: "trivy-results4.sarif"
+
   analyze-ssi-credential-issuer-processes-worker:
     runs-on: ubuntu-latest
     permissions:
@@ -188,12 +188,11 @@ jobs:
           # Path to Docker image
           image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-processes-worker:latest"
           format: "sarif"
-          output: "trivy-results9.sarif"
+          output: "trivy-results5.sarif"
           vuln-type: "os,library"
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@b7cec7526559c32f1616476ff32d17ba4c59b2d6 # v3.25.5
         with:
-          sarif_file: "trivy-results9.sarif"
-        
+          sarif_file: "trivy-results5.sarif"

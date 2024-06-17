@@ -23,7 +23,7 @@ on:
   push:
     paths:
       - 'charts/ssi-credential-issuer/**'
-    branches: [main, dev, release-candidate]
+    branches: [main]
   pull_request:
     paths:
       - 'charts/ssi-credential-issuer/**'

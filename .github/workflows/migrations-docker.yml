@@ -19,7 +19,7 @@
 
 name: Build Migrations Image
 
-on: 
+on:
   push:
     paths:
       # service and transitive paths
@@ -31,7 +31,7 @@ on:
       - 'docker/Dockerfile-credential-issuer-migrations'
 
     branches:
-      - 'dev'
+      - 'main'
   workflow_dispatch:
 
 env:
@@ -67,7 +67,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=dev
+            type=raw,value=main
             type=raw,value=${{ github.sha }}
 
       - name: Build and push Docker image

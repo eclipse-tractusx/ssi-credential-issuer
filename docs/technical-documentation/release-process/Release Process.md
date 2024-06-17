@@ -11,13 +11,13 @@ The release process for a new version can roughly be divided into the following 
   - [Merge release branch](#merge-release-branch)
   - [RC: provide successive rc branch and change base of open PRs](#rc-provide-successive-rc-branch-and-change-base-of-open-prs)
 
-The process builds on the development flow which, usually, takes place within forks and leads to merged pull requests in the repositories of the eclipse-tractusx organization.
+The process builds on the [Development Flow](../dev-process/Dev-flow_git-diagram.md) which, usually, takes place within forks and leads to merged pull requests in the repositories of the eclipse-tractusx organization.
 
 For assigning and incrementing **version** numbers [Semantic Versioning](https://semver.org) is followed.
 
 ## Preparations on the release branch
 
-Checking out from the dev branch a release branch (release/{to be released version} e.g. release/v1.2.0, or respectively release/v1.2.0-rc.1 for a release candidate).
+Checking out from the main branch a release branch (release/{to be released version} e.g. release/v1.2.0, or respectively release/v1.2.0-rc.1 for a release candidate).
 On the release branch the following steps are executed:
 
 ### 1. Aggregate migrations
@@ -25,7 +25,7 @@ On the release branch the following steps are executed:
 Migrations should be **aggregated in the case of releasing a new version**, in order to not release the entire history of migrations which accumulate during the development process.
 
 Once a version has been released, migrations **mustn't be aggregated** in order to ensure upgradeability this also applies to **release candidates > rc.1 and hotfixes**.
-Be aware that migrations coming release branches for release candidates or from hotfix branches, will **need to be incorporated into dev and main**.
+Be aware that migrations coming release branches for release candidates or from hotfix branches, will **need to be incorporated into main**.
 
 ### 2. Version bump
 
@@ -65,14 +65,11 @@ Please see:
 ## Merge release branch
 
 The release branch must be merged into main.
-Afterwards, main into dev.
 Those merges need to happen via PRs.
 
 Example for PR titles:
 
 _build(1.2.0): merge release into main_
-
-_build(1.2.0): merge main to dev_
 
 > Be aware that the merge into main triggers the workflow with the [helm-chart releaser action](../../../.github/workflows/chart-release.yaml).
 >
