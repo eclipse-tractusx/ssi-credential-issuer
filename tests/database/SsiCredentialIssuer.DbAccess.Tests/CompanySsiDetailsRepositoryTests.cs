@@ -59,7 +59,7 @@ public class CompanySsiDetailsRepositoryTests
         var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.MinValue).ToListAsync();
 
         // Assert
-        result.Should().HaveCount(8);
+        result.Should().HaveCount(9);
         result.Where(x => x.Description != null).Should().HaveCount(7).And.Satisfy(
             x => x.Description == "T",
             x => x.Description == "BT",
@@ -86,7 +86,7 @@ public class CompanySsiDetailsRepositoryTests
         var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, dt).ToListAsync();
 
         // Assert
-        result.Should().HaveCount(8);
+        result.Should().HaveCount(9);
         result.Where(x => x.Description != null).Should().HaveCount(7).And.Satisfy(
             x => x.Description == "T",
             x => x.Description == "BT",

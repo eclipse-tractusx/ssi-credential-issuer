@@ -51,5 +51,8 @@ public enum VerifiedCredentialTypeId
     DEMAND_AND_CAPACITY_MANAGEMENT_PURIS = 9,
 
     [EnumMember(Value = "Business Partner Data Management")]
-    BUSINESS_PARTNER_DATA_MANAGEMENT = 10
+    BUSINESS_PARTNER_DATA_MANAGEMENT = 10,
+
+    [EnumMember(Value = "Framework Agreement")]
+    FRAMEWORK_AGREEMENT = 11
 }
