@@ -20,7 +20,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "issuer.fullname" . }}-{{ .Values.issuermigrations.name }}
+  name: {{ include "issuer.fullname" . }}-{{ .Values.migrations.name }}
   annotations:
     "batch.kubernetes.io/job-tracking": "true"
     "helm.sh/hook": post-install,post-upgrade
@@ -28,11 +28,11 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ include "issuer.fullname" . }}-{{ .Values.issuermigrations.name }}
+      name: {{ include "issuer.fullname" . }}-{{ .Values.migrations.name }}
     spec:
       restartPolicy: Never
       containers:
-      - name: {{ include "issuer.fullname" . }}-{{ .Values.issuermigrations.name }}
+      - name: {{ include "issuer.fullname" . }}-{{ .Values.migrations.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -40,8 +40,8 @@ spec:
             - ALL
           readOnlyRootFilesystem: true
           runAsNonRoot: true
-        image: "{{ .Values.issuermigrations.image.name }}:{{ .Values.issuermigrations.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: "{{ .Values.issuermigrations.imagePullPolicy }}"
+        image: "{{ .Values.migrations.image.name }}:{{ .Values.migrations.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: "{{ .Values.migrations.imagePullPolicy }}"
         env:
           - name: DOTNET_ENVIRONMENT
             value: "{{ .Values.dotnetEnvironment }}"
@@ -64,16 +64,16 @@ spec:
             value: "Server={{ .Values.externalDatabase.host }};Database={{ .Values.externalDatabase.database }};Port={{ .Values.externalDatabase.port }};User Id={{ .Values.externalDatabase.username }};Password=$(ISSUER_PASSWORD);Ssl Mode={{ .Values.dbConnection.sslMode }};"
           {{- end }}
           - name: "SEEDING__TESTDATAENVIRONMENTS__0"
-            value: "{{ .Values.issuermigrations.seeding.testDataEnvironments }}"
+            value: "{{ .Values.migrations.seeding.testDataEnvironments }}"
           - name: "SEEDING__DATAPATHS__0"
-            value: "{{ .Values.issuermigrations.seeding.testDataPaths }}"
+            value: "{{ .Values.migrations.seeding.testDataPaths }}"
           - name: "SERILOG__MINIMUMLEVEL__Default"
-            value: "{{ .Values.issuermigrations.logging.default }}"
+            value: "{{ .Values.migrations.logging.default }}"
           - name: "PROCESSIDENTITY__IDENTITYID"
-            value: "{{ .Values.issuermigrations.processIdentity.identityId }}"
+            value: "{{ .Values.migrations.processIdentity.identityId }}"
         ports:
         - name: http
           containerPort: {{ .Values.portContainer }}
           protocol: TCP
         resources:
-          {{- toYaml .Values.issuermigrations.resources | nindent 10 }}
+          {{- toYaml .Values.migrations.resources | nindent 10 }}

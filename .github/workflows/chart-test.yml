@@ -121,7 +121,7 @@ jobs:
         run: ct lint --validate-maintainers=false --check-version-increment=false --target-branch ${{ github.event.repository.default_branch }}
 
       - name: Run chart-testing (install)
-        run: ct install --charts charts/ssi-credential-issuer --config charts/chart-testing-config.yaml --helm-extra-set-args "--set issuer.image.name=kind-registry:5000/credential-issuer-service --set issuer.image.tag=testing --set issuermigrations.image.name=kind-registry:5000/credential-issuer-migrations --set issuermigrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-expiry-app --set credentialExpiry.image.tag=testing"
+        run: ct install --charts charts/ssi-credential-issuer --config charts/chart-testing-config.yaml --helm-extra-set-args "--set service.image.name=kind-registry:5000/credential-issuer-service --set service.image.tag=testing --set migrations.image.name=kind-registry:5000/credential-issuer-migrations --set migrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-expiry-app --set credentialExpiry.image.tag=testing"
         if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'
 
       # Upgrade the released chart version with the locally available chart
@@ -132,5 +132,5 @@ jobs:
           helm repo add tractusx-dev https://eclipse-tractusx.github.io/charts/dev
           helm install ssi-credential-issuer tractusx-dev/ssi-credential-issuer --version ${{ github.event.inputs.upgrade_from || '1.0.0' }} --namespace upgrade --create-namespace
           helm dependency update charts/ssi-credential-issuer
-          helm upgrade ssi-credential-issuer charts/ssi-credential-issuer --set issuer.image.name=kind-registry:5000/credential-issuer-service --set issuer.image.tag=testing --set issuermigrations.image.name=kind-registry:5000/credential-issuer-migrations --set issuermigrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-expiry-app --set credentialExpiry.image.tag=testing --namespace upgrade
+          helm upgrade ssi-credential-issuer charts/ssi-credential-issuer --set service.image.name=kind-registry:5000/credential-issuer-service --set service.image.tag=testing --set migrations.image.name=kind-registry:5000/credential-issuer-migrations --set migrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-expiry-app --set credentialExpiry.image.tag=testing --namespace upgrade
         if: github.event_name != 'pull_request' || steps.list-changed.outputs.changed == 'true'

@@ -22,7 +22,6 @@ using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Linq;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Encryption;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
@@ -384,7 +383,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     public async Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken)
@@ -440,7 +439,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             externalTypeId,
             $"Framework Credential for UseCase {externalTypeId}",
             DateTimeOffset.UtcNow,
-            result.Expiry,
+            GetExpiryDate(result.Expiry),
             _settings.IssuerDid,
             new FrameworkCredentialSubject(
                 holderDid,
@@ -490,7 +489,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var documentContent = Encoding.UTF8.GetBytes(schema);
         var hash = SHA512.HashData(documentContent);
         var documentRepository = _repositories.GetInstance<IDocumentRepository>();
-        var docId = documentRepository.CreateDocument("schema.json", documentContent,
+        var docId = documentRepository.CreateDocument($"{typeId}.json", documentContent,
             hash, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, x =>
             {
                 x.IdentityId = _identity.IdentityId;

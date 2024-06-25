@@ -55,7 +55,7 @@ spec:
                       backend:
                         service: "issuer-service"
                         port: 8080
-            issuermigrations:
+            migrations:
               logging:
                 default: "Debug"
             postgresql:

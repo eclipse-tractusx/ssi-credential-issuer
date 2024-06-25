@@ -32,8 +32,8 @@ public enum VerifiedCredentialExternalTypeId
     [EnumMember(Value = "BehaviorTwinCredential")]
     BEHAVIOR_TWIN_CREDENTIAL = 3,
 
-    [EnumMember(Value = "vehicleDismantle")]
-    VEHICLE_DISMANTLE = 4,
+    [EnumMember(Value = "MembershipCredential")]
+    MEMBERSHIP_CREDENTIAL = 4,
 
     [EnumMember(Value = "CircularEconomyCredential")]
     CIRCULAR_ECONOMY = 5,
@@ -51,5 +51,8 @@ public enum VerifiedCredentialExternalTypeId
     DEMAND_AND_CAPACITY_MANAGEMENT_PURIS = 9,
 
     [EnumMember(Value = "BusinessPartnerCredential")]
-    BUSINESS_PARTNER_DATA_MANAGEMENT = 10
+    BUSINESS_PARTNER_DATA_MANAGEMENT = 10,
+
+    [EnumMember(Value = "FrameworkAgreement")]
+    FRAMEWORK_AGREEMENT = 11
 }

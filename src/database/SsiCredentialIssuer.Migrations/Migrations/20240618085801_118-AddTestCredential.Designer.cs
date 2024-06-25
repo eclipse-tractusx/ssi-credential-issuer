@@ -29,8 +29,8 @@ using System.Text.Json;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240503142547_1.0.0-rc.4")]
-    partial class _100rc4
+    [Migration("20240618085801_118-AddTestCredential")]
+    partial class _118AddTestCredential
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1080,12 +1080,17 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         new
                         {
                             Id = 4,
-                            Label = "VEHICLE_DISMANTLE"
+                            Label = "MEMBERSHIP_CREDENTIAL"
                         },
                         new
                         {
                             Id = 5,
                             Label = "CIRCULAR_ECONOMY"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Label = "QUALITY_CREDENTIAL"
                         },
                         new
                         {
@@ -1106,6 +1111,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         {
                             Id = 10,
                             Label = "BUSINESS_PARTNER_DATA_MANAGEMENT"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Label = "FRAMEWORK_AGREEMENT"
                         });
                 });
 
@@ -1182,12 +1192,17 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         new
                         {
                             Id = 4,
-                            Label = "DISMANTLER_CERTIFICATE"
+                            Label = "MEMBERSHIP_CERTIFICATE"
                         },
                         new
                         {
                             Id = 5,
                             Label = "CIRCULAR_ECONOMY"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Label = "FRAMEWORK_AGREEMENT_QUALITY"
                         },
                         new
                         {
@@ -1208,6 +1223,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         {
                             Id = 10,
                             Label = "BUSINESS_PARTNER_DATA_MANAGEMENT"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Label = "FRAMEWORK_AGREEMENT"
                         });
                 });
 

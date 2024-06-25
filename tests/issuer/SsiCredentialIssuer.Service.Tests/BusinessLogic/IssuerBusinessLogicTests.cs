@@ -662,7 +662,7 @@ public class IssuerBusinessLogicTests
         var result = await _sut.GetCertificateTypes().ToListAsync();
 
         // Assert
-        result.Should().HaveCount(10);
+        result.Should().HaveCount(11);
     }
 
     #endregion
@@ -687,7 +687,7 @@ public class IssuerBusinessLogicTests
         await _sut.CreateBpnCredential(data, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _documentRepository.CreateDocument("schema.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
+        A.CallTo(() => _documentRepository.CreateDocument("BUSINESS_PARTNER_NUMBER.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
             .MustHaveHappenedOnceExactly();
@@ -759,9 +759,9 @@ public class IssuerBusinessLogicTests
         await _sut.CreateMembershipCredential(data, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _documentRepository.CreateDocument("schema.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
+        A.CallTo(() => _documentRepository.CreateDocument("MEMBERSHIP_CERTIFICATE.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();
@@ -926,7 +926,7 @@ public class IssuerBusinessLogicTests
         await _sut.CreateFrameworkCredential(data, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _documentRepository.CreateDocument("schema.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
+        A.CallTo(() => _documentRepository.CreateDocument("TRACEABILITY_FRAMEWORK.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, CompanySsiDetailStatusId.PENDING, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
             .MustHaveHappenedOnceExactly();

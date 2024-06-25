@@ -18,7 +18,6 @@
  ********************************************************************************/
 
 using Microsoft.AspNetCore.Mvc;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;

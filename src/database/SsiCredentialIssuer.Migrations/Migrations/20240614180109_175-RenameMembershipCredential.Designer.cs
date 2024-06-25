@@ -29,8 +29,8 @@ using System.Text.Json;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240503142547_1.0.0-rc.4")]
-    partial class _100rc4
+    [Migration("20240614180109_175-RenameMembershipCredential")]
+    partial class _175RenameMembershipCredential
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1080,12 +1080,17 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         new
                         {
                             Id = 4,
-                            Label = "VEHICLE_DISMANTLE"
+                            Label = "MEMBERSHIP_CREDENTIAL"
                         },
                         new
                         {
                             Id = 5,
                             Label = "CIRCULAR_ECONOMY"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Label = "QUALITY_CREDENTIAL"
                         },
                         new
                         {
@@ -1182,12 +1187,17 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         new
                         {
                             Id = 4,
-                            Label = "DISMANTLER_CERTIFICATE"
+                            Label = "MEMBERSHIP_CERTIFICATE"
                         },
                         new
                         {
                             Id = 5,
                             Label = "CIRCULAR_ECONOMY"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Label = "FRAMEWORK_AGREEMENT_QUALITY"
                         },
                         new
                         {

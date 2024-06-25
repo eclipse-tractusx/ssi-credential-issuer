@@ -19,7 +19,6 @@
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 using System.ComponentModel.DataAnnotations;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
