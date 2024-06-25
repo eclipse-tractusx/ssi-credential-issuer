@@ -40,7 +40,7 @@ public class IssuerSettings
     public IEnumerable<EncryptionModeConfig> EncryptionConfigs { get; set; } = null!;
 
     [Required]
-    public int EncrptionConfigIndex { get; set; }
+    public int EncryptionConfigIndex { get; set; }
 
     [Required(AllowEmptyStrings = false)]
     public string StatusListUrl { get; set; } = null!;
