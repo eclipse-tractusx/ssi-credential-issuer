@@ -50,7 +50,7 @@ try
         .AddLogging()
         .Build();
 
-    await host.Services.InitializeDatabasesAsync(); // We don't actually run anything here. The magic happens in InitializeDatabasesAsync
+    await host.Services.InitializeDatabasesAsync().ConfigureAwait(false); // We don't actually run anything here. The magic happens in InitializeDatabasesAsync
 }
 catch (Exception ex) when (!ex.GetType().Name.Equals("StopTheHostException", StringComparison.Ordinal))
 {
@@ -60,5 +60,5 @@ catch (Exception ex) when (!ex.GetType().Name.Equals("StopTheHostException", Str
 finally
 {
     Log.Information("Process Shutting down...");
-    Log.CloseAndFlush();
+    await Log.CloseAndFlushAsync().ConfigureAwait(false);
 }

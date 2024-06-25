@@ -20,7 +20,7 @@
 using Json.Schema;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Encryption;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
@@ -33,34 +33,29 @@ using EncryptionInformation = Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Se
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
 
-public class WalletBusinessLogic : IWalletBusinessLogic
+public class WalletBusinessLogic(
+    IWalletService walletService,
+    IIssuerRepositories repositories,
+    IOptions<WalletSettings> options)
+    : IWalletBusinessLogic
 {
-    private readonly IWalletService _walletService;
-    private readonly IIssuerRepositories _repositories;
-    private readonly WalletSettings _settings;
-
-    public WalletBusinessLogic(IWalletService walletService, IIssuerRepositories repositories, IOptions<WalletSettings> options)
-    {
-        _walletService = walletService;
-        _repositories = repositories;
-        _settings = options.Value;
-    }
+    private readonly WalletSettings _settings = options.Value;
 
     public async Task CreateCredential(Guid companySsiDetailId, JsonDocument schema, CancellationToken cancellationToken)
     {
-        var credentialId = await _walletService.CreateCredential(schema, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        _repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c => c.ExternalCredentialId = null, c => c.ExternalCredentialId = credentialId);
+        var credentialId = await walletService.CreateCredential(schema, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c => c.ExternalCredentialId = null, c => c.ExternalCredentialId = credentialId);
     }
 
     public async Task SignCredential(Guid companySsiDetailId, Guid credentialId, CancellationToken cancellationToken)
     {
-        var credential = await _walletService.SignCredential(credentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        _repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c => c.Credential = null, c => c.Credential = credential);
+        var credential = await walletService.SignCredential(credentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c => c.Credential = null, c => c.Credential = credential);
     }
 
     public async Task GetCredential(Guid credentialId, Guid externalCredentialId, VerifiedCredentialTypeKindId kindId, CancellationToken cancellationToken)
     {
-        var credential = await _walletService.GetCredential(externalCredentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        var credential = await walletService.GetCredential(externalCredentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await ValidateSchema(kindId, credential, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         using var stream = new MemoryStream();
@@ -69,7 +64,7 @@ public class WalletBusinessLogic : IWalletBusinessLogic
         await writer.FlushAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var documentContent = stream.ToArray();
         var hash = SHA512.HashData(documentContent);
-        var documentRepository = _repositories.GetInstance<IDocumentRepository>();
+        var documentRepository = repositories.GetInstance<IDocumentRepository>();
         var docId = documentRepository.CreateDocument("signed-credential.json", documentContent, hash, MediaTypeId.JSON, DocumentTypeId.VERIFIED_CREDENTIAL, null).Id;
         documentRepository.AssignDocumentToCompanySsiDetails(docId, credentialId);
     }
@@ -96,14 +91,14 @@ public class WalletBusinessLogic : IWalletBusinessLogic
 
     public async Task CreateCredentialForHolder(Guid companySsiDetailId, string holderWalletUrl, string clientId, EncryptionInformation encryptionInformation, string credential, CancellationToken cancellationToken)
     {
-        var cryptoConfig = _settings.EncryptionConfigs.SingleOrDefault(x => x.Index == encryptionInformation.EncryptionMode) ?? throw new ConfigurationException($"EncryptionModeIndex {encryptionInformation.EncryptionMode} is not configured");
-        var secret = CryptoHelper.Decrypt(encryptionInformation.Secret, encryptionInformation.InitializationVector, Convert.FromHexString(cryptoConfig.EncryptionKey), cryptoConfig.CipherMode, cryptoConfig.PaddingMode);
+        var cryptoHelper = _settings.EncryptionConfigs.GetCryptoHelper(_settings.EncryptionConfigIndex);
+        var secret = cryptoHelper.Decrypt(encryptionInformation.Secret, encryptionInformation.InitializationVector);
 
-        await _walletService
+        await walletService
             .CreateCredentialForHolder(holderWalletUrl, clientId, secret, credential, cancellationToken)
             .ConfigureAwait(ConfigureAwaitOptions.None);
 
-        _repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyProcessData(companySsiDetailId,
+        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyProcessData(companySsiDetailId,
             c =>
             {
                 c.ClientId = clientId;

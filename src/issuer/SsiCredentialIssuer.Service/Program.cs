@@ -34,8 +34,8 @@ using System.Text.Json.Serialization;
 
 const string VERSION = "v1";
 
-WebApplicationBuildRunner
-    .BuildAndRunWebApplication<Program>(args, "issuer", VERSION, ".Issuer", builder =>
+await WebApplicationBuildRunner
+    .BuildAndRunWebApplicationAsync<Program>(args, "issuer", VERSION, ".Issuer", builder =>
         {
             builder.Services
                 .AddTransient<IClaimsTransformation, KeycloakClaimsTransformation>()
@@ -67,4 +67,4 @@ WebApplicationBuildRunner
             .MapIssuerApi()
             .MapRevocationApi()
             .MapCredentialApi();
-    });
+    }).ConfigureAwait(ConfigureAwaitOptions.None);
