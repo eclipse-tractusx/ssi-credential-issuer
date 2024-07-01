@@ -53,7 +53,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@595be6a0f6560a0a8fc419ddf630567fc623531d # v0.22.0
+        uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
         with:
           scan-type: "config"
           hide-progress: false
@@ -64,7 +64,7 @@ jobs:
           timeout: "3600s"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@23acc5c183826b7a8a97bce3cecc52db901f8251 # v3.25.10
+        uses: github/codeql-action/upload-sarif@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
         if: always()
         with:
           sarif_file: "trivy-results1.sarif"
@@ -87,7 +87,7 @@ jobs:
       # For public images, no ENV vars must be set.
       - name: Run Trivy vulnerability scanner
         if: always()
-        uses: aquasecurity/trivy-action@595be6a0f6560a0a8fc419ddf630567fc623531d # v0.22.0
+        uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
         with:
           # Path to Docker image
           image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-service:latest"
@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
-        uses: github/codeql-action/upload-sarif@23acc5c183826b7a8a97bce3cecc52db901f8251 # v3.25.10
+        uses: github/codeql-action/upload-sarif@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
         with:
           sarif_file: "trivy-results2.sarif"
 
@@ -119,7 +119,7 @@ jobs:
       # For public images, no ENV vars must be set.
       - name: Run Trivy vulnerability scanner
         if: always()
-        uses: aquasecurity/trivy-action@595be6a0f6560a0a8fc419ddf630567fc623531d # v0.22.0
+        uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
         with:
           # Path to Docker image
           image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-migrations:latest"
@@ -129,7 +129,7 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
-        uses: github/codeql-action/upload-sarif@23acc5c183826b7a8a97bce3cecc52db901f8251 # v3.25.10
+        uses: github/codeql-action/upload-sarif@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
         with:
           sarif_file: "trivy-results3.sarif"
 
@@ -151,7 +151,7 @@ jobs:
       # For public images, no ENV vars must be set.
       - name: Run Trivy vulnerability scanner
         if: always()
-        uses: aquasecurity/trivy-action@595be6a0f6560a0a8fc419ddf630567fc623531d # v0.22.0
+        uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
         with:
           # Path to Docker image
           image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-expiry-app:latest"
@@ -161,7 +161,7 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
-        uses: github/codeql-action/upload-sarif@23acc5c183826b7a8a97bce3cecc52db901f8251 # v3.25.10
+        uses: github/codeql-action/upload-sarif@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
         with:
           sarif_file: "trivy-results4.sarif"
 
@@ -183,7 +183,7 @@ jobs:
       # For public images, no ENV vars must be set.
       - name: Run Trivy vulnerability scanner
         if: always()
-        uses: aquasecurity/trivy-action@595be6a0f6560a0a8fc419ddf630567fc623531d # v0.22.0
+        uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
         with:
           # Path to Docker image
           image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-issuer-processes-worker:latest"
@@ -193,6 +193,6 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         if: always()
-        uses: github/codeql-action/upload-sarif@23acc5c183826b7a8a97bce3cecc52db901f8251 # v3.25.10
+        uses: github/codeql-action/upload-sarif@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
         with:
           sarif_file: "trivy-results5.sarif"
