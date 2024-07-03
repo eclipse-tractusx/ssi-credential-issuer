@@ -23,16 +23,16 @@ metadata:
   name: ssi-credential-issuer
 spec:
   destination:
-    namespace: product-ssi-credential-issuer
+    namespace: product-portal
     server: 'https://kubernetes.default.svc'
   source:
     path: charts/ssi-credential-issuer
     repoURL: 'https://github.com/eclipse-tractusx/ssi-credential-issuer.git'
-    targetRevision: hore/349-deploy-to-eV
+    targetRevision: chore/349-deploy-to-eV
     plugin:
       env:
         - name: AVP_SECRET
           value: vault-secret
         - name: helm_args
           value: '-f values.yaml -f ../../environments/helm-values/values-int.yaml'
-  project: project-ssi-credential-issuer
+  project: project-portal

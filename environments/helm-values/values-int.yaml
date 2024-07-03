@@ -50,7 +50,7 @@ issuer:
     statusListUrl: ""
     encryptionConfigs:
       index0:
-        encryptionKey: "<path:ssi-credential-issuer/data/int/credential#encryptionKey0>"
+        encryptionKey: "<path:portal/data/ssi-credential-issuer/int/credential#encryptionKey0>"
   portal:
     clientId: "<path:ssi-credential-issuer/data/portal#clientId>"
     clientSecret: "<path:portal/data/int/iam/centraidp-client-secrets#issuer-sa>"
@@ -66,11 +66,11 @@ processesworker:
     clientId: "<path:ssi-credential-issuer/data/portal#clientId>"
     clientSecret: "<path:portal/data/int/iam/centraidp-client-secrets#issuer-sa>"
   wallet:
-    clientId: "<path:ssi-credential-issuer/data/int/wallet#clientId>"
-    clientSecret: "<path:ssi-credential-issuer/data/int/wallet#clientSecret>"
+    clientId: "<path:portal/data/ssi-credential-issuer/int/wallet#clientId>"
+    clientSecret: "<path:portal/data/ssi-credential-issuer/int/wallet#clientSecret>"
     encryptionConfigs:
       index0:
-        encryptionKey: "<path:ssi-credential-issuer/data/int/wallet#encryptionKey0>"
+        encryptionKey: "<path:portal/data/ssi-credential-issuer/int/wallet#encryptionKey0>"
 
 credentialExpiry:
   logging:
@@ -87,5 +87,5 @@ replicaCount: 2
 postgresql:
   architecture: standalone
   auth:
-    postgrespassword: "<path:ssi-credential-issuer/data/int/postgres#postgres-password>"
-    password: "<path:ssi-credential-issuer/data/int/postgres#password>"
+    postgrespassword: "<path:portal/data/ssi-credential-issuer/int/postgres#postgres-password>"
+    password: "<path:portal/data/ssi-credential-issuer/int/postgres#password>"
