@@ -676,12 +676,17 @@ public class IssuerBusinessLogicTests
         var didId = Guid.NewGuid().ToString();
         var didDocument = new DidDocument(didId);
         var data = new CreateBpnCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, null, null);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, DateTimeOffset.Now);
+
         HttpRequestMessage? request = null;
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
         }, requestMessage => request = requestMessage);
+
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+            .Invokes((string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
 
         // Act
         await _sut.CreateBpnCredential(data, CancellationToken.None);
@@ -694,6 +699,7 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
+        Assert.NotNull(detail.ExpiryDate);
     }
 
     [Theory]
@@ -746,6 +752,8 @@ public class IssuerBusinessLogicTests
         var didId = Guid.NewGuid().ToString();
         var didDocument = new DidDocument(didId);
         var data = new CreateMembershipCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, "Test", null, null);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, DateTimeOffset.Now);
+
         HttpRequestMessage? request = null;
         A.CallTo(() => _companySsiDetailsRepository.GetCertificateTypes(A<string>._))
             .Returns(Enum.GetValues<VerifiedCredentialTypeId>().ToAsyncEnumerable());
@@ -754,6 +762,9 @@ public class IssuerBusinessLogicTests
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
         }, requestMessage => request = requestMessage);
+
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.DISMANTLER_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+            .Invokes((string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
 
         // Act
         await _sut.CreateMembershipCredential(data, CancellationToken.None);
@@ -766,6 +777,7 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
+        Assert.NotNull(detail.ExpiryDate);
     }
 
     #endregion
