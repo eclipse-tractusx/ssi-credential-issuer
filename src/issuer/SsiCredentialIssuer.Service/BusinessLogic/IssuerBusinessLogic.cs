@@ -462,7 +462,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
     {
-        if (!Uri.TryCreate(didDocumentLocation, UriKind.Absolute, out var uri) || (uri.Scheme != "https" && uri.Scheme != "http") || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment) || UrlPathInvalidCharsRegex.IsMatch(uri.AbsolutePath))
+        if (!Uri.TryCreate(didDocumentLocation, UriKind.Absolute, out var uri) || (uri.Scheme != "https" || !string.IsNullOrEmpty(uri.Query) || !string.IsNullOrEmpty(uri.Fragment) || UrlPathInvalidCharsRegex.IsMatch(uri.AbsolutePath))
         {
             throw ControllerArgumentException.Create(IssuerErrors.INVALID_DID_LOCATION, null, nameof(didDocumentLocation));
         }
