@@ -52,7 +52,7 @@ issuer:
       index0:
         encryptionKey: "<path:portal/data/ssi-credential-issuer/int/credential#encryptionKey0>"
   portal:
-    clientId: "<path:ssi-credential-issuer/data/portal#clientId>"
+    clientId: "<path:portal/data/ssi-credential-issuer#clientId>"
     clientSecret: "<path:portal/data/int/iam/centraidp-client-secrets#issuer-sa>"
 
 issuermigrations:
@@ -63,7 +63,7 @@ processesworker:
   logging:
     default: "Debug"
   portal:
-    clientId: "<path:ssi-credential-issuer/data/portal#clientId>"
+    clientId: "<path:portal/data/ssi-credential-issuer#clientId>"
     clientSecret: "<path:portal/data/int/iam/centraidp-client-secrets#issuer-sa>"
   wallet:
     clientId: "<path:portal/data/ssi-credential-issuer/int/wallet#clientId>"
