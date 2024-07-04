@@ -18,8 +18,8 @@
 ###############################################################
 
 portalBackendAddress: "https://portal-backend.int.catena-x.net"
-walletAddress: ""
-walletTokenAddress: ""
+# walletAddress: ""
+# walletTokenAddress: ""
 
 ingress:
   enabled: true
@@ -45,9 +45,9 @@ ingress:
 issuer:
   swaggerEnabled: true
   credential:
-    issuerDid: ""
+    # issuerDid: ""
     issuerBpn: "BPNL00000003CRHK"
-    statusListUrl: ""
+    # statusListUrl: ""
     encryptionConfigs:
       index0:
         encryptionKey: "<path:portal/data/ssi-credential-issuer/int/credential#encryptionKey0>"
