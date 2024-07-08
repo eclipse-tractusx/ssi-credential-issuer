@@ -62,7 +62,7 @@ jobs:
 
       - name: Build migration image
         id: build-migration-image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/Dockerfile-credential-issuer-migrations
@@ -71,7 +71,7 @@ jobs:
 
       - name: Build service image
         id: build-service-image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/Dockerfile-credential-issuer-service
@@ -80,7 +80,7 @@ jobs:
   
       - name: Build expiry app
         id: build-expiry-app-image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/Dockerfile-credential-expiry-app
@@ -89,7 +89,7 @@ jobs:
     
       - name: Build processes worker
         id: build-processes-worker-image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./docker/Dockerfile-credential-issuer-processes-worker
