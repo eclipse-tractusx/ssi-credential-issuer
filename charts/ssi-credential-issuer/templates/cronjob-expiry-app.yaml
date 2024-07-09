@@ -73,7 +73,7 @@ spec:
             - name: "PROCESSES__IDENTITYID"
               value: "{{ .Values.credentialExpiry.processIdentity.identityId }}"
             - name: "PORTAL__CLIENTID"
-              value: "{{ .Values.issuer.portal.clientId }}"
+              value: "{{ .Values.service.portal.clientId }}"
             - name: "PORTAL__CLIENTSECRET"
               valueFrom:
                 secretKeyRef:
