@@ -17,74 +17,75 @@
 # SPDX-License-Identifier: Apache-2.0
 ###############################################################
 
-portalBackendAddress: "https://portal-backend-pen.dev.demo.catena-x.net"
+portalBackendAddress: "https://portal-backend.int.catena-x.net"
 walletAddress: "https://dis-integration-service-prod.eu10.dim.cloud.sap"
-walletTokenAddress: "https://bpnl00000003crhk-catena-x.authentication.eu10.hana.ondemand.com/oauth/token"
+walletTokenAddress: "https://issuer.authentication.eu10.hana.ondemand.com/oauth/token"
 
 ingress:
   enabled: true
   className: "nginx"
   annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "8m"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:3000, https://*.dev.demo.catena-x.net"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.int.catena-x.net"
   tls:
-    - secretName: "tls-secret"
+    - secretName: "ssi-credential-issuer.int.catena-x.net-tls"
       hosts:
-        - "ssi-credential-issuer-pen.dev.demo.catena-x.net"
+        - "ssi-credential-issuer.int.catena-x.net"
   hosts:
-    - host: "ssi-credential-issuer-pen.dev.demo.catena-x.net"
+    - host: "ssi-credential-issuer.int.catena-x.net"
       paths:
         - path: "/api"
           pathType: "Prefix"
           backend:
             port: 8080
 
-service:
+issuer:
   swaggerEnabled: true
   credential:
-    issuerDid: "did:web:dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com:dim-hosted:2f45795c-d6cc-4038-96c9-63cedc0cd266:holder-iatp"
+    issuerDid: "did:web:portal-backend.int.catena-x.net:api:administration:staticdata:did:BPNL00000003CRHK"
     issuerBpn: "BPNL00000003CRHK"
-    statusListUrl: "https://dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com/credentials/status/c5f1d9bb-42d5-42b7-a80a-ccbda6891df3/3e6f1f74-56e3-443a-a75e-320c301aca07"
+    statusListUrl: "https://dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com/credentials/status/ba0cd4ef-63e0-4c13-829a-915c496dc836/3c7b17d8-fe44-4f08-9bf9-f786f8be73bf"
     encryptionConfigs:
       index0:
-        encryptionKey: "<path:portal/data/ssi-credential-issuer/pen/credential#encryptionKey0>"
+        encryptionKey: "<path:portal/data/ssi-credential-issuer/int/credential#encryptionKey0>"
   portal:
     clientId: "<path:portal/data/ssi-credential-issuer/portal#clientId>"
-    clientSecret: "<path:portal/data/ssi-credential-issuer/pen/portal#clientSecret>"
+    clientSecret: "<path:portal/data/int/iam/centralidp-client-secrets#issuer-sa>"
 
-migrations:
+issuermigrations:
   logging:
     default: "Debug"
-  seeding:
-    testDataEnvironments: "consortia"
 
 processesworker:
   logging:
     default: "Debug"
   portal:
     clientId: "<path:portal/data/ssi-credential-issuer/portal#clientId>"
-    clientSecret: "<path:portal/data/ssi-credential-issuer/pen/portal#clientSecret>"
+    clientSecret: "<path:portal/data/int/iam/centralidp-client-secrets#issuer-sa>"
   wallet:
-    clientId: "<path:portal/data/ssi-credential-issuer/pen/wallet#clientId>"
-    clientSecret: "<path:portal/data/ssi-credential-issuer/pen/wallet#clientSecret>"
+    clientId: "<path:portal/data/ssi-credential-issuer/int/wallet#clientId>"
+    clientSecret: "<path:portal/data/ssi-credential-issuer/int/wallet#clientSecret>"
     encryptionConfigs:
       index0:
-        encryptionKey: "<path:portal/data/ssi-credential-issuer/pen/wallet#encryptionKey0>"
+        encryptionKey: "<path:portal/data/ssi-credential-issuer/int/wallet#encryptionKey0>"
 
 credentialExpiry:
   logging:
     default: "Debug"
 
 centralidp:
-  address: "https://centralidp-pen.dev.demo.catena-x.net"
+  address: "https://centralidp.int.catena-x.net"
   jwtBearerOptions:
     tokenValidationParameters:
       validAudience: "Cl24-CX-SSI-CredentialIssuer"
 
+replicaCount: 2
+
 postgresql:
+  architecture: standalone
   auth:
-    postgrespassword: "<path:portal/data/ssi-credential-issuer/pen/postgres#postgres-password>"
-    password: "<path:portal/data/ssi-credential-issuer/pen/postgres#password>"
-    replicationPassword: "<path:portal/data/ssi-credential-issuer/pen/postgres#replication-password>"
+    postgrespassword: "<path:portal/data/ssi-credential-issuer/int/postgres#postgres-password>"
+    password: "<path:portal/data/ssi-credential-issuer/int/postgres#password>"
