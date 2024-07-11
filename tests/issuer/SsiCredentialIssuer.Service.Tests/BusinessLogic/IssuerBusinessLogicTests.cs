@@ -472,8 +472,6 @@ public class IssuerBusinessLogicTests
             Guid.NewGuid(),
             Context,
             new[] { "VerifiableCredential", VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL.ToString() },
-            VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL.ToString(),
-            $"Framework Credential for UseCase {VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL}",
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow,
             "issuer",
@@ -662,7 +660,7 @@ public class IssuerBusinessLogicTests
         var result = await _sut.GetCertificateTypes().ToListAsync();
 
         // Assert
-        result.Should().HaveCount(11);
+        result.Should().HaveCount(12);
     }
 
     #endregion

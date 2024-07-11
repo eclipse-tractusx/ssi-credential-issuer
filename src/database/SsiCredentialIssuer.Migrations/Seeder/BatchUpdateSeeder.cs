@@ -61,6 +61,16 @@ public class BatchUpdateSeeder : ICustomSeeder
 
         _logger.LogInformation("Start BaseEntityBatch Seeder");
 
+        await SeedTable<UseCase>("use_cases",
+            x => x.Id,
+            x => x.dataEntity.Name != x.dbEntity.Name || x.dataEntity.Shortname != x.dbEntity.Shortname,
+            (dbEntry, entry) =>
+            {
+                dbEntry.Name = entry.Name;
+                dbEntry.Shortname = entry.Shortname;
+            },
+            cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+
         await SeedTable<VerifiedCredentialExternalTypeDetailVersion>("verified_credential_external_type_detail_versions",
             x => x.Id,
             x => x.dataEntity.Template != x.dbEntity.Template || x.dataEntity.Expiry != x.dbEntity.Expiry || x.dataEntity.ValidFrom != x.dbEntity.ValidFrom || x.dataEntity.Version != x.dbEntity.Version,
@@ -70,7 +80,8 @@ public class BatchUpdateSeeder : ICustomSeeder
                 dbEntry.Expiry = entry.Expiry;
                 dbEntry.ValidFrom = entry.ValidFrom;
                 dbEntry.Version = entry.Version;
-            }, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+            },
+            cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         _logger.LogInformation("Finished BaseEntityBatch Seeder");
