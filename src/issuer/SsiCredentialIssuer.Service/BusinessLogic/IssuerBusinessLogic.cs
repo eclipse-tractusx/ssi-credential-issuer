@@ -436,8 +436,6 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             Guid.NewGuid(),
             Context,
             new[] { "VerifiableCredential", externalTypeId },
-            externalTypeId,
-            $"Framework Credential for UseCase {externalTypeId}",
             DateTimeOffset.UtcNow,
             GetExpiryDate(result.Expiry),
             _settings.IssuerDid,
@@ -446,7 +444,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 requestData.HolderBpn,
                 "UseCaseFramework",
                 externalTypeId,
-                result.Template!,
+                result.Template,
                 result.Version!
             ),
             new CredentialStatus(
