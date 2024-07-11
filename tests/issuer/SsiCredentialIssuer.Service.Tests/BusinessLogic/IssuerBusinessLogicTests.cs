@@ -103,7 +103,7 @@ public class IssuerBusinessLogicTests
             MaxPageSize = 15,
             IssuerDid = "did:web:example:org:bpn:18273z682734rt",
             IssuerBpn = IssuerBpnl,
-            EncrptionConfigIndex = 0,
+            EncryptionConfigIndex = 0,
             StatusListUrl = "https://example.org/statuslist"
         });
 
