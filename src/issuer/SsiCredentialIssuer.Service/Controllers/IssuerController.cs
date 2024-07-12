@@ -104,7 +104,7 @@ public static class IssuerController
                 r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidBpn));
             })
             .WithDefaultResponses()
-            .Produces(StatusCodes.Status200OK, typeof(IEnumerable<CredentialDetailData>), Constants.JsonContentType);
+            .Produces(StatusCodes.Status200OK, typeof(IEnumerable<OwnedVerifiedCredentialData>), Constants.JsonContentType);
 
         issuer.MapPost("bpn", ([FromBody] CreateBpnCredentialRequest requestData, CancellationToken cancellationToken, IIssuerBusinessLogic logic) => logic.CreateBpnCredential(requestData, cancellationToken))
             .WithSwaggerDescription("Creates a bpn credential for the given data",
