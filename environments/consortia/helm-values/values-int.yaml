@@ -69,9 +69,6 @@ processesworker:
   wallet:
     clientId: "<path:portal/data/ssi-credential-issuer/int/wallet#clientId>"
     clientSecret: "<path:portal/data/ssi-credential-issuer/int/wallet#clientSecret>"
-    encryptionConfigs:
-      index0:
-        encryptionKey: "<path:portal/data/ssi-credential-issuer/int/wallet#encryptionKey0>"
 
 credentialExpiry:
   logging:
