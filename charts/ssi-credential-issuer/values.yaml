@@ -59,7 +59,7 @@ service:
   credential:
     issuerDid: "did:web:example"
     issuerBpn: "BPNL00000001TEST"
-    statusListUrl: "https://example.org/statuslist"     
+    statusListUrl: "https://example.org/statuslist"
     encryptionConfigIndex: 0
     encryptionConfigs:
       index0:
