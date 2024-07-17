@@ -42,7 +42,7 @@ ingress:
           backend:
             port: 8080
 
-issuer:
+service:
   swaggerEnabled: true
   credential:
     issuerDid: "did:web:portal-backend.int.catena-x.net:api:administration:staticdata:did:BPNL00000003CRHK"
@@ -55,7 +55,7 @@ issuer:
     clientId: "<path:portal/data/ssi-credential-issuer/portal#clientId>"
     clientSecret: "<path:portal/data/int/iam/centralidp-client-secrets#issuer-sa>"
 
-issuermigrations:
+migrations:
   logging:
     default: "Debug"
 
