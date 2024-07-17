@@ -26,22 +26,12 @@ using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 
-public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
+public class CompanySsiDetailsRepository(IssuerDbContext context)
+    : ICompanySsiDetailsRepository
 {
-    private readonly IssuerDbContext _context;
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="dbContext">DB context.</param>
-    public CompanySsiDetailsRepository(IssuerDbContext dbContext)
-    {
-        _context = dbContext;
-    }
-
     /// <inheritdoc />
     public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry) =>
-        _context.VerifiedCredentialTypes
+        context.VerifiedCredentialTypes
             .Where(t => t.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.FRAMEWORK)
             .Select(t => new
             {
@@ -85,7 +75,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
 
     /// <inheritdoc />
     public IAsyncEnumerable<CertificateParticipationData> GetSsiCertificates(string bpnl, DateTimeOffset minExpiry) =>
-        _context.VerifiedCredentialTypes
+        context.VerifiedCredentialTypes
             .Where(types => types.VerifiedCredentialTypeAssignedKind != null && types.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId != VerifiedCredentialTypeKindId.FRAMEWORK)
             .Select(t => new
             {
@@ -128,12 +118,12 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
     {
         var detail = new CompanySsiDetail(Guid.NewGuid(), bpnl, verifiedCredentialTypeId, companySsiDetailStatusId, issuerBpn, userId, DateTimeOffset.UtcNow);
         setOptionalFields?.Invoke(detail);
-        return _context.CompanySsiDetails.Add(detail).Entity;
+        return context.CompanySsiDetails.Add(detail).Entity;
     }
 
     /// <inheritdoc />
     public Task<bool> CheckSsiDetailsExistsForCompany(string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, VerifiedCredentialTypeKindId kindId, Guid? verifiedCredentialExternalTypeUseCaseDetailId) =>
-        _context.CompanySsiDetails
+        context.CompanySsiDetails
             .AnyAsync(x =>
                 x.Bpnl == bpnl &&
                 x.VerifiedCredentialTypeId == verifiedCredentialTypeId &&
@@ -143,7 +133,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
 
     /// <inheritdoc />
     public Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry, bool PendingCredentialRequestExists)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId, string bpnl) =>
-        _context.VerifiedCredentialExternalTypeDetailVersions
+        context.VerifiedCredentialExternalTypeDetailVersions
             .Where(x =>
                 x.Id == verifiedCredentialExternalTypeUseCaseDetailId &&
                 x.VerifiedCredentialExternalType!.VerifiedCredentialTypeAssignedExternalTypes.Any(y => y.VerifiedCredentialTypeId == verifiedCredentialTypeId))
@@ -158,7 +148,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
 
     /// <inheritdoc />
     public Task<(bool Exists, IEnumerable<Guid> DetailVersionIds)> CheckSsiCertificateType(VerifiedCredentialTypeId credentialTypeId) =>
-        _context.VerifiedCredentialTypeAssignedKinds
+        context.VerifiedCredentialTypeAssignedKinds
             .Where(x =>
                 x.VerifiedCredentialTypeId == credentialTypeId &&
                 x.VerifiedCredentialTypeKindId != VerifiedCredentialTypeKindId.FRAMEWORK)
@@ -170,7 +160,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
 
     /// <inheritdoc />
     public IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType) =>
-        _context.CompanySsiDetails.AsNoTracking()
+        context.CompanySsiDetails.AsNoTracking()
             .Where(c =>
                 (!companySsiDetailStatusId.HasValue || c.CompanySsiDetailStatusId == companySsiDetailStatusId.Value) &&
                 (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId) &&
@@ -178,7 +168,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
 
     /// <inheritdoc />
     public IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl) =>
-        _context.CompanySsiDetails.AsNoTracking()
+        context.CompanySsiDetails.AsNoTracking()
             .Where(c => c.Bpnl == bpnl)
             .Select(c => new OwnedVerifiedCredentialData(
                 c.Id,
@@ -190,7 +180,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
 
     /// <inheritdoc />
     public Task<(bool exists, SsiApprovalData data)> GetSsiApprovalData(Guid credentialId) =>
-        _context.CompanySsiDetails
+        context.CompanySsiDetails
             .Where(x => x.Id == credentialId)
             .Select(x => new ValueTuple<bool, SsiApprovalData>(
                 true,
@@ -216,7 +206,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
 
     /// <inheritdoc />
     public Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, string UserId, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId) =>
-        _context.CompanySsiDetails
+        context.CompanySsiDetails
             .Where(x => x.Id == credentialId)
             .Select(x => new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, string, Guid?, IEnumerable<Guid>>(
                 true,
@@ -233,13 +223,13 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
     {
         var entity = new CompanySsiDetail(id, null!, default, default, null!, null!, DateTimeOffset.MinValue);
         initialize?.Invoke(entity);
-        _context.Attach(entity);
+        context.Attach(entity);
         updateFields.Invoke(entity);
     }
 
     /// <inheritdoc />
     public IAsyncEnumerable<VerifiedCredentialTypeId> GetCertificateTypes(string bpnl) =>
-        _context.VerifiedCredentialTypes
+        context.VerifiedCredentialTypes
             .Where(x =>
                 x.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId != VerifiedCredentialTypeKindId.FRAMEWORK &&
                 !x.CompanySsiDetails.Any(ssi =>
@@ -254,7 +244,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
         var twoWeeks = now.AddDays(14);
         var oneMonth = now.AddMonths(2);
 
-        return _context.CompanySsiDetails
+        return context.CompanySsiDetails
             .Select(x => new
             {
                 Details = x,
@@ -284,13 +274,13 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
             .ToAsyncEnumerable();
     }
 
-    public void RemoveSsiDetail(Guid companySsiDetailId) =>
-        _context.CompanySsiDetails.Remove(new CompanySsiDetail(companySsiDetailId, null!, default, default, null!, null!, DateTimeOffset.MinValue));
+    public void RemoveSsiDetail(Guid companySsiDetailId, string bpnl, string userId) =>
+        context.CompanySsiDetails.Remove(new CompanySsiDetail(companySsiDetailId, bpnl, default, default, bpnl, userId, DateTimeOffset.MinValue));
 
     public void CreateProcessData(Guid companySsiDetailId, JsonDocument schema, VerifiedCredentialTypeKindId credentialTypeKindId, Action<CompanySsiProcessData>? setOptionalFields)
     {
         var companySsiDetailData = new CompanySsiProcessData(companySsiDetailId, schema, credentialTypeKindId);
-        _context.CompanySsiProcessData.Add(companySsiDetailData);
+        context.CompanySsiProcessData.Add(companySsiDetailData);
         setOptionalFields?.Invoke(companySsiDetailData);
     }
 
@@ -298,7 +288,7 @@ public class CompanySsiDetailsRepository : ICompanySsiDetailsRepository
     {
         var companySsiDetailData = new CompanySsiProcessData(companySsiDetailId, null!, default);
         initialize?.Invoke(companySsiDetailData);
-        _context.CompanySsiProcessData.Attach(companySsiDetailData);
+        context.CompanySsiProcessData.Attach(companySsiDetailData);
         setOptionalFields(companySsiDetailData);
     }
 }

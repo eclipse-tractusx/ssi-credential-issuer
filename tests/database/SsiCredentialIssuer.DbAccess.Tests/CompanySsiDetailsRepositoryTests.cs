@@ -554,7 +554,7 @@ public class CompanySsiDetailsRepositoryTests
         var (sut, context) = await CreateSutWithContext();
 
         // Act
-        sut.RemoveSsiDetail(Guid.NewGuid());
+        sut.RemoveSsiDetail(Guid.NewGuid(), ValidBpnl, "user1");
 
         // Assert
         var changeTracker = context.ChangeTracker;
