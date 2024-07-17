@@ -7,7 +7,7 @@ flowchart LR
     end
     subgraph eclipse-tractusx
         direction LR
-        D -- PR* to dev*--> SCI(ssi-credential-issuer**)
+        D -- PR* to main*--> SCI(ssi-credential-issuer**)
         click SCI "https://github.com/eclipse-tractusx/ssi-credential-issuer"
     end
     subgraph Argo CD - sync to k8s cluster
