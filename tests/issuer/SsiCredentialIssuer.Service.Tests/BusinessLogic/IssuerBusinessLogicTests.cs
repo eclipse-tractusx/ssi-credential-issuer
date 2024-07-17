@@ -103,7 +103,7 @@ public class IssuerBusinessLogicTests
             MaxPageSize = 15,
             IssuerDid = "did:web:example:org:bpn:18273z682734rt",
             IssuerBpn = IssuerBpnl,
-            EncrptionConfigIndex = 0,
+            EncryptionConfigIndex = 0,
             StatusListUrl = "https://example.org/statuslist"
         });
 
@@ -472,8 +472,6 @@ public class IssuerBusinessLogicTests
             Guid.NewGuid(),
             Context,
             new[] { "VerifiableCredential", VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL.ToString() },
-            VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL.ToString(),
-            $"Framework Credential for UseCase {VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL}",
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow,
             "issuer",
@@ -662,7 +660,7 @@ public class IssuerBusinessLogicTests
         var result = await _sut.GetCertificateTypes().ToListAsync();
 
         // Assert
-        result.Should().HaveCount(11);
+        result.Should().HaveCount(12);
     }
 
     #endregion
@@ -676,12 +674,17 @@ public class IssuerBusinessLogicTests
         var didId = Guid.NewGuid().ToString();
         var didDocument = new DidDocument(didId);
         var data = new CreateBpnCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, null, null);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, DateTimeOffset.Now);
+
         HttpRequestMessage? request = null;
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
         }, requestMessage => request = requestMessage);
+
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+            .Invokes((string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
 
         // Act
         await _sut.CreateBpnCredential(data, CancellationToken.None);
@@ -694,6 +697,7 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
+        Assert.NotNull(detail.ExpiryDate);
     }
 
     [Theory]
@@ -746,6 +750,8 @@ public class IssuerBusinessLogicTests
         var didId = Guid.NewGuid().ToString();
         var didDocument = new DidDocument(didId);
         var data = new CreateMembershipCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, "Test", null, null);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, DateTimeOffset.Now);
+
         HttpRequestMessage? request = null;
         A.CallTo(() => _companySsiDetailsRepository.GetCertificateTypes(A<string>._))
             .Returns(Enum.GetValues<VerifiedCredentialTypeId>().ToAsyncEnumerable());
@@ -754,6 +760,9 @@ public class IssuerBusinessLogicTests
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
         }, requestMessage => request = requestMessage);
+
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+            .Invokes((string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
 
         // Act
         await _sut.CreateMembershipCredential(data, CancellationToken.None);
@@ -766,6 +775,7 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
+        Assert.NotNull(detail.ExpiryDate);
     }
 
     #endregion

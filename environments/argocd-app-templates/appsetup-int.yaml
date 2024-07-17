@@ -20,19 +20,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ssi-credential-issuer-pen
+  name: ssi-credential-issuer
 spec:
   destination:
-    namespace: product-portal-pen
+    namespace: product-portal
     server: 'https://kubernetes.default.svc'
   source:
     path: charts/ssi-credential-issuer
     repoURL: 'https://github.com/eclipse-tractusx/ssi-credential-issuer.git'
-    targetRevision: ssi-credential-issuer-1.0.0
+    targetRevision: ssi-credential-issuer-1.0.0-rc.1
     plugin:
       env:
         - name: AVP_SECRET
           value: vault-secret
         - name: helm_args
-          value: '-f values.yaml -f ../../consortia/environments/values-pen.yaml'
+          value: '-f values.yaml -f ../../environments/helm-values/values-int.yaml'
   project: project-portal

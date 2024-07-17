@@ -100,7 +100,7 @@ public interface ICompanySsiDetailsRepository
     void AttachAndModifyCompanySsiDetails(Guid id, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields);
     IAsyncEnumerable<VerifiedCredentialTypeId> GetCertificateTypes(string bpnl);
     IAsyncEnumerable<CredentialExpiryData> GetExpiryData(DateTimeOffset now, DateTimeOffset inactiveVcsToDelete, DateTimeOffset expiredVcsToDelete);
-    void RemoveSsiDetail(Guid companySsiDetailId);
+    void RemoveSsiDetail(Guid companySsiDetailId, string bpnl, string userId);
     void CreateProcessData(Guid companySsiDetailId, JsonDocument schema, VerifiedCredentialTypeKindId credentialTypeKindId, Action<CompanySsiProcessData>? setOptionalFields);
     void AttachAndModifyProcessData(Guid companySsiDetailId, Action<CompanySsiProcessData>? initialize, Action<CompanySsiProcessData> setOptionalFields);
 }

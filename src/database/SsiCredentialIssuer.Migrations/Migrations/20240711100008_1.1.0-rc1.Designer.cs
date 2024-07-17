@@ -29,8 +29,8 @@ using System.Text.Json;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240618085801_118-AddTestCredential")]
-    partial class _118AddTestCredential
+    [Migration("20240711100008_1.1.0-rc1")]
+    partial class _110rc1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1116,6 +1116,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         {
                             Id = 11,
                             Label = "FRAMEWORK_AGREEMENT"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Label = "DATA_EXCHANGE_GOVERNANCE_CREDENTIAL"
                         });
                 });
 
@@ -1228,6 +1233,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         {
                             Id = 11,
                             Label = "FRAMEWORK_AGREEMENT"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Label = "DATA_EXCHANGE_GOVERNANCE_CREDENTIAL"
                         });
                 });
 

@@ -25,8 +25,6 @@ public record FrameworkCredential(
     [property: JsonPropertyName("id")] Guid Id,
     [property: JsonPropertyName("@context")] IEnumerable<string> Context,
     [property: JsonPropertyName("type")] IEnumerable<string> Type,
-    [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("description")] string Description,
     [property: JsonPropertyName("issuanceDate")] DateTimeOffset IssuanceDate,
     [property: JsonPropertyName("expirationDate")] DateTimeOffset ExpirationDate,
     [property: JsonPropertyName("issuer")] string Issuer,

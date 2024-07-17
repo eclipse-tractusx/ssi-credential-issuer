@@ -23,7 +23,7 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Encryption;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -337,6 +337,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     {
         var companyCredentialDetailsRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
         var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        var expiryDate = DateTimeOffset.UtcNow.AddMonths(12);
         var schemaData = new BpnCredential(
             Guid.NewGuid(),
             Context,
@@ -344,7 +345,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             "BpnCredential",
             "Bpn Credential",
             DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow.AddMonths(12),
+            expiryDate,
             _settings.IssuerDid,
             new BpnCredentialSubject(
                 holderDid,
@@ -356,7 +357,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(requestData.BusinessPartnerNumber, VerifiedCredentialTypeKindId.BPN, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(requestData.BusinessPartnerNumber, VerifiedCredentialTypeKindId.BPN, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, expiryDate, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     public async Task<Guid> CreateMembershipCredential(CreateMembershipCredentialRequest requestData, CancellationToken cancellationToken)
@@ -364,6 +365,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var companyCredentialDetailsRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
 
         var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        var expiryDate = DateTimeOffset.UtcNow.AddMonths(12);
         var schemaData = new MembershipCredential(
             Guid.NewGuid(),
             Context,
@@ -371,7 +373,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             "MembershipCredential",
             "Membership Credential",
             DateTimeOffset.UtcNow,
-            DateTimeOffset.UtcNow.AddMonths(12),
+            expiryDate,
             _settings.IssuerDid,
             new MembershipCredentialSubject(
                 holderDid,
@@ -383,7 +385,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, expiryDate, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     public async Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken)
@@ -436,8 +438,6 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             Guid.NewGuid(),
             Context,
             new[] { "VerifiableCredential", externalTypeId },
-            externalTypeId,
-            $"Framework Credential for UseCase {externalTypeId}",
             DateTimeOffset.UtcNow,
             GetExpiryDate(result.Expiry),
             _settings.IssuerDid,
@@ -446,7 +446,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 requestData.HolderBpn,
                 "UseCaseFramework",
                 externalTypeId,
-                result.Template!,
+                result.Template,
                 result.Version!
             ),
             new CredentialStatus(
@@ -454,7 +454,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                 StatusList)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
-        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
+        return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, result.Expiry, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
@@ -480,6 +480,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         string bpnl,
         VerifiedCredentialTypeKindId kindId,
         VerifiedCredentialTypeId typeId,
+        DateTimeOffset expiryDate,
         string schema,
         TechnicalUserDetails? technicalUserDetails,
         Guid? detailVersionId,
@@ -514,6 +515,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             {
                 c.VerifiedCredentialExternalTypeDetailVersionId = detailVersionId;
                 c.ProcessId = processId;
+                c.ExpiryDate = expiryDate;
             }).Id;
         documentRepository.AssignDocumentToCompanySsiDetails(docId, ssiDetailId);
 
@@ -525,13 +527,13 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
                     return;
                 }
 
-                var cryptoConfig = _settings.EncryptionConfigs.SingleOrDefault(x => x.Index == _settings.EncrptionConfigIndex) ?? throw new ConfigurationException($"EncryptionModeIndex {_settings.EncrptionConfigIndex} is not configured");
-                var (secret, initializationVector) = CryptoHelper.Encrypt(technicalUserDetails.ClientSecret, Convert.FromHexString(cryptoConfig.EncryptionKey), cryptoConfig.CipherMode, cryptoConfig.PaddingMode);
+                var cryptoHelper = _settings.EncryptionConfigs.GetCryptoHelper(_settings.EncryptionConfigIndex);
+                var (secret, initializationVector) = cryptoHelper.Encrypt(technicalUserDetails.ClientSecret);
 
                 c.ClientId = technicalUserDetails.ClientId;
                 c.ClientSecret = secret;
                 c.InitializationVector = initializationVector;
-                c.EncryptionMode = _settings.EncrptionConfigIndex;
+                c.EncryptionMode = _settings.EncryptionConfigIndex;
                 c.HolderWalletUrl = technicalUserDetails.WalletUrl;
                 c.CallbackUrl = callbackUrl;
             });

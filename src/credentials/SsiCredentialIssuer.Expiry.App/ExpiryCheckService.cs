@@ -109,7 +109,7 @@ public class ExpiryCheckService
     {
         if (data.ScheduleData.IsVcToDelete)
         {
-            companySsiDetailsRepository.RemoveSsiDetail(data.Id);
+            companySsiDetailsRepository.RemoveSsiDetail(data.Id, data.Bpnl, data.RequesterId);
         }
         else if (data.ScheduleData.IsVcToDecline)
         {

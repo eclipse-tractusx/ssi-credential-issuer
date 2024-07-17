@@ -54,5 +54,8 @@ public enum VerifiedCredentialExternalTypeId
     BUSINESS_PARTNER_DATA_MANAGEMENT = 10,
 
     [EnumMember(Value = "FrameworkAgreement")]
-    FRAMEWORK_AGREEMENT = 11
+    FRAMEWORK_AGREEMENT = 11,
+
+    [EnumMember(Value = "DataExchangeGovernanceCredential")]
+    DATA_EXCHANGE_GOVERNANCE_CREDENTIAL = 12
 }

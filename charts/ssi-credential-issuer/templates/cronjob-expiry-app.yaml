@@ -70,8 +70,27 @@ spec:
               value: "{{ .Values.credentialExpiry.expiry.expiredVcsToDeleteInMonth }}"
             - name: "EXPIRY__INACTIVEVCSTODELETEINWEEKS"
               value: "{{ .Values.credentialExpiry.expiry.inactiveVcsToDeleteInWeeks }}"
-            - name: "PROCESSES__IDENTITYID"
+            - name: "PROCESSIDENTITY__IDENTITYID"
               value: "{{ .Values.credentialExpiry.processIdentity.identityId }}"
+            - name: "PORTAL__CLIENTID"
+              value: "{{ .Values.service.portal.clientId }}"
+            - name: "PORTAL__CLIENTSECRET"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "issuer.secretName" . }}"
+                  key: "portal-client-secret"
+            - name: "PORTAL__GRANTTYPE"
+              value: "{{ .Values.processesworker.portal.grantType }}"
+            - name: "PORTAL__TOKENADDRESS"
+              value: "{{ .Values.centralidp.address }}{{ .Values.centralidp.tokenPath }}"
+            - name: "PORTAL__BASEADDRESS"
+              value: "{{ .Values.portalBackendAddress }}"
+            - name: "PORTAL__PASSWORD"
+              value: "empty"
+            - name: "PORTAL__SCOPE"
+              value: "{{ .Values.processesworker.portal.scope }}"
+            - name: "PORTAL__USERNAME"
+              value: "empty"
             ports:
             - name: http
               containerPort: {{ .Values.portContainer }}

@@ -106,7 +106,7 @@ public class ExpiryCheckServiceTests
         await _sut.ExecuteAsync(CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(credentialId)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(credentialId, A<string>._, A<string>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
     }
 
@@ -137,7 +137,7 @@ public class ExpiryCheckServiceTests
         await _sut.ExecuteAsync(CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id)).MustNotHaveHappened();
+        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id, A<string>._, A<string>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, A<Guid>._)).MustHaveHappenedOnceExactly();
@@ -183,7 +183,7 @@ public class ExpiryCheckServiceTests
         await _sut.ExecuteAsync(CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id)).MustNotHaveHappened();
+        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id, A<string>._, A<string>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portalService.AddNotification(A<string>._, creatorUserId, NotificationTypeId.CREDENTIAL_EXPIRY, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portalService.TriggerMail("CredentialExpiry", creatorUserId, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();

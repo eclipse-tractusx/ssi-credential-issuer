@@ -1112,6 +1112,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         {
                             Id = 11,
                             Label = "FRAMEWORK_AGREEMENT"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Label = "DATA_EXCHANGE_GOVERNANCE_CREDENTIAL"
                         });
                 });
 
@@ -1224,6 +1229,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         {
                             Id = 11,
                             Label = "FRAMEWORK_AGREEMENT"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Label = "DATA_EXCHANGE_GOVERNANCE_CREDENTIAL"
                         });
                 });
 
