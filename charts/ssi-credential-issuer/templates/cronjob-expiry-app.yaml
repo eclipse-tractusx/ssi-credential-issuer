@@ -70,7 +70,7 @@ spec:
               value: "{{ .Values.credentialExpiry.expiry.expiredVcsToDeleteInMonth }}"
             - name: "EXPIRY__INACTIVEVCSTODELETEINWEEKS"
               value: "{{ .Values.credentialExpiry.expiry.inactiveVcsToDeleteInWeeks }}"
-            - name: "PROCESSES__IDENTITYID"
+            - name: "PROCESSIDENTITY__IDENTITYID"
               value: "{{ .Values.credentialExpiry.processIdentity.identityId }}"
             - name: "PORTAL__CLIENTID"
               value: "{{ .Values.service.portal.clientId }}"
