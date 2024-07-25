@@ -17,45 +17,31 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using System.Runtime.Serialization;
-
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 public enum VerifiedCredentialTypeId
 {
-    [EnumMember(Value = "Traceability Framework")]
     TRACEABILITY_FRAMEWORK = 1,
 
-    [EnumMember(Value = "PCF Framework")]
     PCF_FRAMEWORK = 2,
 
-    [EnumMember(Value = "Behavior Twin Framework")]
     BEHAVIOR_TWIN_FRAMEWORK = 3,
 
-    [EnumMember(Value = "Membership Certificate")]
-    MEMBERSHIP_CERTIFICATE = 4,
+    MEMBERSHIP = 4,
 
-    [EnumMember(Value = "Circular Economy")]
     CIRCULAR_ECONOMY = 5,
 
-    [EnumMember(Value = "frameworkAgreement.quality")]
     FRAMEWORK_AGREEMENT_QUALITY = 6,
 
-    [EnumMember(Value = "BusinessPartnerCredential")]
     BUSINESS_PARTNER_NUMBER = 7,
 
-    [EnumMember(Value = "Demand and Capacity Management")]
     DEMAND_AND_CAPACITY_MANAGEMENT = 8,
 
-    [EnumMember(Value = "Demand and Capacity Management")]
     DEMAND_AND_CAPACITY_MANAGEMENT_PURIS = 9,
 
-    [EnumMember(Value = "Business Partner Data Management")]
     BUSINESS_PARTNER_DATA_MANAGEMENT = 10,
 
-    [EnumMember(Value = "Framework Agreement")]
     FRAMEWORK_AGREEMENT = 11,
 
-    [EnumMember(Value = "Date Exchange Governance")]
     DATA_EXCHANGE_GOVERNANCE_CREDENTIAL = 12
 }

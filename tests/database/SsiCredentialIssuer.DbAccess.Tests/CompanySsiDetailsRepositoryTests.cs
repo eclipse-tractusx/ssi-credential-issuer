@@ -125,9 +125,9 @@ public class CompanySsiDetailsRepositoryTests
             .And.Satisfy(
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE);
         result.Where(x => x.Bpnl == "BPNL00000001LLHA").Should().ContainSingle()
             .And.Satisfy(x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
@@ -149,7 +149,7 @@ public class CompanySsiDetailsRepositoryTests
             .And.Satisfy(
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE);
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP);
         result.Should().ContainSingle(x => x.Bpnl == "BPNL00000001LLHA")
             .Which.Should().Match<CompanySsiDetail>(x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
     }
@@ -184,7 +184,7 @@ public class CompanySsiDetailsRepositoryTests
         // Assert
         result.Should().HaveCount(2)
             .And.Satisfy(
-                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE &&
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP &&
                      x.Credentials.Count() == 1 &&
                      x.Credentials.Single().SsiDetailData.Count(ssi => ssi.ParticipationStatus == CompanySsiDetailStatusId.PENDING) == 1,
                 x => x.CredentialType == VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER && !x.Credentials.Any()
@@ -209,10 +209,10 @@ public class CompanySsiDetailsRepositoryTests
             .And.Satisfy(
                 x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK && x.Status == CompanySsiDetailStatusId.PENDING,
                 x => x.CredentialType == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.Status == CompanySsiDetailStatusId.PENDING,
-                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE && x.Status == CompanySsiDetailStatusId.PENDING,
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.Status == CompanySsiDetailStatusId.PENDING,
                 x => x.CredentialType == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK && x.Status == CompanySsiDetailStatusId.INACTIVE,
-                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE && x.Status == CompanySsiDetailStatusId.INACTIVE,
-                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE && x.Status == CompanySsiDetailStatusId.INACTIVE
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.Status == CompanySsiDetailStatusId.INACTIVE,
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.Status == CompanySsiDetailStatusId.INACTIVE
             );
     }
 
@@ -335,7 +335,7 @@ public class CompanySsiDetailsRepositoryTests
     [InlineData(VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, false)]
     [InlineData(VerifiedCredentialTypeId.PCF_FRAMEWORK, false)]
     [InlineData(VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK, false)]
-    [InlineData(VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, true)]
+    [InlineData(VerifiedCredentialTypeId.MEMBERSHIP, true)]
     public async Task CheckSsiCertificateType_WithTypeId_ReturnsTrue(VerifiedCredentialTypeId typeId, bool expectedResult)
     {
         // Arrange
@@ -397,7 +397,7 @@ public class CompanySsiDetailsRepositoryTests
         // Assert
         result.Exists.Should().BeTrue();
         result.Status.Should().Be(CompanySsiDetailStatusId.PENDING);
-        result.Type.Should().Be(VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
+        result.Type.Should().Be(VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL);
     }
 
     [Fact]
@@ -490,7 +490,7 @@ public class CompanySsiDetailsRepositoryTests
 
         // Assert
         result.Should().HaveCount(2).And.Satisfy(
-            x => x == VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE,
+            x => x == VerifiedCredentialTypeId.MEMBERSHIP,
                  x => x == VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER);
     }
 

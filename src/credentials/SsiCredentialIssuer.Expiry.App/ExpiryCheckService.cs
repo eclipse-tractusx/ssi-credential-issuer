@@ -168,7 +168,7 @@ public class ExpiryCheckService
 
         var content = JsonSerializer.Serialize(new
         {
-            Type = data.VerifiedCredentialTypeId,
+            Type = data.VerifiedCredentialExternalTypeId,
             ExpiryDate = data.ExpiryDate?.ToString("O") ?? throw new ConflictException("Expiry Date must be set here"),
             Version = data.DetailVersion,
             CredentialId = data.Id,
@@ -179,9 +179,9 @@ public class ExpiryCheckService
         {
             await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_EXPIRY,
                 cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-            var typeValue = data.VerifiedCredentialTypeId.GetEnumValue() ??
+            var typeValue = data.VerifiedCredentialExternalTypeId.GetEnumValue() ??
                             throw new UnexpectedConditionException(
-                                $"VerifiedCredentialType {data.VerifiedCredentialTypeId} does not exists");
+                                $"VerifiedCredentialType {data.VerifiedCredentialExternalTypeId} does not exists");
             var mailParameters = new MailParameter[]
             {
                 new("typeId", typeValue), new("version", data.DetailVersion ?? "no version"),
