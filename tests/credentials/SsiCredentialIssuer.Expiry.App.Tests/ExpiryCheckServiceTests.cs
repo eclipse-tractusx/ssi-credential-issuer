@@ -96,7 +96,7 @@ public class ExpiryCheckServiceTests
             .Create();
         var data = new CredentialExpiryData[]
         {
-            new(credentialId, Guid.NewGuid().ToString(), inactiveVcsToDelete.AddDays(-1), null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, credentialScheduleData)
+            new(credentialId, Guid.NewGuid().ToString(), inactiveVcsToDelete.AddDays(-1), null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
         };
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
@@ -117,7 +117,7 @@ public class ExpiryCheckServiceTests
         var now = DateTimeOffset.UtcNow;
         var expiredVcsToDeleteInMonth = now.AddMonths(-_settings.ExpiredVcsToDeleteInMonth);
         var creatorUserId = Guid.NewGuid();
-        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, CompanySsiDetailStatusId.PENDING, IssuerBpnl, creatorUserId.ToString(), now)
+        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.PENDING, IssuerBpnl, creatorUserId.ToString(), now)
         {
             ExpiryDate = expiredVcsToDeleteInMonth.AddDays(-2),
             CreatorUserId = creatorUserId.ToString()
@@ -127,7 +127,7 @@ public class ExpiryCheckServiceTests
             .Create();
         var data = new CredentialExpiryData[]
         {
-            new(ssiDetail.Id, ssiDetail.CreatorUserId, ssiDetail.ExpiryDate!.Value, ssiDetail.ExpiryCheckTypeId, null, Bpnl, ssiDetail.CompanySsiDetailStatusId, ssiDetail.VerifiedCredentialTypeId, credentialScheduleData)
+            new(ssiDetail.Id, ssiDetail.CreatorUserId, ssiDetail.ExpiryDate!.Value, ssiDetail.ExpiryCheckTypeId, null, Bpnl, ssiDetail.CompanySsiDetailStatusId, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
         };
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
@@ -152,7 +152,7 @@ public class ExpiryCheckServiceTests
         // Arrange
         var now = DateTimeOffset.UtcNow;
         var creatorUserId = Guid.NewGuid();
-        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, creatorUserId.ToString(), now)
+        var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, creatorUserId.ToString(), now)
         {
             ExpiryDate = now.AddDays(-days),
             ExpiryCheckTypeId = currentExpiryCheckTypeId,
@@ -166,7 +166,7 @@ public class ExpiryCheckServiceTests
             .Create();
         var data = new CredentialExpiryData[]
         {
-            new(ssiDetail.Id, ssiDetail.CreatorUserId, ssiDetail.ExpiryDate!.Value, ssiDetail.ExpiryCheckTypeId, null, Bpnl, ssiDetail.CompanySsiDetailStatusId, ssiDetail.VerifiedCredentialTypeId, credentialScheduleData)
+            new(ssiDetail.Id, ssiDetail.CreatorUserId, ssiDetail.ExpiryDate!.Value, ssiDetail.ExpiryCheckTypeId, null, Bpnl, ssiDetail.CompanySsiDetailStatusId, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
         };
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
