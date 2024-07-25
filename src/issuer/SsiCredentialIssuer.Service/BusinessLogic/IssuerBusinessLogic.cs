@@ -172,6 +172,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var typeValue = data.Type.GetEnumValue() ?? throw UnexpectedConditionException.Create(IssuerErrors.CREDENTIAL_TYPE_NOT_FOUND, new ErrorParameter[] { new("verifiedCredentialType", data.Type.ToString()) });
         var mailParameters = new MailParameter[]
         {
+            new("companyName", data.Bpn),
             new("requestName", typeValue),
             new("credentialType", typeValue),
             new("expiryDate", expiry.ToString("o", CultureInfo.InvariantCulture))
