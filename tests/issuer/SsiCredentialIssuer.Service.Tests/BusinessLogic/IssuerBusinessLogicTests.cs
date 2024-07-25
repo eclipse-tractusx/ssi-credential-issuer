@@ -208,7 +208,7 @@ public class IssuerBusinessLogicTests
     public async Task ApproveCredential_WithExpiryInThePast_ReturnsExpected()
     {
         // Arrange
-        const VerifiedCredentialTypeId typeId = VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK;
+        const VerifiedCredentialExternalTypeId typeId = VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL;
         var now = DateTimeOffset.Now;
         var detailData = new DetailData(
             VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
@@ -288,7 +288,7 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.UtcNow;
         var data = new SsiApprovalData(
             CompanySsiDetailStatusId.PENDING,
-            VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+            VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
             null,
             VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
@@ -321,7 +321,7 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.UtcNow;
         var data = new SsiApprovalData(
             CompanySsiDetailStatusId.PENDING,
-            VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+            VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
             Guid.NewGuid(),
             VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
@@ -368,7 +368,7 @@ public class IssuerBusinessLogicTests
 
         var data = new SsiApprovalData(
             CompanySsiDetailStatusId.PENDING,
-            VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+            VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
             null,
             VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
@@ -425,7 +425,7 @@ public class IssuerBusinessLogicTests
 
         var data = new SsiApprovalData(
             CompanySsiDetailStatusId.PENDING,
-            VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+            VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
             null,
             VerifiedCredentialTypeKindId.FRAMEWORK,
             Bpnl,
@@ -502,7 +502,7 @@ public class IssuerBusinessLogicTests
         // Arrange
         var notExistingId = Guid.NewGuid();
         A.CallTo(() => _companySsiDetailsRepository.GetSsiRejectionData(notExistingId))
-            .Returns(default((bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, string, Guid?, IEnumerable<Guid>)));
+            .Returns(default((bool, CompanySsiDetailStatusId, VerifiedCredentialExternalTypeId, string, Guid?, IEnumerable<Guid>)));
         Task Act() => _sut.RejectCredential(notExistingId, CancellationToken.None);
 
         // Act
@@ -525,7 +525,7 @@ public class IssuerBusinessLogicTests
             .Returns((
                 true,
                 status,
-                VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
                 CompanyUserId.ToString(),
                 null,
                 Enumerable.Empty<Guid>()
@@ -552,7 +552,7 @@ public class IssuerBusinessLogicTests
             .Returns((
                 true,
                 CompanySsiDetailStatusId.PENDING,
-                VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
                 CompanyUserId.ToString(),
                 null,
                 Enumerable.Empty<Guid>()));
@@ -586,7 +586,7 @@ public class IssuerBusinessLogicTests
             .Returns((
                 true,
                 CompanySsiDetailStatusId.PENDING,
-                VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
                 CompanyUserId.ToString(),
                 Guid.NewGuid(),
                 Enumerable.Repeat<Guid>(Guid.NewGuid(), 1)));
@@ -621,7 +621,7 @@ public class IssuerBusinessLogicTests
             .Returns((
                 true,
                 CompanySsiDetailStatusId.PENDING,
-                VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
                 "test123",
                 Guid.NewGuid(),
                 Enumerable.Repeat(Guid.NewGuid(), 1)));
@@ -750,7 +750,7 @@ public class IssuerBusinessLogicTests
         var didId = Guid.NewGuid().ToString();
         var didDocument = new DidDocument(didId);
         var data = new CreateMembershipCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, "Test", null, null);
-        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, DateTimeOffset.Now);
+        var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, DateTimeOffset.Now);
 
         HttpRequestMessage? request = null;
         A.CallTo(() => _companySsiDetailsRepository.GetCertificateTypes(A<string>._))
@@ -761,16 +761,16 @@ public class IssuerBusinessLogicTests
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
         }, requestMessage => request = requestMessage);
 
-        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
             .Invokes((string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
 
         // Act
         await _sut.CreateMembershipCredential(data, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _documentRepository.CreateDocument("MEMBERSHIP_CERTIFICATE.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
+        A.CallTo(() => _documentRepository.CreateDocument("MEMBERSHIP.json", A<byte[]>._, A<byte[]>._, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, A<Action<Document>>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP_CERTIFICATE, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
+        A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();

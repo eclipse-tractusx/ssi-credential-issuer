@@ -167,7 +167,7 @@ public class CredentialExpiryProcessHandlerTests
         // Arrange
         var requesterId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
-            .Returns((VerifiedCredentialTypeId.PCF_FRAMEWORK, requesterId.ToString()));
+            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString()));
 
         // Act
         var result = await _sut.TriggerNotification(_credentialId, CancellationToken.None);
@@ -191,7 +191,7 @@ public class CredentialExpiryProcessHandlerTests
         // Arrange
         var requesterId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
-            .Returns((VerifiedCredentialTypeId.PCF_FRAMEWORK, requesterId.ToString()));
+            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString()));
 
         // Act
         var result = await _sut.TriggerMail(_credentialId, CancellationToken.None);

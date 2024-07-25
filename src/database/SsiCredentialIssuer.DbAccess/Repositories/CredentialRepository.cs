@@ -91,10 +91,10 @@ public class CredentialRepository(IssuerDbContext dbContext) : ICredentialReposi
         modify(entity);
     }
 
-    public Task<(VerifiedCredentialTypeId TypeId, string RequesterId)> GetCredentialNotificationData(Guid credentialId) =>
+    public Task<(VerifiedCredentialExternalTypeId ExternalTypeId, string RequesterId)> GetCredentialNotificationData(Guid credentialId) =>
         dbContext.CompanySsiDetails
             .Where(x => x.Id == credentialId)
-            .Select(x => new ValueTuple<VerifiedCredentialTypeId, string>(x.VerifiedCredentialTypeId, x.CreatorUserId))
+            .Select(x => new ValueTuple<VerifiedCredentialExternalTypeId, string>(x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalTypeId, x.CreatorUserId))
             .SingleOrDefaultAsync();
 
     public Task<(bool Exists, bool IsSameCompany, IEnumerable<(DocumentStatusId StatusId, byte[] Content)> Documents)> GetSignedCredentialForCredentialId(Guid credentialId, string bpnl) =>

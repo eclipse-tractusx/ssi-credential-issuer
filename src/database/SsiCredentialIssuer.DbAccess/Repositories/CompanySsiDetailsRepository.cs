@@ -186,7 +186,7 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 true,
                 new SsiApprovalData(
                     x.CompanySsiDetailStatusId,
-                    x.VerifiedCredentialTypeId,
+                    x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalTypeId,
                     x.ProcessId,
                     x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind == null ? null : x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId,
                     x.Bpnl,
@@ -205,13 +205,13 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
             .SingleOrDefaultAsync();
 
     /// <inheritdoc />
-    public Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialTypeId Type, string UserId, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId) =>
+    public Task<(bool Exists, CompanySsiDetailStatusId Status, VerifiedCredentialExternalTypeId Type, string UserId, Guid? ProcessId, IEnumerable<Guid> ProcessStepIds)> GetSsiRejectionData(Guid credentialId) =>
         context.CompanySsiDetails
             .Where(x => x.Id == credentialId)
-            .Select(x => new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialTypeId, string, Guid?, IEnumerable<Guid>>(
+            .Select(x => new ValueTuple<bool, CompanySsiDetailStatusId, VerifiedCredentialExternalTypeId, string, Guid?, IEnumerable<Guid>>(
                 true,
                 x.CompanySsiDetailStatusId,
-                x.VerifiedCredentialTypeId,
+                x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalTypeId,
                 x.CreatorUserId,
                 x.ProcessId,
                 x.Process!.ProcessSteps.Where(ps => ps.ProcessStepStatusId == ProcessStepStatusId.TODO).Select(p => p.Id)
@@ -263,7 +263,7 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 x.Details.VerifiedCredentialExternalTypeDetailVersion!.Version,
                 x.Details.Bpnl,
                 x.Details.CompanySsiDetailStatusId,
-                x.Details.VerifiedCredentialTypeId,
+                x.Details.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalTypeId,
                 new CredentialScheduleData(
                     x.IsVcToDelete,
                     x.IsOneDayNotification,
