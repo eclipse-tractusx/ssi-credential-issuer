@@ -4,6 +4,8 @@ This helm chart installs the Catena-X SSI Credential Issuer application.
 
 For further information please refer to [Technical Documentation](./docs/technical-documentation).
 
+For further information about the initial credential creation for an operator please refer to [initial credential setup](./docs/operator-credential-creation/intial-credential-setup.md)
+
 The referenced container images are for demonstration purposes only.
 
 ## Installation
