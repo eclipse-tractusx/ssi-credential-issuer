@@ -50,6 +50,8 @@ VALUES ('8ddd7518-4532-409e-920a-c2b5029408a7', 5, 1, 'your process id', now(), 
 
 ```
 
+**Warning**: Currently the application of the wallet must be set to `catena-x-portal`. This value is not configurable and must be existing in the wallet. This will be resolved in a later release.
+
 ## NOTICE
 
 This work is licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
