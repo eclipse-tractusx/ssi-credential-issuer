@@ -22,6 +22,8 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -290,5 +292,28 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
         initialize?.Invoke(companySsiDetailData);
         context.CompanySsiProcessData.Attach(companySsiDetailData);
         setOptionalFields(companySsiDetailData);
+    }
+
+    public IAsyncEnumerable<CredentialAboutToExpireData> GetCredentialsAboutToExpire(DateTimeOffset expirationDate)
+    {
+        return context.CompanySsiDetails
+            .Select(x => new
+            {
+                Details = x,
+                IsDateAboutToExpire = x.ExpiryDate != null && x.ExpiryDate.Value.Date.CompareTo(expirationDate.Date) == 0,
+                IsSsiStatusIdActive = x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE,
+                IsValidCredendialType = x.CompanySsiProcessData != null && (x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.BPN || x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.MEMBERSHIP)
+            })
+            .Where(ssi => ssi.IsSsiStatusIdActive && ssi.IsDateAboutToExpire && ssi.IsValidCredendialType)
+            .Select(x => new CredentialAboutToExpireData(
+                    x.Details.Bpnl,
+                    x.Details.Bpnl,
+                    x.Details.CompanySsiProcessData.Schema,
+                    x.Details.CompanySsiProcessData.HolderWalletUrl,
+                    x.Details.CompanySsiProcessData.ClientId,
+                    x.Details.CompanySsiProcessData.ClientSecret,
+                    x.Details.CompanySsiProcessData.CallbackUrl
+                ))
+            .AsAsyncEnumerable();
     }
 }
