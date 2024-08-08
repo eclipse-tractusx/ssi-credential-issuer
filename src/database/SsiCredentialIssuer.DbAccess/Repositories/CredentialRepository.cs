@@ -111,7 +111,7 @@ public class CredentialRepository(IssuerDbContext dbContext) : ICredentialReposi
             .Where(x => x.Id == documentId)
             .Select(x => new ValueTuple<bool, bool, string, DocumentStatusId, byte[], MediaTypeId>(
                 true,
-                x.CompanySsiDetails.Any(c => c.Bpnl == bpnl),
+                x.CompanySsiDetails.Any(c => c.Bpnl == bpnl || c.IssuerBpn == bpnl),
                 x.DocumentName,
                 x.DocumentStatusId,
                 x.DocumentContent,
