@@ -23,29 +23,37 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.Handlers;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Models;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App;
 
 /// <summary>
 /// Service to re-issue credentials that will expire in the day after.
 /// </summary>
-public class RenewalService
+public class RenewalService : IRenewalService
 {
+    private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<RenewalService> _logger;
-    private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
-
+    private readonly ICredentialIssuerHandler _credentialIssuerHandler;
     /// <summary>
     /// Creates a new instance of <see cref="RenewalService"/>
     /// </summary>
     /// <param name="serviceScopeFactory">access to the services</param>
+    /// <param name="credentialIssuerHandler">access to the credential issuer handler service</param>
     /// <param name="logger">the logger</param>
     public RenewalService(IServiceScopeFactory serviceScopeFactory,
+        ICredentialIssuerHandler credentialIssuerHandler,
         ILogger<RenewalService> logger)
     {
         _serviceScopeFactory = serviceScopeFactory;
+        _credentialIssuerHandler = credentialIssuerHandler;
         _logger = logger;
     }
     
@@ -64,9 +72,9 @@ public class RenewalService
                 var repositories = processServiceScope.ServiceProvider.GetRequiredService<IIssuerRepositories>();
                 var expirationDate = dateTimeProvider.OffsetNow.AddDays(1);
                 var companySsiDetailsRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
-
+                var credentialIssuerHandler = processServiceScope.ServiceProvider.GetRequiredService<ICredentialIssuerHandler>();
                 var credentialsAboutToExpire = companySsiDetailsRepository.GetCredentialsAboutToExpire(expirationDate);
-                await CreateNewCredentials(credentialsAboutToExpire);
+                await ProcessCredentials(credentialsAboutToExpire, dateTimeProvider);
             }
             catch (Exception ex)
             {
@@ -76,11 +84,76 @@ public class RenewalService
         }
     }
 
-    private async Task CreateNewCredentials(IAsyncEnumerable<CredentialAboutToExpireData> credentialsAboutToExpire)
+    private async Task ProcessCredentials(IAsyncEnumerable<CredentialAboutToExpireData> credentialsAboutToExpire, IDateTimeProvider dateTimeProvider)
     {
-        await foreach(var item in credentialsAboutToExpire)
+        await foreach(var credential in credentialsAboutToExpire)
         {
-            _logger.LogInformation("HolderBpn: {0}", item.HolderBpn);
+            var expirationDate = dateTimeProvider.OffsetNow.AddMonths(12);
+            
+            var schemaData = CreateNewCredential(credential, expirationDate);
+
+            await _credentialIssuerHandler.HandleCredentialProcessCreation(new IssuerCredentialRequest(
+                credential.HolderBpn,
+                credential.VerifiedCredentialTypeKindId,
+                credential.VerifiedCredentialTypeId,
+                expirationDate,
+                credential.IdentityId,
+                schemaData,
+                credential.WalletUrl,
+                credential.DetailVersionId,
+                credential.CallbackUrl
+            ));
+
         }
+    }
+
+    private string CreateNewCredential(CredentialAboutToExpireData credential, DateTimeOffset expirationDate)
+    {
+        string schemaData;
+        if (credential.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.BPN)
+        {
+            schemaData = CreateBpnCredential(credential, credential.Schema, expirationDate);
+        }
+        else
+        {
+            schemaData = CreateMembershipCredential(credential, credential.Schema, expirationDate);
+        }
+        return schemaData;
+    }
+
+    private string CreateBpnCredential(CredentialAboutToExpireData credential, JsonDocument schema, DateTimeOffset expirationDate)
+    {
+        var bpnAboutToExpire = credential.Schema.Deserialize<BpnCredential>();
+        var bpnCredential = new BpnCredential(
+            Guid.NewGuid(),
+            CredentialContext.Context,
+            bpnAboutToExpire.Type,
+            bpnAboutToExpire.Name,
+            bpnAboutToExpire.Description,
+            DateTimeOffset.UtcNow,
+            expirationDate,
+            bpnAboutToExpire.Issuer,
+            bpnAboutToExpire.CredentialSubject,
+            bpnAboutToExpire.CredentialStatus);
+
+        return JsonSerializer.Serialize(bpnCredential, Options);
+    }
+
+    private string CreateMembershipCredential(CredentialAboutToExpireData credential, JsonDocument schema, DateTimeOffset expirationDate)
+    {
+        var membershipAboutToExpire = credential.Schema.Deserialize<MembershipCredential>();
+        var membershipCredential = new MembershipCredential(
+            Guid.NewGuid(),
+            CredentialContext.Context,
+            membershipAboutToExpire.Type,
+            membershipAboutToExpire.Name,
+            membershipAboutToExpire.Description,
+            DateTimeOffset.UtcNow,
+            expirationDate,
+            membershipAboutToExpire.Issuer,
+            membershipAboutToExpire.CredentialSubject,
+            membershipAboutToExpire.CredentialStatus);
+
+        return JsonSerializer.Serialize(membershipCredential, Options);
     }
 }
