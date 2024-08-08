@@ -44,10 +44,12 @@ public record CredentialScheduleData(
 public record CredentialAboutToExpireData(
     string Holder,
     string HolderBpn,
-    JsonDocument schema,
-    string WalletUrl,
-    string ClientId,
-    byte[]? ClientSecret,
+    VerifiedCredentialTypeId VerifiedCredentialTypeId,
+    VerifiedCredentialTypeKindId VerifiedCredentialTypeKindId,
+    JsonDocument Schema,
+    string IdentityId,
+    string? WalletUrl,
+    Guid? DetailVersionId,
     string? CallbackUrl
 );
 

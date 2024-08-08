@@ -308,10 +308,12 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
             .Select(x => new CredentialAboutToExpireData(
                     x.Details.Bpnl,
                     x.Details.Bpnl,
+                    x.Details.VerifiedCredentialTypeId,
+                    x.Details.CompanySsiProcessData!.CredentialTypeKindId,
                     x.Details.CompanySsiProcessData.Schema,
-                    x.Details.CompanySsiProcessData.HolderWalletUrl,
-                    x.Details.CompanySsiProcessData.ClientId,
-                    x.Details.CompanySsiProcessData.ClientSecret,
+                    x.Details.Documents.Select(document => document.IdentityId).SingleOrDefault()!,
+                    x.Details.CompanySsiProcessData.HolderWalletUrl!,
+                    x.Details.VerifiedCredentialExternalTypeDetailVersion!.Id,
                     x.Details.CompanySsiProcessData.CallbackUrl
                 ))
             .AsAsyncEnumerable();
