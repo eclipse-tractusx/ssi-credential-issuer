@@ -124,6 +124,16 @@ processesworker:
     clientId: "wallet-client-id"
     # -- Client-secret for wallet client-id. Secret-key 'wallet-client-secret'.
     clientSecret: ""
+    # -- the application set in the wallet
+    application: "catena-x-portal"
+    # -- path to create a credential
+    credentialCreationPath: "api/v2.0.0/credentials"
+    # -- path to sign a specific credential {0} will be replaced by the credential id
+    signingCreationPath: "/api/v2.0.0/credentials/{0}"
+    # -- path to get a specific credential {0} will be replaced by the credential id
+    getCreationPath: "/api/v2.0.0/credentials/{0}"
+    # -- path to revoke a specific credential {0} will be replaced by the credential id
+    revokeCreationPath: "/api/v2.0.0/credentials/{0}"
 
 credentialExpiry:
   name: "expiry"

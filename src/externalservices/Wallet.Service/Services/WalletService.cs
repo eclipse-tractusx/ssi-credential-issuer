@@ -28,25 +28,19 @@ using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
-public class WalletService : IWalletService
+public class WalletService(IBasicAuthTokenService basicAuthTokenService, IOptions<WalletSettings> options)
+    : IWalletService
 {
     private const string NoIdErrorMessage = "Response must contain a valid id";
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-    private readonly IBasicAuthTokenService _basicAuthTokenService;
-    private readonly WalletSettings _settings;
-
-    public WalletService(IBasicAuthTokenService basicAuthTokenService, IOptions<WalletSettings> options)
-    {
-        _basicAuthTokenService = basicAuthTokenService;
-        _settings = options.Value;
-    }
+    private readonly WalletSettings _settings = options.Value;
 
     public async Task<Guid> CreateCredential(JsonDocument payload, CancellationToken cancellationToken)
     {
-        using var client = await _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
-        var data = new CreateCredentialRequest("catena-x-portal", new CredentialPayload(payload));
-        var result = await client.PostAsJsonAsync("api/v2.0.0/credentials", data, Options, cancellationToken)
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        var data = new CreateCredentialRequest(_settings.WalletApplication, new CredentialPayload(payload));
+        var result = await client.PostAsJsonAsync(_settings.CredentialCreationPath, data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("create-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
@@ -61,9 +55,9 @@ public class WalletService : IWalletService
 
     public async Task<string> SignCredential(Guid credentialId, CancellationToken cancellationToken)
     {
-        using var client = await _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
         var data = new SignCredentialRequest(new SignPayload(new SignUpdate("external", "jwt")));
-        var result = await client.PatchAsJsonAsync($"/api/v2.0.0/credentials/{credentialId}", data, Options, cancellationToken)
+        var result = await client.PatchAsJsonAsync(string.Format(_settings.SigningCredentialPath, credentialId), data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("sign-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
@@ -78,8 +72,8 @@ public class WalletService : IWalletService
 
     public async Task<JsonDocument> GetCredential(Guid externalCredentialId, CancellationToken cancellationToken)
     {
-        using var client = await _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
-        var result = await client.GetAsync($"/api/v2.0.0/credentials/{externalCredentialId}", cancellationToken)
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        var result = await client.GetAsync(string.Format(_settings.SigningCredentialPath, externalCredentialId), cancellationToken)
             .CatchingIntoServiceExceptionFor("get-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
@@ -100,9 +94,9 @@ public class WalletService : IWalletService
             ClientSecret = clientSecret,
             TokenAddress = $"{holderWalletUrl}/oauth/token"
         };
-        using var client = await _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(authSettings, cancellationToken);
-        var data = new DeriveCredentialData("catena-x-portal", new DeriveCredentialPayload(new DeriveCredential(credential)));
-        var result = await client.PostAsJsonAsync("/api/v2.0.0/credentials", data, Options, cancellationToken)
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(authSettings, cancellationToken);
+        var data = new DeriveCredentialData(_settings.WalletApplication, new DeriveCredentialPayload(new DeriveCredential(credential)));
+        var result = await client.PostAsJsonAsync(_settings.CredentialCreationPath, data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("create-holder-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
@@ -117,9 +111,9 @@ public class WalletService : IWalletService
 
     public async Task RevokeCredentialForIssuer(Guid externalCredentialId, CancellationToken cancellationToken)
     {
-        using var client = await _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
         var data = new RevokeCredentialRequest(new RevokePayload(true));
-        await client.PatchAsJsonAsync($"/api/v2.0.0/credentials/{externalCredentialId}", data, Options, cancellationToken)
+        await client.PatchAsJsonAsync(string.Format(_settings.RevokeCredentialPath, externalCredentialId), data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("revoke-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);

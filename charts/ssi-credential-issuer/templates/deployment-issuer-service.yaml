@@ -163,6 +163,16 @@ spec:
             secretKeyRef:
               name: "{{ template "issuer.secretName" . }}"
               key: "credential-encryption-key0"
+        - name: "WALLET__WALLETAPPLICATION"
+          value: "{{ .Values.processesworker.wallet.application }}"
+        - name: "WALLET__CREDENTIALCREATIONPATH"
+          value: "{{ .Values.processesworker.wallet.credentialCreationPath }}"
+        - name: "WALLET__SIGNINGCREDENTIALPATH"
+          value: "{{ .Values.processesworker.wallet.signingCreationPath }}"
+        - name: "WALLET__GETCREDENTIALPATH"
+          value: "{{ .Values.processesworker.wallet.getCreationPath }}"
+        - name: "WALLET__REVOKECREDENTIALPATH"
+          value: "{{ .Values.processesworker.wallet.revokeCreationPath }}"
         ports:
         - name: http
           containerPort: {{ .Values.portContainer }}
