@@ -39,10 +39,10 @@ public class PortalService(ITokenService tokenService, IOptions<PortalSettings> 
 
     private readonly PortalSettings _settings = options.Value;
 
-    public async Task AddNotification(string content, Guid requester, NotificationTypeId notificationTypeId, CancellationToken cancellationToken)
+    public async Task AddNotification(string content, Guid receiver, NotificationTypeId notificationTypeId, CancellationToken cancellationToken)
     {
         using var client = await tokenService.GetAuthorizedClient<PortalService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        var data = new NotificationRequest(requester, content, notificationTypeId);
+        var data = new NotificationRequest(receiver, content, notificationTypeId);
         await client.PostAsJsonAsync("api/notification/ssi-credentials", data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("notification", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION,
         async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))

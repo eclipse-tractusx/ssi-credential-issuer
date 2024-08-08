@@ -87,7 +87,7 @@ public class PortalServiceTests
             x.Content is JsonContent &&
             (x.Content as JsonContent)!.ObjectType == typeof(NotificationRequest) &&
             ((x.Content as JsonContent)!.Value as NotificationRequest)!.Content == "Test" &&
-            ((x.Content as JsonContent)!.Value as NotificationRequest)!.Requester == requester &&
+            ((x.Content as JsonContent)!.Value as NotificationRequest)!.Receiver == requester &&
             ((x.Content as JsonContent)!.Value as NotificationRequest)!.NotificationTypeId == NotificationTypeId.CREDENTIAL_APPROVAL
         );
     }
