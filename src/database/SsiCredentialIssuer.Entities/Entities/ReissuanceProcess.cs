@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,17 +17,20 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.Handlers;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 
-/// <summary>
-/// Handles the re-issuance of a new credential then creates a new create credential process 
-/// </summary>
-public interface ICredentialIssuerHandler
+public class ReissuanceProcess : IBaseEntity
 {
-    /// <summary>
-    /// Hadkes the request to create a new credential process
-    /// </summary>
-    /// <param name="issuerCredentialRequest">Credential Request Object</param>
-    /// <returns></returns>
-    public Task HandleCredentialProcessCreation(IssuerCredentialRequest issuerCredentialRequest);
+    public ReissuanceProcess(Guid id, Guid reissuedCredentialId)
+    {
+        Id = id;
+        ReissuedCredentialId = reissuedCredentialId;
+    }
+
+    public Guid Id { get; private set; }
+    public Guid ReissuedCredentialId { get; private set; }
+
+    // Navigation properties
+    public virtual CompanySsiDetail? CompanySsiDetail { get; private set; }
 }

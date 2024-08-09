@@ -20,7 +20,9 @@
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.Handlers;
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+
 public class IssuerCredentialRequest(
+    Guid id,
     string bpnl,
     VerifiedCredentialTypeKindId kindId,
     VerifiedCredentialTypeId typeId,
@@ -31,6 +33,7 @@ public class IssuerCredentialRequest(
     Guid? detailVersionId,
     string? callbackUrl)
 {
+    public Guid Id { get; } = id;
     public string Bpnl { get; } = bpnl;
     public VerifiedCredentialTypeKindId KindId { get; } = kindId;
     public VerifiedCredentialTypeId TypeId { get; } = typeId;
@@ -39,5 +42,5 @@ public class IssuerCredentialRequest(
     public string Schema { get; } = schema;
     public string? HolderWalletUrl { get; } = holderWalletUrl;
     public Guid? DetailVersionId { get; } = detailVersionId;
-    public string CallbackUrl { get; } = callbackUrl;
+    public string? CallbackUrl { get; } = callbackUrl;
 }

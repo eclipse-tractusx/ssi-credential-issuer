@@ -302,11 +302,12 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 Details = x,
                 IsDateAboutToExpire = x.ExpiryDate != null && x.ExpiryDate.Value.Date.CompareTo(expirationDate.Date) == 0,
                 IsSsiStatusIdActive = x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE,
-                IsValidCredendialType = x.CompanySsiProcessData != null && (x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.BPN || x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.MEMBERSHIP)
+                IsValidCredendialType = x.CompanySsiProcessData != null && (x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.BPN || x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.MEMBERSHIP),
+                IsCredentialNotReissued = x.ReissuanceProcess == null
             })
-            .Where(ssi => ssi.IsSsiStatusIdActive && ssi.IsDateAboutToExpire && ssi.IsValidCredendialType)
+            .Where(ssi => ssi.IsSsiStatusIdActive && ssi.IsDateAboutToExpire && ssi.IsValidCredendialType && ssi.IsCredentialNotReissued)
             .Select(x => new CredentialAboutToExpireData(
-                    x.Details.Bpnl,
+                    x.Details.Id,
                     x.Details.Bpnl,
                     x.Details.VerifiedCredentialTypeId,
                     x.Details.CompanySsiProcessData!.CredentialTypeKindId,

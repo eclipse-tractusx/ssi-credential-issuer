@@ -29,9 +29,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Configuration;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.Handlers;
 
-/// <summary>
-/// Handles the re-issuance of a new credential then creates a new create credential process 
-/// </summary>
+/// <inheritdoc />
 public class CredentialIssuerHandler : ICredentialIssuerHandler
 {
     private readonly CredentialSettings _settings;
@@ -47,11 +45,7 @@ public class CredentialIssuerHandler : ICredentialIssuerHandler
         _settings = options.Value;
     }
 
-    /// <summary>
-    /// Hadkes the request to create a new credential process
-    /// </summary>
-    /// <param name="credentialRequest">Credential Request Object</param>
-    /// <returns></returns>
+    /// <inheritdoc />
     public async Task HandleCredentialProcessCreation(IssuerCredentialRequest credentialRequest)
     {
         var documentContent = Encoding.UTF8.GetBytes(credentialRequest.Schema);
@@ -59,6 +53,7 @@ public class CredentialIssuerHandler : ICredentialIssuerHandler
         using var processServiceScope = _serviceScopeFactory.CreateScope();
         var repositories = processServiceScope.ServiceProvider.GetRequiredService<IIssuerRepositories>();
         var documentRepository = repositories.GetInstance<IDocumentRepository>();
+        var reissuanceRepository = repositories.GetInstance<IReissuanceRepository>();
         var companyCredentialDetailsRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
         var docId = documentRepository.CreateDocument($"{credentialRequest.TypeId}.json", documentContent,
             hash, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, x =>
@@ -81,7 +76,10 @@ public class CredentialIssuerHandler : ICredentialIssuerHandler
                 c.ProcessId = processId;
                 c.ExpiryDate = credentialRequest.ExpiryDate;
             }).Id;
+
         documentRepository.AssignDocumentToCompanySsiDetails(docId, ssiDetailId);
+
+        reissuanceRepository.CreateReissuanceProcess(credentialRequest.Id, ssiDetailId);
 
         companyCredentialDetailsRepository.CreateProcessData(ssiDetailId, JsonDocument.Parse(credentialRequest.Schema), credentialRequest.KindId,
             c =>

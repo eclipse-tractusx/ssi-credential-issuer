@@ -42,7 +42,7 @@ public record CredentialScheduleData(
 );
 
 public record CredentialAboutToExpireData(
-    string Holder,
+    Guid Id,
     string HolderBpn,
     VerifiedCredentialTypeId VerifiedCredentialTypeId,
     VerifiedCredentialTypeKindId VerifiedCredentialTypeKindId,

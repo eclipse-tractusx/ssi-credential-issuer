@@ -61,6 +61,7 @@ public class IssuerDbContext : DbContext
     public virtual DbSet<ProcessStepStatus> ProcessStepStatuses { get; set; } = default!;
     public virtual DbSet<ProcessStepType> ProcessStepTypes { get; set; } = default!;
     public virtual DbSet<ProcessType> ProcessTypes { get; set; } = default!;
+    public virtual DbSet<ReissuanceProcess> Reissuances { get; set; } = default!;
     public virtual DbSet<UseCase> UseCases { get; set; } = default!;
     public virtual DbSet<VerifiedCredentialExternalType> VerifiedCredentialExternalTypes { get; set; } = default!;
     public virtual DbSet<VerifiedCredentialExternalTypeDetailVersion> VerifiedCredentialExternalTypeDetailVersions { get; set; } = default!;
@@ -143,6 +144,15 @@ public class IssuerDbContext : DbContext
                 .HasForeignKey(x => x.CredentialTypeKindId);
         });
 
+        modelBuilder.Entity<ReissuanceProcess>(e =>
+        {
+            e.HasKey(x => x.Id);
+
+            e.HasOne(x => x.CompanySsiDetail)
+                .WithOne(x => x.ReissuanceProcess)
+                .HasForeignKey<ReissuanceProcess>(x => x.Id);
+        });
+
         modelBuilder.Entity<Document>(entity =>
         {
             entity.HasAuditV2Triggers<Document, AuditDocument20240419>();
@@ -181,6 +191,7 @@ public class IssuerDbContext : DbContext
             .WithMany(p => p!.Processes)
             .HasForeignKey(d => d.ProcessTypeId)
             .OnDelete(DeleteBehavior.ClientSetNull);
+
 
         modelBuilder.Entity<ProcessStep>()
             .HasOne(d => d.Process)

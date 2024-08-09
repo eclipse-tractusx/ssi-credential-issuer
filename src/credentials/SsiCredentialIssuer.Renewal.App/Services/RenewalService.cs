@@ -93,6 +93,7 @@ public class RenewalService : IRenewalService
             var schemaData = CreateNewCredential(credential, expirationDate);
 
             await _credentialIssuerHandler.HandleCredentialProcessCreation(new IssuerCredentialRequest(
+                credential.Id,
                 credential.HolderBpn,
                 credential.VerifiedCredentialTypeKindId,
                 credential.VerifiedCredentialTypeId,
@@ -107,7 +108,7 @@ public class RenewalService : IRenewalService
         }
     }
 
-    private string CreateNewCredential(CredentialAboutToExpireData credential, DateTimeOffset expirationDate)
+    private static string CreateNewCredential(CredentialAboutToExpireData credential, DateTimeOffset expirationDate)
     {
         string schemaData;
         if (credential.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.BPN)
@@ -121,13 +122,13 @@ public class RenewalService : IRenewalService
         return schemaData;
     }
 
-    private string CreateBpnCredential(CredentialAboutToExpireData credential, JsonDocument schema, DateTimeOffset expirationDate)
+    private static string CreateBpnCredential(CredentialAboutToExpireData credential, JsonDocument schema, DateTimeOffset expirationDate)
     {
         var bpnAboutToExpire = credential.Schema.Deserialize<BpnCredential>();
         var bpnCredential = new BpnCredential(
             Guid.NewGuid(),
             CredentialContext.Context,
-            bpnAboutToExpire.Type,
+            bpnAboutToExpire!.Type,
             bpnAboutToExpire.Name,
             bpnAboutToExpire.Description,
             DateTimeOffset.UtcNow,
@@ -139,13 +140,13 @@ public class RenewalService : IRenewalService
         return JsonSerializer.Serialize(bpnCredential, Options);
     }
 
-    private string CreateMembershipCredential(CredentialAboutToExpireData credential, JsonDocument schema, DateTimeOffset expirationDate)
+    private static string CreateMembershipCredential(CredentialAboutToExpireData credential, JsonDocument schema, DateTimeOffset expirationDate)
     {
         var membershipAboutToExpire = credential.Schema.Deserialize<MembershipCredential>();
         var membershipCredential = new MembershipCredential(
             Guid.NewGuid(),
             CredentialContext.Context,
-            membershipAboutToExpire.Type,
+            membershipAboutToExpire!.Type,
             membershipAboutToExpire.Name,
             membershipAboutToExpire.Description,
             DateTimeOffset.UtcNow,

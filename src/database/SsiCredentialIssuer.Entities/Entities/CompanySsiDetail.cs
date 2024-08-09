@@ -73,6 +73,7 @@ public class CompanySsiDetail : IAuditableV2, IBaseEntity
     public virtual ExpiryCheckType? ExpiryCheckType { get; set; }
     public virtual CompanySsiDetailStatus? CompanySsiDetailStatus { get; set; }
     public virtual Process? Process { get; set; }
+    public virtual ReissuanceProcess? ReissuanceProcess { get; set; }
     public virtual VerifiedCredentialExternalTypeDetailVersion? VerifiedCredentialExternalTypeDetailVersion { get; set; }
     public virtual CompanySsiProcessData? CompanySsiProcessData { get; set; }
     public virtual ICollection<Document> Documents { get; private set; }
