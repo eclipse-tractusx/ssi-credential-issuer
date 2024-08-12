@@ -90,7 +90,7 @@ public class ReissuanceService : IReissuanceService
 
     private async Task ProcessCredentials(IAsyncEnumerable<CredentialAboutToExpireData> credentialsAboutToExpire, IDateTimeProvider dateTimeProvider)
     {
-        await foreach(var credential in credentialsAboutToExpire)
+        await foreach (var credential in credentialsAboutToExpire)
         {
             var expirationDate = dateTimeProvider.OffsetNow.AddMonths(12);
 
