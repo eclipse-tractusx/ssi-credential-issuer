@@ -25,7 +25,7 @@ metadata:
   labels:
     {{- include "issuer.labels" . | nindent 4 }}
 spec:
-  schedule: "0 0 * * *"
+  schedule: "0 23 * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     metadata:
@@ -87,6 +87,25 @@ spec:
               value: "{{ .Values.processesworker.portal.scope }}"
             - name: "PORTAL__USERNAME"
               value: "empty"
+            - name: "CREDENTIAL__ISSUERDID"
+              value: "{{ .Values.service.credential.issuerDid }}"
+            - name: "CREDENTIAL__ISSUERBPN"
+              value: "{{ .Values.service.credential.issuerBpn }}"
+            - name: "CREDENTIAL__STATUSLISTURL"
+              value: "{{ .Values.service.credential.statusListUrl }}"
+            - name: "CREDENTIAL__ENCRYPTIONCONFIG__ENCRYPTIONCONFIGINDEX"
+              value: "{{ .Values.service.credential.encryptionConfigIndex }}"
+            - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__INDEX"
+              value: "{{ .Values.service.credential.encryptionConfigs.index0.index}}"
+            - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__CIPHERMODE"
+              value: "{{ .Values.service.credential.encryptionConfigs.index0.cipherMode}}"
+            - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__PADDINGMODE"
+              value: "{{ .Values.service.credential.encryptionConfigs.index0.paddingMode}}"
+            - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__ENCRYPTIONKEY"
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ template "issuer.secretName" . }}"
+                  key: "credential-encryption-key0"
             ports:
             - name: http
               containerPort: {{ .Values.portContainer }}
