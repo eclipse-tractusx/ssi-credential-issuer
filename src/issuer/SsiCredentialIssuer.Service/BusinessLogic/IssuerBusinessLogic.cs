@@ -34,6 +34,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -47,7 +48,6 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 {
     private const string StatusList = "StatusList2021";
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-    private static readonly IEnumerable<string> Context = new[] { "https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0" };
     private static readonly Regex UrlPathInvalidCharsRegex = new("""[""<>#%{}|\\^~\[\]`]+""", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
 
     private readonly IIssuerRepositories _repositories;
@@ -341,7 +341,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var expiryDate = DateTimeOffset.UtcNow.AddMonths(12);
         var schemaData = new BpnCredential(
             Guid.NewGuid(),
-            Context,
+            CredentialContext.Context,
             new[] { "VerifiableCredential", "BpnCredential" },
             "BpnCredential",
             "Bpn Credential",
@@ -369,7 +369,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var expiryDate = DateTimeOffset.UtcNow.AddMonths(12);
         var schemaData = new MembershipCredential(
             Guid.NewGuid(),
-            Context,
+            CredentialContext.Context,
             new[] { "VerifiableCredential", "MembershipCredential" },
             "MembershipCredential",
             "Membership Credential",
@@ -437,7 +437,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var holderDid = await GetHolderInformation(requestData.Holder, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         var schemaData = new FrameworkCredential(
             Guid.NewGuid(),
-            Context,
+            CredentialContext.Context,
             new[] { "VerifiableCredential", externalTypeId },
             DateTimeOffset.UtcNow,
             GetExpiryDate(result.Expiry),
