@@ -34,9 +34,11 @@ public static class ReissuanceServiceExtensions
     /// Adds the renewal service
     /// </summary>
     /// <param name="services">the services</param>
+    /// <param name="section">Expiry section</param>
     /// <returns>the enriched service collection</returns>
-    public static IServiceCollection AddRenewalService(this IServiceCollection services)
+    public static IServiceCollection AddReissuanceService(this IServiceCollection services, IConfigurationSection section)
     {
+        services.AddOptions<ReissuanceExpirySettings>().Bind(section);
         services
             .AddTransient<IReissuanceService, ReissuanceService>()
             .AddTransient<IDateTimeProvider, UtcDateTimeProvider>()

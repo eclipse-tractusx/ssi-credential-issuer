@@ -28,6 +28,8 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
 using System.Text.Json;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 
@@ -40,18 +42,22 @@ public class ReissuanceService : IReissuanceService
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ILogger<ReissuanceService> _logger;
     private readonly ICredentialIssuerHandler _credentialIssuerHandler;
+    private readonly ReissuanceExpirySettings _settings;
     /// <summary>
     /// Creates a new instance of <see cref="ReissuanceService"/>
     /// </summary>
     /// <param name="serviceScopeFactory">access to the services</param>
     /// <param name="credentialIssuerHandler">access to the credential issuer handler service</param>
+    /// <param name="options">access to the expiry section settings</param>
     /// <param name="logger">the logger</param>
     public ReissuanceService(IServiceScopeFactory serviceScopeFactory,
         ICredentialIssuerHandler credentialIssuerHandler,
+        IOptions<ReissuanceExpirySettings> options,
         ILogger<ReissuanceService> logger)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _credentialIssuerHandler = credentialIssuerHandler;
+        _settings = options.Value;
         _logger = logger;
     }
 
@@ -68,7 +74,7 @@ public class ReissuanceService : IReissuanceService
                 using var processServiceScope = _serviceScopeFactory.CreateScope();
                 var dateTimeProvider = processServiceScope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
                 var repositories = processServiceScope.ServiceProvider.GetRequiredService<IIssuerRepositories>();
-                var expirationDate = dateTimeProvider.OffsetNow.AddDays(1);
+                var expirationDate = dateTimeProvider.OffsetNow.AddDays(_settings.ExpiredVcsToReissueInDays);
                 var companySsiDetailsRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
                 var credentialIssuerHandler = processServiceScope.ServiceProvider.GetRequiredService<ICredentialIssuerHandler>();
                 var credentialsAboutToExpire = companySsiDetailsRepository.GetCredentialsAboutToExpire(expirationDate);

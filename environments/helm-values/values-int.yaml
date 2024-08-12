@@ -73,6 +73,10 @@ credentialExpiry:
   logging:
     default: "Debug"
 
+credentialReissuance:
+  logging:
+    default: "Debug"
+
 centralidp:
   address: "https://centralidp.int.catena-x.net"
   jwtBearerOptions:

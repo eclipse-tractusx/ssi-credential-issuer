@@ -43,7 +43,7 @@ try
                 .AddIssuerRepositories(hostContext.Configuration)
                 .AddPortalService(hostContext.Configuration.GetSection("Portal"))
                 .AddICredentialServiceExtensions(hostContext.Configuration)
-                .AddRenewalService();
+                .AddReissuanceService(hostContext.Configuration.GetSection("Expiry"));
         })
         .AddLogging()
         .Build();
