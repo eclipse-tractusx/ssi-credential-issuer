@@ -1,4 +1,4 @@
-/********************************************************************************
+﻿/********************************************************************************
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,20 +17,11 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
-public enum ProcessStepTypeId
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
+
+public interface ICredentialReissuanceProcessHandler
 {
-    // CREATE CREDENTIAL PROCESS
-    CREATE_CREDENTIAL = 1,
-    SIGN_CREDENTIAL = 2,
-    SAVE_CREDENTIAL_DOCUMENT = 3,
-    CREATE_CREDENTIAL_FOR_HOLDER = 4,
-    TRIGGER_CALLBACK = 5,
-    REVOKE_REISSUED_CREDENTIAL = 6,
-
-    // DECLINE PROCESS
-    REVOKE_CREDENTIAL = 100,
-    TRIGGER_NOTIFICATION = 101,
-    TRIGGER_MAIL = 102
+    Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RevokeReissuedCredential(Guid credentialId);
 }

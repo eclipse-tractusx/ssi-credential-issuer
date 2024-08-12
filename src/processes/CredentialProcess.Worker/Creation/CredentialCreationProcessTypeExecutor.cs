@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -31,10 +32,12 @@ public class CredentialCreationProcessTypeExecutor : IProcessTypeExecutor
 {
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly ICredentialCreationProcessHandler _credentialCreationProcessHandler;
+    private readonly ICredentialReissuanceProcessHandler _credentialReissuanceProcessHandler;
 
     private readonly IEnumerable<ProcessStepTypeId> _executableProcessSteps = ImmutableArray.Create(
         ProcessStepTypeId.CREATE_CREDENTIAL,
         ProcessStepTypeId.SIGN_CREDENTIAL,
+        ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL,
         ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
         ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
         ProcessStepTypeId.TRIGGER_CALLBACK);
@@ -43,10 +46,12 @@ public class CredentialCreationProcessTypeExecutor : IProcessTypeExecutor
 
     public CredentialCreationProcessTypeExecutor(
         IIssuerRepositories issuerRepositories,
-        ICredentialCreationProcessHandler credentialCreationProcessHandler)
+        ICredentialCreationProcessHandler credentialCreationProcessHandler,
+        ICredentialReissuanceProcessHandler credentialReissuanceProcessHandler)
     {
         _issuerRepositories = issuerRepositories;
         _credentialCreationProcessHandler = credentialCreationProcessHandler;
+        _credentialReissuanceProcessHandler = credentialReissuanceProcessHandler;
     }
 
     public ProcessTypeId GetProcessTypeId() => ProcessTypeId.CREATE_CREDENTIAL;
@@ -85,6 +90,8 @@ public class CredentialCreationProcessTypeExecutor : IProcessTypeExecutor
                 ProcessStepTypeId.CREATE_CREDENTIAL => await _credentialCreationProcessHandler.CreateCredential(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.SIGN_CREDENTIAL => await _credentialCreationProcessHandler.SignCredential(_credentialId, cancellationToken)
+                    .ConfigureAwait(ConfigureAwaitOptions.None),
+                ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL => await _credentialReissuanceProcessHandler.RevokeReissuedCredential(_credentialId)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => await _credentialCreationProcessHandler.SaveCredentialDocument(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),

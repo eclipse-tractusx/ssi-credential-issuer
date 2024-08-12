@@ -27,7 +27,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Configuration;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.Handlers;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
 
 /// <inheritdoc />
 public class CredentialIssuerHandler : ICredentialIssuerHandler

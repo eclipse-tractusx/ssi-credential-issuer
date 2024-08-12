@@ -40,4 +40,12 @@ public static class CredentialHandlerExtensions
 
         return services;
     }
+
+    public static IServiceCollection AddCredentialReissuedProcessHandler(this IServiceCollection services)
+    {
+        services
+            .AddTransient<ICredentialReissuanceProcessHandler, CredentialReissuanceProcessHandler>();
+
+        return services;
+    }
 }

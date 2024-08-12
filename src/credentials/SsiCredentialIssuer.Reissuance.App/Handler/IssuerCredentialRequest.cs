@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.Handlers;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 

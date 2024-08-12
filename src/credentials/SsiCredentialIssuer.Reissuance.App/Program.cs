@@ -22,11 +22,12 @@ using Microsoft.Extensions.Hosting;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 using Serilog;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 
 LoggingExtensions.EnsureInitialized();
 Log.Information("Building worker");
@@ -37,9 +38,10 @@ try
         .ConfigureServices((hostContext, services) =>
         {
             services
-                //.AddTransient<ITokenService, TokenService>()
+                .AddTransient<ITokenService, TokenService>()
                 .AddProcessIdentity(hostContext.Configuration.GetSection("ProcessIdentity"))
                 .AddIssuerRepositories(hostContext.Configuration)
+                .AddPortalService(hostContext.Configuration.GetSection("Portal"))
                 .AddICredentialServiceExtensions(hostContext.Configuration)
                 .AddRenewalService();
         })
@@ -56,7 +58,7 @@ try
     };
 
     Log.Information("Start processing");
-    var workerInstance = host.Services.GetRequiredService<IRenewalService>();
+    var workerInstance = host.Services.GetRequiredService<IReissuanceService>();
     await workerInstance.ExecuteAsync(tokenSource.Token).ConfigureAwait(ConfigureAwaitOptions.None);
     Log.Information("Execution finished shutting down");
 }

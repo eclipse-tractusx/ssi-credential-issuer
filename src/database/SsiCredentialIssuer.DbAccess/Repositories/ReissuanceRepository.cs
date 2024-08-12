@@ -38,4 +38,18 @@ public class ReissuanceRepository : IReissuanceRepository
         var reissuanceProcess = new ReissuanceProcess(id, reissuedCredentialId);
         _dbContext.Reissuances.Add(reissuanceProcess);
     }
+
+    public Guid GetCompanySsiDetailId(Guid companySsiDetaillId)
+    {
+        return _dbContext.Reissuances
+            .Where(ssi => ssi.ReissuedCredentialId == companySsiDetaillId)
+            .Select(ssi => ssi.Id).SingleOrDefault();
+    }
+
+    public bool IsReissuedCredential(Guid companySsiDetaillId)
+    {
+        return _dbContext.Reissuances
+            .Where(ssi => ssi.ReissuedCredentialId == companySsiDetaillId)
+            .Select(ssi => true).SingleOrDefault();
+    }
 }

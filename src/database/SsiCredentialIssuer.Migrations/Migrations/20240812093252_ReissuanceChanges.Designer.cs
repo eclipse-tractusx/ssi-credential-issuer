@@ -13,7 +13,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240809153759_ReissuanceChanges")]
+    [Migration("20240812093252_ReissuanceChanges")]
     partial class ReissuanceChanges
     {
         /// <inheritdoc />
@@ -956,6 +956,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         {
                             Id = 5,
                             Label = "TRIGGER_CALLBACK"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Label = "REVOKE_REISSUED_CREDENTIAL"
                         },
                         new
                         {

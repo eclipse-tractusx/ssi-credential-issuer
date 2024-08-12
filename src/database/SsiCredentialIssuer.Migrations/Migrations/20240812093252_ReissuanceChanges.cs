@@ -30,6 +30,12 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                schema: "issuer",
+                table: "process_step_types",
+                columns: new[] { "id", "label" },
+                values: new object[] { 6, "REVOKE_REISSUED_CREDENTIAL" });
         }
 
         /// <inheritdoc />
@@ -38,6 +44,12 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
             migrationBuilder.DropTable(
                 name: "reissuances",
                 schema: "issuer");
+
+            migrationBuilder.DeleteData(
+                schema: "issuer",
+                table: "process_step_types",
+                keyColumn: "id",
+                keyValue: 6);
         }
     }
 }

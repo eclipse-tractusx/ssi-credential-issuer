@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Microsoft.Extensions.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Expiry;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;

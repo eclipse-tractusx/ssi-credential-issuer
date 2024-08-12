@@ -62,7 +62,7 @@ public class CredentialCreationProcessHandler : ICredentialCreationProcessHandle
 
         await _walletBusinessLogic.SignCredential(credentialId, externalCredentialId!.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         return (
-            Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1),
+            Enumerable.Repeat(ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL, 1),
             ProcessStepStatusId.DONE,
             false,
             null);

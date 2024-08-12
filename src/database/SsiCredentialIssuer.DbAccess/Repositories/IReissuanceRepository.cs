@@ -17,9 +17,15 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
+
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 
 public interface IReissuanceRepository
 {
     void CreateReissuanceProcess(Guid id, Guid reissuedCredentialId);
+
+    Guid GetCompanySsiDetailId(Guid companySsiDetaillId);
+
+    bool IsReissuedCredential(Guid companySsiDetaillId);
 }

@@ -23,40 +23,38 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.Handlers;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 
 /// <summary>
 /// Service to re-issue credentials that will expire in the day after.
 /// </summary>
-public class RenewalService : IRenewalService
+public class ReissuanceService : IReissuanceService
 {
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<RenewalService> _logger;
+    private readonly ILogger<ReissuanceService> _logger;
     private readonly ICredentialIssuerHandler _credentialIssuerHandler;
     /// <summary>
-    /// Creates a new instance of <see cref="RenewalService"/>
+    /// Creates a new instance of <see cref="ReissuanceService"/>
     /// </summary>
     /// <param name="serviceScopeFactory">access to the services</param>
     /// <param name="credentialIssuerHandler">access to the credential issuer handler service</param>
     /// <param name="logger">the logger</param>
-    public RenewalService(IServiceScopeFactory serviceScopeFactory,
+    public ReissuanceService(IServiceScopeFactory serviceScopeFactory,
         ICredentialIssuerHandler credentialIssuerHandler,
-        ILogger<RenewalService> logger)
+        ILogger<ReissuanceService> logger)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _credentialIssuerHandler = credentialIssuerHandler;
         _logger = logger;
     }
-    
+
     /// <summary>
     /// Handles the process of re-issuing new verifiable credentias
     /// </summary>
@@ -89,7 +87,7 @@ public class RenewalService : IRenewalService
         await foreach(var credential in credentialsAboutToExpire)
         {
             var expirationDate = dateTimeProvider.OffsetNow.AddMonths(12);
-            
+
             var schemaData = CreateNewCredential(credential, expirationDate);
 
             await _credentialIssuerHandler.HandleCredentialProcessCreation(new IssuerCredentialRequest(

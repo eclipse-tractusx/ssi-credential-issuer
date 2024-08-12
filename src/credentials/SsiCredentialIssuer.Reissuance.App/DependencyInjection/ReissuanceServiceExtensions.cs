@@ -20,14 +20,15 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.Handlers;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Renewal.App.DependencyInjection;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
 
 /// <summary>
 /// Extension method to register the renewal service and dependent services
 /// </summary>
-public static class RenewalServiceExtensions
+public static class ReissuanceServiceExtensions
 {
     /// <summary>
     /// Adds the renewal service
@@ -37,7 +38,7 @@ public static class RenewalServiceExtensions
     public static IServiceCollection AddRenewalService(this IServiceCollection services)
     {
         services
-            .AddTransient<IRenewalService, RenewalService>()
+            .AddTransient<IReissuanceService, ReissuanceService>()
             .AddTransient<IDateTimeProvider, UtcDateTimeProvider>()
             .AddCredentialIssuerHandlerService();
 
