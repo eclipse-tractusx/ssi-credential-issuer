@@ -105,7 +105,7 @@ public class CredentialReissuanceProcessHandlerTests
         var revokeCredentialResponse = _sut.RevokeReissuedCredential(credentialId);
 
         // Assert
-        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(credentialId, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._)).WithAnyArguments().MustHaveHappened();
+        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(credentialId, null, null)).WithAnyArguments().MustHaveHappened();
         AssertSuccessResult(revokeCredentialResponse);
     }
 
