@@ -208,7 +208,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     {
         var processStepRepository = _repositories.GetInstance<IProcessStepRepository>();
         var processId = processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL).Id;
-        processStepRepository.CreateProcessStep(ProcessStepTypeId.CREATE_CREDENTIAL, ProcessStepStatusId.TODO, processId);
+        processStepRepository.CreateProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, ProcessStepStatusId.TODO, processId);
         return processId;
     }
 

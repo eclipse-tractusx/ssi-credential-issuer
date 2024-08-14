@@ -40,8 +40,8 @@ public class WalletServiceTests
             TokenAddress = "https://example.org/token",
             EncryptionConfigIndex = 0,
             WalletApplication = "catena-x-portal",
+            CreateSignedCredentialPath = "/api/v2.0.0/credentials",
             CreateCredentialPath = "api/v2.0.0/credentials",
-            SignCredentialPath = "/api/v2.0.0/credentials/{0}",
             GetCredentialPath = "/api/v2.0.0/credentials/{0}",
             RevokeCredentialPath = "/api/v2.0.0/credentials/{0}"
         });
@@ -66,15 +66,17 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.CreateCredential(payload, CancellationToken.None);
+        var result = await _sut.CreateSignedCredential(payload, CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
             x.Content is JsonContent &&
-            (x.Content as JsonContent)!.ObjectType == typeof(CreateCredentialRequest) &&
-            ((x.Content as JsonContent)!.Value as CreateCredentialRequest)!.Application == "catena-x-portal"
+            (x.Content as JsonContent)!.ObjectType == typeof(CreateSignedCredentialRequest) &&
+            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Application == "catena-x-portal" &&
+            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Payload.Signature.ProofMechanism == "external" &&
+            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Payload.Signature.ProofType == "jwt"
         );
-        result.Should().Be(id);
+        result.Should().BeOfType<CreateSignedCredentialResponse>().Which.Id.Should().Be(id);
     }
 
     [Theory]
@@ -96,66 +98,7 @@ public class WalletServiceTests
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.CreateCredential(payload, CancellationToken.None);
-
-        // Assert
-        var ex = await Assert.ThrowsAsync<ServiceException>(Act);
-        ex.Message.Should().Be(message);
-        ex.StatusCode.Should().Be(statusCode);
-    }
-
-    #endregion
-
-    #region SignCredential
-
-    [Fact]
-    public async Task SignCredential_WithValid_DoesNotThrowException()
-    {
-        // Arrange
-        var credentialId = Guid.NewGuid();
-        const string jwt = "thisisonlyatestexample";
-        var response = new SignCredentialResponse(jwt);
-        var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
-        using var httpClient = new HttpClient(httpMessageHandlerMock)
-        {
-            BaseAddress = new Uri("https://base.address.com")
-        };
-        A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._))
-            .Returns(httpClient);
-
-        // Act
-        var result = await _sut.SignCredential(credentialId, CancellationToken.None);
-
-        // Assert
-        httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
-            x.Content is JsonContent &&
-            (x.Content as JsonContent)!.ObjectType == typeof(SignCredentialRequest) &&
-            ((x.Content as JsonContent)!.Value as SignCredentialRequest)!.Payload.Sign.ProofMechanism == "external" &&
-            ((x.Content as JsonContent)!.Value as SignCredentialRequest)!.Payload.Sign.ProofType == "jwt"
-        );
-        result.Should().Be(jwt);
-    }
-
-    [Theory]
-    [InlineData(HttpStatusCode.Conflict, "{ \"message\": \"Framework test!\" }", "call to external system sign-credential failed with statuscode 409 - Message: { \"message\": \"Framework test!\" }")]
-    [InlineData(HttpStatusCode.BadRequest, "{ \"test\": \"123\" }", "call to external system sign-credential failed with statuscode 400 - Message: { \"test\": \"123\" }")]
-    [InlineData(HttpStatusCode.BadRequest, "this is no json", "call to external system sign-credential failed with statuscode 400 - Message: this is no json")]
-    [InlineData(HttpStatusCode.Forbidden, null, "call to external system sign-credential failed with statuscode 403")]
-    public async Task SignCredential_WithConflict_ThrowsServiceExceptionWithErrorContent(HttpStatusCode statusCode, string? content, string message)
-    {
-        // Arrange
-        var credentialId = Guid.NewGuid();
-        var httpMessageHandlerMock = content == null
-            ? new HttpMessageHandlerMock(statusCode)
-            : new HttpMessageHandlerMock(statusCode, new StringContent(content));
-        using var httpClient = new HttpClient(httpMessageHandlerMock)
-        {
-            BaseAddress = new Uri("https://base.address.com")
-        };
-        A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_options.Value, A<CancellationToken>._)).Returns(httpClient);
-
-        // Act
-        async Task Act() => await _sut.SignCredential(credentialId, CancellationToken.None);
+        async Task Act() => await _sut.CreateSignedCredential(payload, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);

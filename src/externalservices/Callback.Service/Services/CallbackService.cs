@@ -28,7 +28,10 @@ using System.Text.Json.Serialization;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
 
-public class CallbackService : ICallbackService
+public class CallbackService(
+    ITokenService tokenService,
+    IOptions<CallbackSettings> options)
+    : ICallbackService
 {
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -36,18 +39,11 @@ public class CallbackService : ICallbackService
         Converters = { new JsonStringEnumConverter(allowIntegerValues: false) }
     };
 
-    private readonly ITokenService _tokenService;
-    private readonly CallbackSettings _settings;
-
-    public CallbackService(ITokenService tokenService, IOptions<CallbackSettings> options)
-    {
-        _tokenService = tokenService;
-        _settings = options.Value;
-    }
+    private readonly CallbackSettings _settings = options.Value;
 
     public async Task TriggerCallback(string callbackUrl, IssuerResponseData responseData, CancellationToken cancellationToken)
     {
-        var client = await _tokenService.GetAuthorizedClient<CallbackService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        var client = await tokenService.GetAuthorizedClient<CallbackService>(_settings, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await client.PostAsJsonAsync($"{callbackUrl}", responseData, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("callback", HttpAsyncResponseMessageExtension.RecoverOptions.REQUEST_EXCEPTION)
             .ConfigureAwait(false);

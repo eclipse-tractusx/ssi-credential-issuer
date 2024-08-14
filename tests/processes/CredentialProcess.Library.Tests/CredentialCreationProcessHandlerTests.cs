@@ -41,7 +41,6 @@ public class CredentialCreationProcessHandlerTests
     private readonly Guid _credentialId = Guid.NewGuid();
 
     private readonly IWalletBusinessLogic _walletBusinessLogic;
-    private readonly IIssuerRepositories _issuerRepositories;
     private readonly ICredentialRepository _credentialRepository;
 
     private readonly CredentialCreationProcessHandler _sut;
@@ -55,15 +54,15 @@ public class CredentialCreationProcessHandlerTests
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        _issuerRepositories = A.Fake<IIssuerRepositories>();
+        var issuerRepositories = A.Fake<IIssuerRepositories>();
         _credentialRepository = A.Fake<ICredentialRepository>();
 
-        A.CallTo(() => _issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
+        A.CallTo(() => issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
 
         _walletBusinessLogic = A.Fake<IWalletBusinessLogic>();
         _callbackService = A.Fake<ICallbackService>();
 
-        _sut = new CredentialCreationProcessHandler(_issuerRepositories, _walletBusinessLogic, _callbackService);
+        _sut = new CredentialCreationProcessHandler(issuerRepositories, _walletBusinessLogic, _callbackService);
     }
 
     #region CreateCredential
@@ -76,50 +75,10 @@ public class CredentialCreationProcessHandlerTests
             .Returns(default((VerifiedCredentialTypeKindId, JsonDocument)));
 
         // Act
-        var result = await _sut.CreateCredential(_credentialId, CancellationToken.None);
+        var result = await _sut.CreateSignedCredential(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletBusinessLogic.CreateCredential(_credentialId, A<JsonDocument>._, A<CancellationToken>._))
-            .MustHaveHappenedOnceExactly();
-
-        result.modified.Should().BeFalse();
-        result.processMessage.Should().BeNull();
-        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.SIGN_CREDENTIAL);
-    }
-
-    #endregion
-
-    #region SignCredential
-
-    [Fact]
-    public async Task SignCredential_WithNotExisting_ReturnsExpected()
-    {
-        // Arrange
-        A.CallTo(() => _credentialRepository.GetWalletCredentialId(_credentialId))
-            .Returns<Guid?>(null);
-        Task Act() => _sut.SignCredential(_credentialId, CancellationToken.None);
-
-        // Act
-        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
-
-        // Assert
-        ex.Message.Should().Be("ExternalCredentialId must be set here");
-    }
-
-    [Fact]
-    public async Task SignCredential_WithValidData_ReturnsExpected()
-    {
-        // Arrange
-        var externalCredentialId = Guid.NewGuid();
-        A.CallTo(() => _credentialRepository.GetWalletCredentialId(_credentialId))
-            .Returns(externalCredentialId);
-
-        // Act
-        var result = await _sut.SignCredential(_credentialId, CancellationToken.None);
-
-        // Assert
-        A.CallTo(() => _walletBusinessLogic.SignCredential(_credentialId, externalCredentialId, A<CancellationToken>._))
+        A.CallTo(() => _walletBusinessLogic.CreateSignedCredential(_credentialId, A<JsonDocument>._, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
 
         result.modified.Should().BeFalse();

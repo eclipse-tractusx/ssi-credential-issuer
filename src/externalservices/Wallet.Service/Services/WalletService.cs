@@ -28,7 +28,9 @@ using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
-public class WalletService(IBasicAuthTokenService basicAuthTokenService, IOptions<WalletSettings> options)
+public class WalletService(
+    IBasicAuthTokenService basicAuthTokenService,
+    IOptions<WalletSettings> options)
     : IWalletService
 {
     private const string NoIdErrorMessage = "Response must contain a valid id";
@@ -36,38 +38,21 @@ public class WalletService(IBasicAuthTokenService basicAuthTokenService, IOption
 
     private readonly WalletSettings _settings = options.Value;
 
-    public async Task<Guid> CreateCredential(JsonDocument payload, CancellationToken cancellationToken)
+    public async Task<CreateSignedCredentialResponse> CreateSignedCredential(JsonDocument payload, CancellationToken cancellationToken)
     {
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
-        var data = new CreateCredentialRequest(_settings.WalletApplication, new CredentialPayload(payload));
-        var result = await client.PostAsJsonAsync(_settings.CreateCredentialPath, data, Options, cancellationToken)
+        var data = new CreateSignedCredentialRequest(_settings.WalletApplication, new CreateSignedPayload(payload, new SignData("external", "jwt", null)));
+        var result = await client.PostAsJsonAsync(_settings.CreateSignedCredentialPath, data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("create-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
-        var response = await result.Content.ReadFromJsonAsync<CreateCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        var response = await result.Content.ReadFromJsonAsync<CreateSignedCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         if (response == null)
         {
             throw new ConflictException(NoIdErrorMessage);
         }
 
-        return response.Id;
-    }
-
-    public async Task<string> SignCredential(Guid credentialId, CancellationToken cancellationToken)
-    {
-        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
-        var data = new SignCredentialRequest(new SignPayload(new SignUpdate("external", "jwt")));
-        var result = await client.PatchAsJsonAsync(string.Format(_settings.SignCredentialPath, credentialId), data, Options, cancellationToken)
-            .CatchingIntoServiceExceptionFor("sign-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
-                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
-            .ConfigureAwait(false);
-        var response = await result.Content.ReadFromJsonAsync<SignCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        if (response is null)
-        {
-            throw new ServiceException(NoIdErrorMessage, true);
-        }
-
-        return response.Jwt;
+        return response;
     }
 
     public async Task<JsonDocument> GetCredential(Guid externalCredentialId, CancellationToken cancellationToken)
