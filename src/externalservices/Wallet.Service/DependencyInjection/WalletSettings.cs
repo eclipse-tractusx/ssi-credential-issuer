@@ -38,10 +38,10 @@ public class WalletSettings : BasicAuthSettings
     public string WalletApplication { get; set; } = null!;
 
     [Required]
-    public string CredentialCreationPath { get; set; } = null!;
+    public string CreateCredentialPath { get; set; } = null!;
 
     [Required]
-    public string SigningCredentialPath { get; set; } = null!;
+    public string SignCredentialPath { get; set; } = null!;
 
     [Required]
     public string GetCredentialPath { get; set; } = null!;

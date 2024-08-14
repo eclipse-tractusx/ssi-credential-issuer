@@ -40,7 +40,7 @@ public class WalletService(IBasicAuthTokenService basicAuthTokenService, IOption
     {
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
         var data = new CreateCredentialRequest(_settings.WalletApplication, new CredentialPayload(payload));
-        var result = await client.PostAsJsonAsync(_settings.CredentialCreationPath, data, Options, cancellationToken)
+        var result = await client.PostAsJsonAsync(_settings.CreateCredentialPath, data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("create-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
@@ -57,7 +57,7 @@ public class WalletService(IBasicAuthTokenService basicAuthTokenService, IOption
     {
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
         var data = new SignCredentialRequest(new SignPayload(new SignUpdate("external", "jwt")));
-        var result = await client.PatchAsJsonAsync(string.Format(_settings.SigningCredentialPath, credentialId), data, Options, cancellationToken)
+        var result = await client.PatchAsJsonAsync(string.Format(_settings.SignCredentialPath, credentialId), data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("sign-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
@@ -73,7 +73,7 @@ public class WalletService(IBasicAuthTokenService basicAuthTokenService, IOption
     public async Task<JsonDocument> GetCredential(Guid externalCredentialId, CancellationToken cancellationToken)
     {
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
-        var result = await client.GetAsync(string.Format(_settings.SigningCredentialPath, externalCredentialId), cancellationToken)
+        var result = await client.GetAsync(string.Format(_settings.GetCredentialPath, externalCredentialId), cancellationToken)
             .CatchingIntoServiceExceptionFor("get-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
@@ -96,7 +96,7 @@ public class WalletService(IBasicAuthTokenService basicAuthTokenService, IOption
         };
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(authSettings, cancellationToken);
         var data = new DeriveCredentialData(_settings.WalletApplication, new DeriveCredentialPayload(new DeriveCredential(credential)));
-        var result = await client.PostAsJsonAsync(_settings.CredentialCreationPath, data, Options, cancellationToken)
+        var result = await client.PostAsJsonAsync(_settings.CreateCredentialPath, data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("create-holder-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);

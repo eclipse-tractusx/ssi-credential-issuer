@@ -165,14 +165,14 @@ spec:
               key: "credential-encryption-key0"
         - name: "WALLET__WALLETAPPLICATION"
           value: "{{ .Values.processesworker.wallet.application }}"
-        - name: "WALLET__CREDENTIALCREATIONPATH"
-          value: "{{ .Values.processesworker.wallet.credentialCreationPath }}"
-        - name: "WALLET__SIGNINGCREDENTIALPATH"
-          value: "{{ .Values.processesworker.wallet.signingCreationPath }}"
+        - name: "WALLET__CREATECREDENTIALPATH"
+          value: "{{ .Values.processesworker.wallet.createCredentialPath }}"
+        - name: "WALLET__SIGNCREDENTIALPATH"
+          value: "{{ .Values.processesworker.wallet.signCredentialPath }}"
         - name: "WALLET__GETCREDENTIALPATH"
-          value: "{{ .Values.processesworker.wallet.getCreationPath }}"
+          value: "{{ .Values.processesworker.wallet.getCredentialPath }}"
         - name: "WALLET__REVOKECREDENTIALPATH"
-          value: "{{ .Values.processesworker.wallet.revokeCreationPath }}"
+          value: "{{ .Values.processesworker.wallet.revokeCredentialPath }}"
         ports:
         - name: http
           containerPort: {{ .Values.portContainer }}

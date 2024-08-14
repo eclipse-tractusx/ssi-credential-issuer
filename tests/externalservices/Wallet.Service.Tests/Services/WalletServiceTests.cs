@@ -40,8 +40,8 @@ public class WalletServiceTests
             TokenAddress = "https://example.org/token",
             EncryptionConfigIndex = 0,
             WalletApplication = "catena-x-portal",
-            CredentialCreationPath = "api/v2.0.0/credentials",
-            SigningCredentialPath = "/api/v2.0.0/credentials/{0}",
+            CreateCredentialPath = "api/v2.0.0/credentials",
+            SignCredentialPath = "/api/v2.0.0/credentials/{0}",
             GetCredentialPath = "/api/v2.0.0/credentials/{0}",
             RevokeCredentialPath = "/api/v2.0.0/credentials/{0}"
         });
