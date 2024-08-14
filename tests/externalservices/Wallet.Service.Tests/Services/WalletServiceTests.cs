@@ -38,7 +38,12 @@ public class WalletServiceTests
             ClientId = "CatenaX",
             ClientSecret = "pass@Secret",
             TokenAddress = "https://example.org/token",
-            EncryptionConfigIndex = 0
+            EncryptionConfigIndex = 0,
+            WalletApplication = "catena-x-portal",
+            CreateCredentialPath = "api/v2.0.0/credentials",
+            SignCredentialPath = "/api/v2.0.0/credentials/{0}",
+            GetCredentialPath = "/api/v2.0.0/credentials/{0}",
+            RevokeCredentialPath = "/api/v2.0.0/credentials/{0}"
         });
         _sut = new WalletService(_basicAuthTokenService, _options);
     }
