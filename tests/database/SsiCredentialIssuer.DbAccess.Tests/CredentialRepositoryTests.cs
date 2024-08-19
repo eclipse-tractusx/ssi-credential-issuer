@@ -244,6 +244,21 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
     }
 
     [Fact]
+    public async Task GetDocumentById_WithIssuerBpn_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetDocumentById(new Guid("e020787d-1e04-4c0b-9c06-bd1cd44724b1"), "BPNL000003ISSUER");
+
+        // Assert
+        result.Exists.Should().BeTrue();
+        result.IsSameCompany.Should().BeTrue();
+        result.MediaTypeId.Should().Be(MediaTypeId.PNG);
+    }
+
+    [Fact]
     public async Task GetDocumentById_WithWrongBpn_ReturnsExpected()
     {
         // Arrange
