@@ -33,4 +33,19 @@ public class WalletSettings : BasicAuthSettings
 
     [Required]
     public int EncryptionConfigIndex { get; set; }
+
+    [Required]
+    public string WalletApplication { get; set; } = null!;
+
+    [Required]
+    public string CreateCredentialPath { get; set; } = null!;
+
+    [Required]
+    public string SignCredentialPath { get; set; } = null!;
+
+    [Required]
+    public string GetCredentialPath { get; set; } = null!;
+
+    [Required]
+    public string RevokeCredentialPath { get; set; } = null!;
 }
