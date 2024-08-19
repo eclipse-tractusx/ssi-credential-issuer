@@ -30,5 +30,5 @@ public class ReissuanceExpirySettings
     /// Vcs which are about to expire in the next day(s).
     /// </summary>
     [Required]
-    public int ExpiredVcsToReissueInDays { get; init; }
+    public int ExpiredVcsToReissueInDays { get; init; } = 1;
 }
