@@ -93,6 +93,11 @@ dependencies:
 | processesworker.wallet.grantType | string | `"client_credentials"` |  |
 | processesworker.wallet.clientId | string | `"wallet-client-id"` | Provide wallet client-id from CX IAM centralidp. |
 | processesworker.wallet.clientSecret | string | `""` | Client-secret for wallet client-id. Secret-key 'wallet-client-secret'. |
+| processesworker.wallet.application | string | `"catena-x-portal"` | the application set in the wallet |
+| processesworker.wallet.createCredentialPath | string | `"api/v2.0.0/credentials"` | path to create a credential |
+| processesworker.wallet.signCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to sign a specific credential; {0} will be replaced by the credential id |
+| processesworker.wallet.getCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to get a specific credential; {0} will be replaced by the credential id |
+| processesworker.wallet.revokeCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to revoke a specific credential; {0} will be replaced by the credential id |
 | credentialExpiry.name | string | `"expiry"` |  |
 | credentialExpiry.image.name | string | `"docker.io/tractusx/ssi-credential-expiry-app"` |  |
 | credentialExpiry.image.tag | string | `""` |  |
