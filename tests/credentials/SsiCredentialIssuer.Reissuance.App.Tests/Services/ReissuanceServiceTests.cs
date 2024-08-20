@@ -31,7 +31,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjectio
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 using Xunit;
-using System.Text;
 using System.Text.Json;
 using FluentAssertions;
 
