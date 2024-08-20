@@ -33,7 +33,7 @@ public static class CredentialServiceExtensions
     /// </summary>
     /// <param name="services">the services</param>
     /// <returns>the enriched service collection</returns>
-    public static IServiceCollection AddICredentialServiceExtensions(this IServiceCollection services, IConfiguration config) => 
+    public static IServiceCollection AddICredentialServiceExtensions(this IServiceCollection services, IConfiguration config) =>
         services
             .ConfigureCredentialSettings(config.GetSection("Credential"));
 }

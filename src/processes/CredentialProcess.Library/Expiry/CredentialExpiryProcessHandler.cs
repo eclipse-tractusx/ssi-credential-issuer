@@ -133,9 +133,6 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
 
     private static MailParameter[] CreateEmailParameters(string typeValue, string reason)
     {
-        return
-            [
-                new("requestName", typeValue), new("reason", reason)
-            ];
+        return [new("requestName", typeValue), new("reason", reason)];
     }
 }
