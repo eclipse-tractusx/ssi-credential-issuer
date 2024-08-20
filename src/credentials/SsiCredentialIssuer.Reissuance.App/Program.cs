@@ -30,7 +30,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.DependencyInje
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 
 LoggingExtensions.EnsureInitialized();
-Log.Information("Building worker");
+Log.Information("Building Reissuance App");
 try
 {
     var host = Host
@@ -47,7 +47,7 @@ try
         })
         .AddLogging()
         .Build();
-    Log.Information("Building worker completed");
+    Log.Information("Building Reissuance App completed");
 
     using var tokenSource = new CancellationTokenSource();
     Console.CancelKeyPress += (s, e) =>

@@ -83,10 +83,12 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerNotification(Guid credentialId, CancellationToken cancellationToken)
     {
         var (typeId, requesterId) = await _repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var notificationTypeId = await GetNotificationTypeId(credentialId);
+
         if (Guid.TryParse(requesterId, out var companyUserId))
         {
             var content = JsonSerializer.Serialize(new { Type = typeId, CredentialId = credentialId }, Options);
-            await _portalService.AddNotification(content, companyUserId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
+            await _portalService.AddNotification(content, companyUserId, notificationTypeId, cancellationToken);
         }
 
         return (
@@ -96,18 +98,30 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
             null);
     }
 
+    private Task<NotificationTypeId> GetNotificationTypeId(Guid credentialId)
+    {
+        var isRevokedByReissuance = _repositories.GetInstance<IReissuanceRepository>().IsCredentialRevokedByReissuance(credentialId);
+        return Task.FromResult(isRevokedByReissuance ? NotificationTypeId.CREDENTIAL_RENEWAL : NotificationTypeId.CREDENTIAL_REJECTED);
+    }
+
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerMail(Guid credentialId, CancellationToken cancellationToken)
     {
         var (typeId, requesterId) = await _repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
-
         var typeValue = typeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {typeId} does not exists");
+        var isRevokedByReissuance = _repositories.GetInstance<IReissuanceRepository>().IsCredentialRevokedByReissuance(credentialId);
+
         if (Guid.TryParse(requesterId, out var companyUserId))
         {
-            var mailParameters = new MailParameter[]
+            if (isRevokedByReissuance)
             {
-                new("requestName", typeValue), new("reason", "The credential is already expired")
-            };
-            await _portalService.TriggerMail("CredentialRejected", companyUserId, mailParameters, cancellationToken);
+                var mailParameters = CreateEmailParameters(typeValue, "The credential about to expiry is revoked and new credential was reissued");
+                await _portalService.TriggerMail("CredentialRenewal", companyUserId, mailParameters, cancellationToken);
+            }
+            else
+            {
+                var mailParameters = CreateEmailParameters(typeValue, "The credential is already expired");
+                await _portalService.TriggerMail("CredentialRejected", companyUserId, mailParameters, cancellationToken);
+            }
         }
 
         return (
@@ -115,5 +129,13 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
             ProcessStepStatusId.DONE,
             false,
             null);
+    }
+
+    private static MailParameter[] CreateEmailParameters(string typeValue, string reason)
+    {
+        return
+            [
+                new("requestName", typeValue), new("reason", reason)
+            ];
     }
 }

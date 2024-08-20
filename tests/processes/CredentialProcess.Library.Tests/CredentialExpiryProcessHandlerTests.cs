@@ -42,6 +42,7 @@ public class CredentialExpiryProcessHandlerTests
     private readonly IWalletService _walletService;
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly ICredentialRepository _credentialRepository;
+    private readonly IReissuanceRepository _reissuanceRepository;
     private readonly IPortalService _portalService;
 
     private readonly CredentialExpiryProcessHandler _sut;
@@ -58,9 +59,11 @@ public class CredentialExpiryProcessHandlerTests
         _issuerRepositories = A.Fake<IIssuerRepositories>();
         _credentialRepository = A.Fake<ICredentialRepository>();
         _documentRepository = A.Fake<IDocumentRepository>();
+        _reissuanceRepository = A.Fake<IReissuanceRepository>();
 
         A.CallTo(() => _issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
+        A.CallTo(() => _issuerRepositories.GetInstance<IReissuanceRepository>()).Returns(_reissuanceRepository);
 
         _walletService = A.Fake<IWalletService>();
         _portalService = A.Fake<IPortalService>();
@@ -162,7 +165,7 @@ public class CredentialExpiryProcessHandlerTests
     #region TriggerNotification
 
     [Fact]
-    public async Task TriggerNotification_WithValid_CallsExpected()
+    public async Task TriggerNotification_CredentialRejected_WithValid_CallsExpected()
     {
         // Arrange
         var requesterId = Guid.NewGuid();
@@ -181,12 +184,32 @@ public class CredentialExpiryProcessHandlerTests
         result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_MAIL);
     }
 
+    [Fact]
+    public async Task TriggerNotification_CredentialRenewal_WithValid_CallsExpected()
+    {
+        // Arrange
+        var requesterId = Guid.NewGuid();
+        A.CallTo(() => _reissuanceRepository.IsCredentialRevokedByReissuance(_credentialId)).Returns(true);
+        A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
+            .Returns((VerifiedCredentialExternalTypeId.BUSINESS_PARTNER_NUMBER, requesterId.ToString()));
+
+        // Act
+        var result = await _sut.TriggerNotification(_credentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _portalService.AddNotification(A<string>._, requesterId, NotificationTypeId.CREDENTIAL_RENEWAL, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_MAIL);
+    }
     #endregion
 
     #region TriggerMail
 
     [Fact]
-    public async Task TriggerMail_WithValid_CallsExpected()
+    public async Task TriggerMail_CredentialRejected_WithValid_CallsExpected()
     {
         // Arrange
         var requesterId = Guid.NewGuid();
@@ -205,5 +228,25 @@ public class CredentialExpiryProcessHandlerTests
         result.nextStepTypeIds.Should().BeNull();
     }
 
+    [Fact]
+    public async Task TriggerMail_CredentialRenewal_WithValid_CallsExpected()
+    {
+        // Arrange
+        var requesterId = Guid.NewGuid();
+        A.CallTo(() => _reissuanceRepository.IsCredentialRevokedByReissuance(_credentialId)).Returns(true);
+        A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
+            .Returns((VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, requesterId.ToString()));
+
+        // Act
+        var result = await _sut.TriggerMail(_credentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _portalService.TriggerMail("CredentialRenewal", requesterId, A<IEnumerable<MailParameter>>._, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().BeNull();
+    }
     #endregion
 }

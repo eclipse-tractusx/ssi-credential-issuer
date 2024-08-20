@@ -28,4 +28,6 @@ public interface IReissuanceRepository
     Guid GetCompanySsiDetailId(Guid companySsiDetaillId);
 
     bool IsReissuedCredential(Guid companySsiDetaillId);
+
+    bool IsCredentialRevokedByReissuance(Guid companySsiDetaillId);
 }

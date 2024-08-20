@@ -52,4 +52,11 @@ public class ReissuanceRepository : IReissuanceRepository
             .Where(ssi => ssi.ReissuedCredentialId == companySsiDetaillId)
             .Select(ssi => true).SingleOrDefault();
     }
+
+    public bool IsCredentialRevokedByReissuance(Guid companySsiDetaillId)
+    {
+        return _dbContext.Reissuances
+            .Where(ssi => ssi.Id == companySsiDetaillId)
+            .Select(ssi => true).SingleOrDefault();
+    }
 }
