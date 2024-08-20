@@ -192,7 +192,6 @@ public class IssuerDbContext : DbContext
             .HasForeignKey(d => d.ProcessTypeId)
             .OnDelete(DeleteBehavior.ClientSetNull);
 
-
         modelBuilder.Entity<ProcessStep>()
             .HasOne(d => d.Process)
             .WithMany(p => p!.ProcessSteps)

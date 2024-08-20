@@ -85,7 +85,15 @@ public class CredentialIssuerHandlerTests
         var schema = "{\"id\": \"21a1aa1f-b2f9-43bb-9c71-00b62bd1f8e0\", \"name\": \"BpnCredential\"}";
         var processStepRepository = A.Fake<IProcessStepRepository>();
         var process = new Process(Guid.NewGuid(), ProcessTypeId.CREATE_CREDENTIAL, Guid.NewGuid());
-        var companySsiDetail = new CompanySsiDetail(Guid.NewGuid(), null!, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, _options.Value.IssuerBpn, Guid.NewGuid().ToString(), DateTimeOffset.UtcNow);;
+        var companySsiDetail = new CompanySsiDetail(
+            Guid.NewGuid(),
+            null!,
+            VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER,
+            CompanySsiDetailStatusId.ACTIVE,
+            _options.Value.IssuerBpn,
+            Guid.NewGuid().ToString(),
+            DateTimeOffset.UtcNow);
+
         var request = new IssuerCredentialRequest(
             Guid.NewGuid(),
             "BPNL000000000000",
