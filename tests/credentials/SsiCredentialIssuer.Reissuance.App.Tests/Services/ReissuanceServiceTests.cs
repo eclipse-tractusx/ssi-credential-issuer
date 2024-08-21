@@ -126,8 +126,6 @@ public class ReissuanceServiceTests
     {
         // Arrange
         var schema = "{\"id\":\"6f05cac6-c073-4562-8540-8fc883807808\",\"name\":\"BpnCredential\",\"type\":[\"VerifiableCredential\",\"BpnCredential\"],\"issuer\":\"did:web:localhost:BPNL000000000000\",\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://w3id.org/catenax/credentials/v1.0.0\"],\"description\":\"BpnCredential\",\"issuanceDate\":\"2024-08-19T07:32:37.598099+00:00\",\"expirationDate\":\"2025-08-19T07:32:37.598079+00:00\",\"credentialStatus\":{\"id\":\"example.com\",\"type\":\"StatusList2021\"},\"credentialSubject\":{\"id\":\"did:web:localhost:BPNL000000000000\",\"bpn\":\"BPNL000000000000\",\"holderIdentifier\":\"BPNL000000000000\"}}";
-        IssuerCredentialRequest? issuerCredentialRequest = null;
-
         var credentialsAboutToExpire = new CredentialAboutToExpireData(
             Guid.NewGuid(),
             "BPNL000000000000",
