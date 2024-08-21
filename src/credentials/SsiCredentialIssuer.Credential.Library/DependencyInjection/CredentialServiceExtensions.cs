@@ -17,9 +17,9 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Configuration;
-using Microsoft.Extensions.Configuration;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.DependencyInjection;
 

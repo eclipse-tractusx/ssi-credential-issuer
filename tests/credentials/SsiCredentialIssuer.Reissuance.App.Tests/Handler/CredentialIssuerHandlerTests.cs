@@ -17,20 +17,20 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using AutoFixture;
+using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Configuration;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
-using Xunit;
-using System.Text.Json;
-using AutoFixture;
-using AutoFixture.AutoFakeItEasy;
 using System.Text;
+using System.Text.Json;
+using Xunit;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Tests.Handler;
 

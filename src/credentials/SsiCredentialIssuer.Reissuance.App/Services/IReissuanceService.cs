@@ -1,4 +1,4 @@
-﻿namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 
 public interface IReissuanceService
 {

@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -18,14 +18,14 @@
  ********************************************************************************/
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Configuration;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Configuration;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
 

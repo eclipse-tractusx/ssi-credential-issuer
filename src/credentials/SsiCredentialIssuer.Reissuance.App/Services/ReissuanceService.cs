@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -19,17 +19,17 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Models;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Models;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
-using System.Text.Json;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
-using Microsoft.Extensions.Options;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
+using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 

@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -21,13 +21,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 using Serilog;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.DependencyInjection;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 
 LoggingExtensions.EnsureInitialized();
 Log.Information("Building Reissuance App");
