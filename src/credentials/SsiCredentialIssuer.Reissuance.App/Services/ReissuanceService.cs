@@ -113,14 +113,7 @@ public class ReissuanceService : IReissuanceService
 
     private static string CreateNewCredential(CredentialAboutToExpireData credential, DateTimeOffset expirationDate)
     {
-        if (credential.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.BPN)
-        {
-            return CreateBpnCredential(credential, expirationDate);
-        }
-        else
-        {
-            return CreateMembershipCredential(credential, expirationDate);
-        }
+        return credential.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.BPN ? CreateBpnCredential(credential, expirationDate) : CreateMembershipCredential(credential, expirationDate);
     }
 
     private static string CreateBpnCredential(CredentialAboutToExpireData credential, DateTimeOffset expirationDate)
