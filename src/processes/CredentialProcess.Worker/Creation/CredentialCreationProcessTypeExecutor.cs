@@ -22,6 +22,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creatio
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
 using System.Collections.Immutable;
 
@@ -86,19 +87,19 @@ public class CredentialCreationProcessTypeExecutor(
         }
         catch (Exception ex) when (ex is not SystemException)
         {
-            (stepStatusId, processMessage, nextStepTypeIds) = ProcessError(ex);
+            (stepStatusId, processMessage, nextStepTypeIds) = ProcessError(ex, processStepTypeId);
             modified = true;
         }
 
         return new IProcessTypeExecutor.StepExecutionResult(modified, stepStatusId, nextStepTypeIds, null, processMessage);
     }
 
-    private static (ProcessStepStatusId StatusId, string? ProcessMessage, IEnumerable<ProcessStepTypeId>? nextSteps) ProcessError(Exception ex)
+    private static (ProcessStepStatusId StatusId, string? ProcessMessage, IEnumerable<ProcessStepTypeId>? nextSteps) ProcessError(Exception ex, ProcessStepTypeId processStepTypeId)
     {
         return ex switch
         {
             ServiceException { IsRecoverable: true } => (ProcessStepStatusId.TODO, ex.Message, null),
-            _ => (ProcessStepStatusId.FAILED, ex.Message, null)
+            _ => (ProcessStepStatusId.FAILED, ex.Message, Enumerable.Repeat(processStepTypeId.GetRetriggerStep(), 1))
         };
     }
 }

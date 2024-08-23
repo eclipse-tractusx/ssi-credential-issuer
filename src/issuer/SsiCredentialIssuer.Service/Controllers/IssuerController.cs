@@ -181,6 +181,25 @@ public static class IssuerController
             .Produces(StatusCodes.Status404NotFound, typeof(ErrorResponse), Constants.JsonContentType)
             .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
 
+        issuer.MapPost("{processId}/retrigger-step/{processStepTypeId}", async ([FromRoute] Guid processId, [FromRoute] ProcessStepTypeId processStepTypeId, CancellationToken cancellationToken, IIssuerBusinessLogic logic) =>
+            {
+                await logic.RetriggerProcessStep(processId, processStepTypeId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+                return Results.NoContent();
+            })
+            .WithSwaggerDescription("Retriggers the failed process step",
+                "POST: api/issuer/{processId}/retrigger-step/RETRIGGER_CREATE_SIGNED_CREDENTIAL",
+                "Id of the process to retrigger",
+                "The step that should be retriggered")
+            .RequireAuthorization(r =>
+            {
+                r.RequireRole(DecisionSsiRole);
+                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
+            })
+            .WithDefaultResponses()
+            .Produces(StatusCodes.Status204NoContent, contentType: Constants.JsonContentType)
+            .Produces(StatusCodes.Status404NotFound, typeof(ErrorResponse), Constants.JsonContentType)
+            .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
+
         return group;
     }
 }

@@ -77,7 +77,7 @@ public class ManualProcessDataExtensionsTests
                 data.ProcessStepTypeId == stepTypeId &&
                 data.Process == sut.Process &&
                 data.ProcessSteps.SequenceEqual(sut.ProcessSteps!) &&
-                data.PortalRepositories == _issuerRepositories);
+                data.Repositories == _issuerRepositories);
     }
 
     [Fact]
@@ -184,7 +184,7 @@ public class ManualProcessDataExtensionsTests
         var process = new Process(Guid.NewGuid(), _fixture.Create<ProcessTypeId>(), Guid.NewGuid()) { LockExpiryDate = null };
         var sut = _fixture.Build<ManualProcessStepData>()
             .With(x => x.Process, process)
-            .With(x => x.PortalRepositories, _issuerRepositories)
+            .With(x => x.Repositories, _issuerRepositories)
             .Create();
 
         // Act
@@ -203,7 +203,7 @@ public class ManualProcessDataExtensionsTests
         var process = new Process(Guid.NewGuid(), _fixture.Create<ProcessTypeId>(), Guid.NewGuid()) { LockExpiryDate = expiryDate };
         var sut = _fixture.Build<ManualProcessStepData>()
             .With(x => x.Process, process)
-            .With(x => x.PortalRepositories, _issuerRepositories)
+            .With(x => x.Repositories, _issuerRepositories)
             .Create();
 
         var Act = () => sut.RequestLock(DateTimeOffset.UtcNow);
@@ -285,7 +285,7 @@ public class ManualProcessDataExtensionsTests
         var sut = _fixture.Build<ManualProcessStepData>()
             .With(x => x.ProcessStepTypeId, stepTypeIds[3])
             .With(x => x.Process, process)
-            .With(x => x.PortalRepositories, _issuerRepositories)
+            .With(x => x.Repositories, _issuerRepositories)
             .With(x => x.ProcessSteps, processSteps)
             .Create();
 
@@ -375,7 +375,7 @@ public class ManualProcessDataExtensionsTests
         var sut = _fixture.Build<ManualProcessStepData>()
             .With(x => x.ProcessStepTypeId, stepTypeIds[3])
             .With(x => x.Process, process)
-            .With(x => x.PortalRepositories, _issuerRepositories)
+            .With(x => x.Repositories, _issuerRepositories)
             .With(x => x.ProcessSteps, processSteps)
             .Create();
 

@@ -200,8 +200,12 @@ public class CredentialCreationProcessTypeExecutorTests
         result.SkipStepTypeIds.Should().BeNull();
     }
 
-    [Fact]
-    public async Task ExecuteProcessStep_WithServiceException_ReturnsFailedAndRetriggerStep()
+    [Theory]
+    [InlineData(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL)]
+    [InlineData(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT)]
+    [InlineData(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessStepTypeId.TRIGGER_CALLBACK, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK)]
+    public async Task ExecuteProcessStep_WithServiceException_ReturnsFailedAndRetriggerStep(ProcessStepTypeId processStepTypeId, ProcessStepTypeId expectedRetriggerStep)
     {
         // Arrange InitializeProcess
         var validProcessId = Guid.NewGuid();
@@ -219,13 +223,19 @@ public class CredentialCreationProcessTypeExecutorTests
         // Arrange
         A.CallTo(() => _credentialCreationProcessHandler.CreateSignedCredential(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialCreationProcessHandler.SaveCredentialDocument(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialCreationProcessHandler.CreateCredentialForHolder(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialCreationProcessHandler.TriggerCallback(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test"));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+        var result = await _sut.ExecuteProcessStep(processStepTypeId, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeTrue();
-        result.ScheduleStepTypeIds.Should().BeNull();
+        result.ScheduleStepTypeIds.Should().ContainSingle().Which.Should().Be(expectedRetriggerStep);
         result.ProcessStepStatusId.Should().Be(ProcessStepStatusId.FAILED);
         result.ProcessMessage.Should().Be("this is a test");
         result.SkipStepTypeIds.Should().BeNull();

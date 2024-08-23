@@ -27,5 +27,5 @@ public record ManualProcessStepData(
     ProcessStepTypeId ProcessStepTypeId,
     Process Process,
     IEnumerable<ProcessStep> ProcessSteps,
-    IIssuerRepositories PortalRepositories
+    IIssuerRepositories Repositories
 );

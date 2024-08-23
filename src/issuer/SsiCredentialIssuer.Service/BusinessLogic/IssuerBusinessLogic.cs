@@ -29,8 +29,10 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
@@ -226,7 +228,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
         ValidateFrameworkCredential(data);
 
-        if (Enum.GetValues<VerifiedCredentialTypeKindId>().All(x => x != data.Kind))
+        if (Array.TrueForAll(Enum.GetValues<VerifiedCredentialTypeKindId>(), x => x != data.Kind))
         {
             throw ConflictException.Create(IssuerErrors.KIND_NOT_SUPPORTED, new ErrorParameter[] { new("kind", data.Kind != null ? data.Kind.Value.ToString() : "empty kind") });
         }
@@ -457,6 +459,9 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         var schema = JsonSerializer.Serialize(schemaData, Options);
         return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, result.Expiry, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
+
+    public Task RetriggerProcessStep(Guid processId, ProcessStepTypeId processStepTypeId, CancellationToken cancellationToken) =>
+        processStepTypeId.TriggerProcessStep(processId, _repositories);
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
     {
