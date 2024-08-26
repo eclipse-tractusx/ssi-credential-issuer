@@ -38,15 +38,6 @@ public record SignData(
     [property: JsonPropertyName("keyName")] string? KeyName
 );
 
-public record CreateCredentialRequest(
-    [property: JsonPropertyName("application")] string Application,
-    [property: JsonPropertyName("payload")] CredentialPayload Payload
-);
-
-public record CredentialPayload(
-    [property: JsonPropertyName("issue")] JsonDocument Issue
-);
-
 public record CreateSignedCredentialResponse(
     [property: JsonPropertyName("id")] Guid Id,
     [property: JsonPropertyName("jwt")] string Jwt

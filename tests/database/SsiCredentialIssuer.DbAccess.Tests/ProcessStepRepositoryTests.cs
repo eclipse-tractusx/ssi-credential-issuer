@@ -341,6 +341,41 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     #endregion
 
+    #region IsValidProcess
+
+    [Fact]
+    public async Task IsValidProcess_ReturnsExpected()
+    {
+        // Arrange
+        var processId = new Guid("dd371565-9489-4907-a2e4-b8cbfe7a8cd2");
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.IsValidProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1));
+
+        // Assert
+        result.ProcessExists.Should().BeTrue();
+        result.ProcessData.ProcessSteps.Should().ContainSingle()
+            .And.Satisfy(x => x.ProcessStepStatusId == ProcessStepStatusId.TODO);
+    }
+
+    [Fact]
+    public async Task IsValidProcess_WithNonExisting_ReturnsExpected()
+    {
+        // Arrange
+        var processId = Guid.NewGuid();
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.IsValidProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1));
+
+        // Assert
+        result.ProcessExists.Should().BeFalse();
+        result.ProcessData.Should().BeNull();
+    }
+
+    #endregion
+
     private async Task<(ProcessStepRepository sut, IssuerDbContext dbContext)> CreateSutWithContext()
     {
         var context = await _dbTestDbFixture.GetDbContext();

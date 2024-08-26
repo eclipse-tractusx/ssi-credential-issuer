@@ -953,12 +953,18 @@ public class IssuerBusinessLogicTests
 
     #region RetriggerProcessStep
 
-    [Fact]
-    public async Task RetriggerProcessStep_WithInvalidProcess_ThrowsNotFoundException()
+    [Theory]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_MAIL)]
+    public async Task RetriggerProcessStep_WithInvalidProcess_ThrowsNotFoundException(ProcessTypeId processId, ProcessStepTypeId retriggerStep)
     {
         // Arrange
-        var retriggerStep = ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL;
-        var process = new Process(Guid.NewGuid(), ProcessTypeId.CREATE_CREDENTIAL, Guid.NewGuid());
+        var process = new Process(Guid.NewGuid(), processId, Guid.NewGuid());
         var processStep = new ProcessStep(Guid.NewGuid(), retriggerStep, ProcessStepStatusId.TODO, process.Id, DateTimeOffset.UtcNow);
         var processSteps = new List<ProcessStep>();
         A.CallTo(() => _processStepRepository.IsValidProcess(A<Guid>._, A<ProcessTypeId>._, A<IEnumerable<ProcessStepTypeId>>._))
@@ -976,13 +982,10 @@ public class IssuerBusinessLogicTests
                 A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._))
             .Invokes((IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)> processStepStatus) =>
                 {
-                    foreach (var ps in processStepStatus)
+                    foreach (var ps in processStepStatus.Where(p => p.ProcessStepId == processStep.Id))
                     {
-                        if (ps.ProcessStepId == processStep.Id)
-                        {
-                            ps.Initialize?.Invoke(processStep);
-                            ps.Modify(processStep);
-                        }
+                        ps.Initialize?.Invoke(processStep);
+                        ps.Modify(processStep);
                     }
                 });
         Task Act() => _sut.RetriggerProcessStep(process.Id, retriggerStep, CancellationToken.None);
@@ -998,11 +1001,17 @@ public class IssuerBusinessLogicTests
     }
 
     [Theory]
-    [InlineData(ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL, ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL)]
-    public async Task RetriggerProcessStep_ReturnsExpected(ProcessStepTypeId retriggerStep, ProcessStepTypeId expectedStepTypeId)
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL, ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT, ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER, ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK, ProcessStepTypeId.TRIGGER_CALLBACK)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL, ProcessStepTypeId.REVOKE_CREDENTIAL)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION, ProcessStepTypeId.TRIGGER_NOTIFICATION)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_MAIL, ProcessStepTypeId.TRIGGER_MAIL)]
+    public async Task RetriggerProcessStep_ReturnsExpected(ProcessTypeId processTypeId, ProcessStepTypeId retriggerStep, ProcessStepTypeId expectedStepTypeId)
     {
         // Arrange
-        var process = new Process(Guid.NewGuid(), ProcessTypeId.CREATE_CREDENTIAL, Guid.NewGuid());
+        var process = new Process(Guid.NewGuid(), processTypeId, Guid.NewGuid());
         var processStep = new ProcessStep(Guid.NewGuid(), retriggerStep, ProcessStepStatusId.TODO, process.Id, DateTimeOffset.UtcNow);
         var processSteps = new List<ProcessStep>();
         A.CallTo(() => _processStepRepository.IsValidProcess(A<Guid>._, A<ProcessTypeId>._, A<IEnumerable<ProcessStepTypeId>>._))
@@ -1020,13 +1029,10 @@ public class IssuerBusinessLogicTests
                 A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._))
             .Invokes((IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)> processStepStatus) =>
                 {
-                    foreach (var ps in processStepStatus)
+                    foreach (var ps in processStepStatus.Where(p => p.ProcessStepId == processStep.Id))
                     {
-                        if (ps.ProcessStepId == processStep.Id)
-                        {
-                            ps.Initialize?.Invoke(processStep);
-                            ps.Modify(processStep);
-                        }
+                        ps.Initialize?.Invoke(processStep);
+                        ps.Modify(processStep);
                     }
                 });
 
