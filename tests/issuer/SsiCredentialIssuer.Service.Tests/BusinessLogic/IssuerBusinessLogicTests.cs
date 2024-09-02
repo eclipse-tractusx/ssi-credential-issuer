@@ -989,4 +989,50 @@ public class IssuerBusinessLogicTests
     }
 
     #endregion
+
+    #region GetCredentialsForBpn
+
+    [Fact]
+    public async void GetCredentialsForBpn_WithVersion_ReturnExpected()
+    {
+        OwnedVerifiedCredentialData[] ownedVerifiedCredentialData = [new OwnedVerifiedCredentialData(
+            Guid.NewGuid(),
+            VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+            CompanySsiDetailStatusId.ACTIVE,
+            DateTimeOffset.Now,
+            "Test Authority",
+            "3.0")];
+
+        A.CallTo(() => _companySsiDetailsRepository.GetOwnCredentialDetails(_identity.Bpnl)).Returns(ownedVerifiedCredentialData.ToAsyncEnumerable());
+
+        var ownedCredentials = _sut.GetCredentialsForBpn();
+
+        await foreach (var credentialData in ownedCredentials)
+        {
+            credentialData.Version.Should().Be(ownedVerifiedCredentialData[0].Version);
+        }
+    }
+
+    [Fact]
+    public async void GetCredentialsForBpn_WithoutVersion_ReturnExpected()
+    {
+        OwnedVerifiedCredentialData[] ownedVerifiedCredentialData = [new OwnedVerifiedCredentialData(
+            Guid.NewGuid(),
+            VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+            CompanySsiDetailStatusId.ACTIVE,
+            DateTimeOffset.Now,
+            "Test Authority",
+            null)];
+
+        A.CallTo(() => _companySsiDetailsRepository.GetOwnCredentialDetails(_identity.Bpnl)).Returns(ownedVerifiedCredentialData.ToAsyncEnumerable());
+
+        var ownedCredentials = _sut.GetCredentialsForBpn();
+
+        await foreach (var credentialData in ownedCredentials)
+        {
+            credentialData.Version.Should().BeNull();
+        }
+    }
+
+    #endregion
 }

@@ -177,7 +177,8 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 c.VerifiedCredentialTypeId,
                 c.CompanySsiDetailStatusId,
                 c.ExpiryDate,
-                c.IssuerBpn))
+                c.IssuerBpn,
+                c.VerifiedCredentialExternalTypeDetailVersion!.Version))
             .ToAsyncEnumerable();
 
     /// <inheritdoc />
