@@ -28,9 +28,10 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 
 public class CredentialRepository(IssuerDbContext dbContext) : ICredentialRepository
 {
-    public Task<Guid?> GetWalletCredentialId(Guid credentialId) =>
-        dbContext.CompanySsiDetails.Where(x => x.Id == credentialId)
-            .Select(x => x.ExternalCredentialId)
+    public Task<(Guid? ExternalCredentialId, bool IsReissuance)> GetSigningData(Guid credentialId) =>
+        dbContext.CompanySsiDetails
+            .Where(x => x.Id == credentialId)
+            .Select(x => new ValueTuple<Guid?, bool>(x.ExternalCredentialId, x.ReissuedCredentialId != null))
             .SingleOrDefaultAsync();
 
     public Task<(HolderWalletData HolderWalletData, string? Credential, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId) =>
@@ -91,10 +92,13 @@ public class CredentialRepository(IssuerDbContext dbContext) : ICredentialReposi
         modify(entity);
     }
 
-    public Task<(VerifiedCredentialExternalTypeId ExternalTypeId, string RequesterId)> GetCredentialNotificationData(Guid credentialId) =>
+    public Task<(VerifiedCredentialExternalTypeId ExternalTypeId, string RequesterId, bool isReissuance)> GetCredentialNotificationData(Guid credentialId) =>
         dbContext.CompanySsiDetails
             .Where(x => x.Id == credentialId)
-            .Select(x => new ValueTuple<VerifiedCredentialExternalTypeId, string>(x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalTypeId, x.CreatorUserId))
+            .Select(x => new ValueTuple<VerifiedCredentialExternalTypeId, string, bool>(
+                x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalTypeId,
+                x.CreatorUserId,
+                x.ReissuedCredentialId != null))
             .SingleOrDefaultAsync();
 
     public Task<(bool Exists, bool IsSameCompany, IEnumerable<(DocumentStatusId StatusId, byte[] Content)> Documents)> GetSignedCredentialForCredentialId(Guid credentialId, string bpnl) =>

@@ -17,53 +17,30 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.Extensions.Logging;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Reissuance;
 
-public class CredentialReissuanceProcessHandler : ICredentialReissuanceProcessHandler
+public class CredentialReissuanceProcessHandler(IIssuerRepositories issuerRepositories)
+    : ICredentialReissuanceProcessHandler
 {
-    private readonly IIssuerRepositories _issuerRepositories;
-    private readonly ILogger<CredentialReissuanceProcessHandler> _logger;
-
-    public CredentialReissuanceProcessHandler(IIssuerRepositories issuerRepositories, ILogger<CredentialReissuanceProcessHandler> logger)
+    public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RevokeReissuedCredential(Guid credentialId)
     {
-        _issuerRepositories = issuerRepositories;
-        _logger = logger;
-    }
+        var companySsiRepository = issuerRepositories.GetInstance<ICompanySsiDetailsRepository>();
+        var processStepRepository = issuerRepositories.GetInstance<IProcessStepRepository>();
+        var credentialToRevokeId = await issuerRepositories.GetInstance<ICompanySsiDetailsRepository>().GetCredentialToRevoke(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
 
-    public Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RevokeReissuedCredential(Guid credentialId)
-    {
-        var isReissuedCredential = _issuerRepositories.GetInstance<IReissuanceRepository>().IsReissuedCredential(credentialId);
-
-        if (isReissuedCredential)
+        if (credentialToRevokeId == null)
         {
-            CreateRevokeCredentialProcess(credentialId);
+            throw new ConflictException("Id of the credential to revoke should always be set here");
         }
 
-        (IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage) result = (
-            Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1),
-            ProcessStepStatusId.DONE,
-            false,
-            null);
-
-        return Task.FromResult(result);
-    }
-
-    private void CreateRevokeCredentialProcess(Guid credentialId)
-    {
-        var companySsiRepository = _issuerRepositories.GetInstance<ICompanySsiDetailsRepository>();
-        var processStepRepository = _issuerRepositories.GetInstance<IProcessStepRepository>();
         var processId = processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL).Id;
-        var credentialToRevokeId = _issuerRepositories.GetInstance<IReissuanceRepository>().GetCompanySsiDetailId(credentialId);
-
-        try
-        {
-            processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, processId);
-            companySsiRepository.AttachAndModifyCompanySsiDetails(credentialToRevokeId, c =>
+        processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, processId);
+        companySsiRepository.AttachAndModifyCompanySsiDetails(credentialToRevokeId.Value, c =>
             {
                 c.ProcessId = null;
             },
@@ -71,11 +48,12 @@ public class CredentialReissuanceProcessHandler : ICredentialReissuanceProcessHa
             {
                 c.ProcessId = processId;
             });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("The revokation of the reissued credential failed with error: {Errors}", ex.Message);
-        }
+
+        return (
+            Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1),
+            ProcessStepStatusId.DONE,
+            false,
+            null);
     }
 }
 

@@ -34,7 +34,6 @@ public class IssuerRepositories : IIssuerRepositories
         { typeof(ICredentialRepository), context => new CredentialRepository(context) },
         { typeof(IDocumentRepository), context => new DocumentRepository(context) },
         { typeof(IProcessStepRepository), context => new ProcessStepRepository(context) },
-        { typeof(IReissuanceRepository), context => new ReissuanceRepository(context) },
     }.ToImmutableDictionary();
 
     public IssuerRepositories(IssuerDbContext dbContext)

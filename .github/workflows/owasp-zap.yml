@@ -95,7 +95,16 @@ jobs:
           file: ./docker/Dockerfile-credential-expiry-app
           push: true
           tags: kind-registry:5000/credential-expiry-app:testing
-  
+
+      - name: Build Reissuance image
+        id: build-reissuance-image
+        uses: docker/build-push-action@1a162644f9a7e87d8f4b053101d1d9a712edc18c # v6.3.0
+        with:
+          context: .
+          file: ./docker/Dockerfile-credential-reissuance-app
+          push: true
+          tags: kind-registry:5000/credential-reissuance-app:testing
+
       - name: Add bitnami repo
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami 

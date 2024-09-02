@@ -19,7 +19,7 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace Org.Eclipse.TractusX.Portal.Backend.Tests.Shared;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.Tests;
 
 public interface IMockLogger<T>
 {

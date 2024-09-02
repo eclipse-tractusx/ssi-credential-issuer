@@ -26,7 +26,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 
 public interface ICredentialRepository
 {
-    Task<Guid?> GetWalletCredentialId(Guid credentialId);
+    Task<(Guid? ExternalCredentialId, bool IsReissuance)> GetSigningData(Guid credentialId);
     Task<(HolderWalletData HolderWalletData, string? Credential, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId);
     Task<(bool Exists, Guid CredentialId)> GetDataForProcessId(Guid processId);
     Task<(VerifiedCredentialTypeKindId CredentialTypeKindId, JsonDocument Schema)> GetCredentialStorageInformationById(Guid credentialId);
@@ -34,7 +34,7 @@ public interface ICredentialRepository
     Task<(string Bpn, string? CallbackUrl)> GetCallbackUrl(Guid credentialId);
     Task<(bool Exists, bool IsSameBpnl, Guid? ExternalCredentialId, CompanySsiDetailStatusId StatusId, IEnumerable<(Guid DocumentId, DocumentStatusId DocumentStatusId)> Documents)> GetRevocationDataById(Guid credentialId, string bpnl);
     void AttachAndModifyCredential(Guid credentialId, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> modify);
-    Task<(VerifiedCredentialExternalTypeId ExternalTypeId, string RequesterId)> GetCredentialNotificationData(Guid credentialId);
+    Task<(VerifiedCredentialExternalTypeId ExternalTypeId, string RequesterId, bool isReissuance)> GetCredentialNotificationData(Guid credentialId);
     Task<(bool Exists, bool IsSameCompany, IEnumerable<(DocumentStatusId StatusId, byte[] Content)> Documents)> GetSignedCredentialForCredentialId(Guid credentialId, string bpnl);
     Task<(bool Exists, bool IsSameCompany, string FileName, DocumentStatusId StatusId, byte[] Content, MediaTypeId MediaTypeId)> GetDocumentById(Guid documentId, string bpnl);
 }

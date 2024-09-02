@@ -22,13 +22,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handler;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Models;
 using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
@@ -36,42 +36,25 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 /// <summary>
 /// Service to re-issue credentials that will expire in the day after.
 /// </summary>
-public class ReissuanceService : IReissuanceService
+public class ReissuanceService(IServiceScopeFactory serviceScopeFactory,
+    ICredentialIssuerHandler credentialIssuerHandler,
+    IOptions<ReissuanceSettings> options,
+    ILogger<ReissuanceService> logger) : IReissuanceService
 {
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<ReissuanceService> _logger;
-    private readonly ICredentialIssuerHandler _credentialIssuerHandler;
-    private readonly ReissuanceExpirySettings _settings;
-    /// <summary>
-    /// Creates a new instance of <see cref="ReissuanceService"/>
-    /// </summary>
-    /// <param name="serviceScopeFactory">access to the services</param>
-    /// <param name="credentialIssuerHandler">access to the credential issuer handler service</param>
-    /// <param name="options">access to the expiry section settings</param>
-    /// <param name="logger">the logger</param>
-    public ReissuanceService(IServiceScopeFactory serviceScopeFactory,
-        ICredentialIssuerHandler credentialIssuerHandler,
-        IOptions<ReissuanceExpirySettings> options,
-        ILogger<ReissuanceService> logger)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        _credentialIssuerHandler = credentialIssuerHandler;
-        _settings = options.Value;
-        _logger = logger;
-    }
+    private readonly ReissuanceSettings _settings = options.Value;
 
     /// <summary>
     /// Handles the process of re-issuing new verifiable credentias
     /// </summary>
-    /// <param name="stoppingToken">Cancellation Token</param>public async Task ExecuteAsync(CancellationToken stoppingToken)
+    /// <param name="stoppingToken">Cancellation Token</param>
     public async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                using var processServiceScope = _serviceScopeFactory.CreateScope();
+                using var processServiceScope = serviceScopeFactory.CreateScope();
                 var dateTimeProvider = processServiceScope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
                 var repositories = processServiceScope.ServiceProvider.GetRequiredService<IIssuerRepositories>();
                 var expirationDate = dateTimeProvider.OffsetNow.AddDays(_settings.ExpiredVcsToReissueInDays);
@@ -82,7 +65,7 @@ public class ReissuanceService : IReissuanceService
             catch (Exception ex)
             {
                 Environment.ExitCode = 1;
-                _logger.LogError("Verified Credential re-issuance check failed with error: {Errors}", ex.Message);
+                logger.LogError(ex, "Verified Credential re-issuance check failed with error: {Errors}", ex.Message);
             }
         }
     }
@@ -95,7 +78,7 @@ public class ReissuanceService : IReissuanceService
 
             var schemaData = CreateNewCredential(credential, expirationDate);
 
-            await _credentialIssuerHandler.HandleCredentialProcessCreation(new IssuerCredentialRequest(
+            await credentialIssuerHandler.HandleCredentialProcessCreation(new IssuerCredentialRequest(
                 credential.Id,
                 credential.HolderBpn,
                 credential.VerifiedCredentialTypeKindId,
@@ -107,14 +90,16 @@ public class ReissuanceService : IReissuanceService
                 credential.DetailVersionId,
                 credential.CallbackUrl
             ));
-
         }
     }
 
-    private static string CreateNewCredential(CredentialAboutToExpireData credential, DateTimeOffset expirationDate)
-    {
-        return credential.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.BPN ? CreateBpnCredential(credential, expirationDate) : CreateMembershipCredential(credential, expirationDate);
-    }
+    private static string CreateNewCredential(CredentialAboutToExpireData credential, DateTimeOffset expirationDate) =>
+        credential.VerifiedCredentialTypeKindId switch
+        {
+            VerifiedCredentialTypeKindId.BPN => CreateBpnCredential(credential, expirationDate),
+            VerifiedCredentialTypeKindId.MEMBERSHIP => CreateMembershipCredential(credential, expirationDate),
+            var _ => throw new NotSupportedException("Only BPN or MEMBERSHIP credentials can be reissued")
+        };
 
     private static string CreateBpnCredential(CredentialAboutToExpireData credential, DateTimeOffset expirationDate)
     {

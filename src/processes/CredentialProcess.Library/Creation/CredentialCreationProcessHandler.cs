@@ -54,7 +54,7 @@ public class CredentialCreationProcessHandler : ICredentialCreationProcessHandle
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> SignCredential(Guid credentialId, CancellationToken cancellationToken)
     {
-        var externalCredentialId = await _issuerRepositories.GetInstance<ICredentialRepository>().GetWalletCredentialId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (externalCredentialId, isReissuance) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetSigningData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId is null)
         {
             throw new ConflictException("ExternalCredentialId must be set here");
@@ -62,7 +62,7 @@ public class CredentialCreationProcessHandler : ICredentialCreationProcessHandle
 
         await _walletBusinessLogic.SignCredential(credentialId, externalCredentialId!.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         return (
-            Enumerable.Repeat(ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL, 1),
+            Enumerable.Repeat(isReissuance ? ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL : ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1),
             ProcessStepStatusId.DONE,
             false,
             null);

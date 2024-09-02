@@ -29,7 +29,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handler;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 using System.Text.Json;
 using Xunit;
@@ -40,9 +40,7 @@ public class ReissuanceServiceTests
 {
     private readonly ICredentialIssuerHandler _credentialIssuerHandler;
     private readonly IReissuanceService _reissuanceService;
-    private readonly IIssuerRepositories _issuerRepositories;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
-    private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ILogger<ReissuanceService> _logger;
 
     public ReissuanceServiceTests()
@@ -53,30 +51,30 @@ public class ReissuanceServiceTests
         fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         var serviceScopeFactory = fixture.Create<IServiceScopeFactory>();
         var serviceScope = fixture.Create<IServiceScope>();
-        var options = A.Fake<IOptions<ReissuanceExpirySettings>>();
+        var options = A.Fake<IOptions<ReissuanceSettings>>();
         _logger = A.Fake<ILogger<ReissuanceService>>();
-        var settings = new ReissuanceExpirySettings();
+        var settings = new ReissuanceSettings();
         var serviceProvider = fixture.Create<IServiceProvider>();
-        _dateTimeProvider = A.Fake<IDateTimeProvider>();
+        var dateTimeProvider = A.Fake<IDateTimeProvider>();
 
         _credentialIssuerHandler = A.Fake<ICredentialIssuerHandler>();
-        _issuerRepositories = A.Fake<IIssuerRepositories>();
+        var issuerRepositories = A.Fake<IIssuerRepositories>();
         _companySsiDetailsRepository = A.Fake<ICompanySsiDetailsRepository>();
         _credentialIssuerHandler = A.Fake<ICredentialIssuerHandler>();
 
         A.CallTo(() => options.Value).Returns(settings);
-        A.CallTo(() => serviceProvider.GetService(typeof(IDateTimeProvider))).Returns(_dateTimeProvider);
-        A.CallTo(() => serviceProvider.GetService(typeof(IIssuerRepositories))).Returns(_issuerRepositories);
-        A.CallTo(() => _issuerRepositories.GetInstance<ICompanySsiDetailsRepository>()).Returns(_companySsiDetailsRepository);
+        A.CallTo(() => serviceProvider.GetService(typeof(IDateTimeProvider))).Returns(dateTimeProvider);
+        A.CallTo(() => serviceProvider.GetService(typeof(IIssuerRepositories))).Returns(issuerRepositories);
+        A.CallTo(() => issuerRepositories.GetInstance<ICompanySsiDetailsRepository>()).Returns(_companySsiDetailsRepository);
         A.CallTo(() => serviceScope.ServiceProvider).Returns(serviceProvider);
         A.CallTo(() => serviceScopeFactory.CreateScope()).Returns(serviceScope);
-        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(DateTimeOffset.UtcNow);
+        A.CallTo(() => dateTimeProvider.OffsetNow).Returns(DateTimeOffset.UtcNow);
 
         _reissuanceService = new ReissuanceService(serviceScopeFactory, _credentialIssuerHandler, options, _logger);
     }
 
     [Fact]
-    public async void ExecuteAsync_ProcessCredentials_NoCredentialsAboutToExpire()
+    public async Task ExecuteAsync_ProcessCredentials_NoCredentialsAboutToExpire()
     {
         // Act
         await _reissuanceService.ExecuteAsync(CancellationToken.None);
@@ -86,7 +84,7 @@ public class ReissuanceServiceTests
     }
 
     [Fact]
-    public async void ExecuteAsync_ProcessCredentials_CreateBpnCredential()
+    public async Task ExecuteAsync_ProcessCredentials_CreateBpnCredential()
     {
         // Arrange
         var schema = "{\"id\":\"6f05cac6-c073-4562-8540-8fc883807808\",\"name\":\"BpnCredential\",\"type\":[\"VerifiableCredential\",\"BpnCredential\"],\"issuer\":\"did:web:localhost:BPNL000000000000\",\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://w3id.org/catenax/credentials/v1.0.0\"],\"description\":\"BpnCredential\",\"issuanceDate\":\"2024-08-19T07:32:37.598099+00:00\",\"expirationDate\":\"2025-08-19T07:32:37.598079+00:00\",\"credentialStatus\":{\"id\":\"example.com\",\"type\":\"StatusList2021\"},\"credentialSubject\":{\"id\":\"did:web:localhost:BPNL000000000000\",\"bpn\":\"BPNL000000000000\",\"holderIdentifier\":\"BPNL000000000000\"}}";
@@ -122,7 +120,7 @@ public class ReissuanceServiceTests
     }
 
     [Fact]
-    public async void ExecuteAsync_ProcessCredentials_HandleException()
+    public async Task ExecuteAsync_ProcessCredentials_HandleException()
     {
         // Arrange
         var schema = "{\"id\":\"6f05cac6-c073-4562-8540-8fc883807808\",\"name\":\"BpnCredential\",\"type\":[\"VerifiableCredential\",\"BpnCredential\"],\"issuer\":\"did:web:localhost:BPNL000000000000\",\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://w3id.org/catenax/credentials/v1.0.0\"],\"description\":\"BpnCredential\",\"issuanceDate\":\"2024-08-19T07:32:37.598099+00:00\",\"expirationDate\":\"2025-08-19T07:32:37.598079+00:00\",\"credentialStatus\":{\"id\":\"example.com\",\"type\":\"StatusList2021\"},\"credentialSubject\":{\"id\":\"did:web:localhost:BPNL000000000000\",\"bpn\":\"BPNL000000000000\",\"holderIdentifier\":\"BPNL000000000000\"}}";
@@ -147,6 +145,5 @@ public class ReissuanceServiceTests
         // Assert
         A.CallTo(() => _credentialIssuerHandler.HandleCredentialProcessCreation(A<IssuerCredentialRequest>._)).MustHaveHappenedOnceExactly();
         A.CallTo(_logger).Where(call => call.Method.Name == "Log" && call.GetArgument<LogLevel>(0) == LogLevel.Error).MustHaveHappened(1, Times.Exactly);
-
     }
 }

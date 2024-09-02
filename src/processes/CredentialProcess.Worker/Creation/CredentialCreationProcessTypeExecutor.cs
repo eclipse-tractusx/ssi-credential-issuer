@@ -20,6 +20,7 @@
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Reissuance;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;

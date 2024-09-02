@@ -21,7 +21,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
@@ -38,12 +37,9 @@ try
         .ConfigureServices((hostContext, services) =>
         {
             services
-                .AddTransient<ITokenService, TokenService>()
                 .AddProcessIdentity(hostContext.Configuration.GetSection("ProcessIdentity"))
                 .AddIssuerRepositories(hostContext.Configuration)
-                .AddPortalService(hostContext.Configuration.GetSection("Portal"))
-                .AddICredentialServiceExtensions(hostContext.Configuration)
-                .AddReissuanceService(hostContext.Configuration.GetSection("Expiry"));
+                .AddReissuanceService(hostContext.Configuration.GetSection("Reissuance"));
         })
         .AddLogging()
         .Build();

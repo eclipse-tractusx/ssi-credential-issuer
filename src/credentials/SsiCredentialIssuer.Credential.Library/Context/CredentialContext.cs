@@ -17,10 +17,11 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
-public class CredentialContext
-{
-    private static readonly IEnumerable<string> _context = ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0"];
+using System.Collections.Immutable;
 
-    public static IEnumerable<string> Context => _context;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
+
+public static class CredentialContext
+{
+    public static ImmutableArray<string> Context => ["https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0"];
 }

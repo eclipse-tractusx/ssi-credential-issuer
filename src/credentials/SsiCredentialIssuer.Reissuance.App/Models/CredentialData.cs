@@ -19,7 +19,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Models;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Models;
 
 public record FrameworkCredential(
     [property: JsonPropertyName("id")] Guid Id,

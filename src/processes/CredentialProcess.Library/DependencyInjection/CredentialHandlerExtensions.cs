@@ -20,6 +20,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Reissuance;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 

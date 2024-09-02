@@ -19,7 +19,7 @@
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Reissuance;
 
 public interface ICredentialReissuanceProcessHandler
 {

@@ -20,14 +20,15 @@
 using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Configuration;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handler;
 using System.Text;
 using System.Text.Json;
 using Xunit;
@@ -36,52 +37,40 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Tests.Handler;
 
 public class CredentialIssuerHandlerTests
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IOptions<CredentialSettings> _options;
+    private readonly IOptions<ReissuanceSettings> _options;
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly IDocumentRepository _documentRepository;
-    private readonly IReissuanceRepository _reissuanceRepository;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
-    private readonly IServiceScope _serviceScope;
     private readonly ICredentialIssuerHandler _credentialIssuerHandler;
-    private readonly IFixture _fixture;
 
     public CredentialIssuerHandlerTests()
     {
-        _fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
-        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-            .ForEach(b => _fixture.Behaviors.Remove(b));
-        var serviceProvider = _fixture.Create<IServiceProvider>();
+        var fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
+        fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+            .ForEach(b => fixture.Behaviors.Remove(b));
 
-        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         _issuerRepositories = A.Fake<IIssuerRepositories>();
         _documentRepository = A.Fake<IDocumentRepository>();
-        _reissuanceRepository = A.Fake<IReissuanceRepository>();
         _companySsiDetailsRepository = A.Fake<ICompanySsiDetailsRepository>();
 
-        _serviceScopeFactory = _fixture.Create<IServiceScopeFactory>();
-        _serviceScope = _fixture.Create<IServiceScope>();
-        _options = A.Fake<IOptions<CredentialSettings>>();
+        _options = A.Fake<IOptions<ReissuanceSettings>>();
 
-        A.CallTo(() => _serviceScopeFactory.CreateScope()).Returns(_serviceScope);
-        A.CallTo(() => _serviceScope.ServiceProvider).Returns(serviceProvider);
-        A.CallTo(() => serviceProvider.GetService(typeof(IIssuerRepositories))).Returns(_issuerRepositories);
         A.CallTo(() => _issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
-        A.CallTo(() => _issuerRepositories.GetInstance<IReissuanceRepository>()).Returns(_reissuanceRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<ICompanySsiDetailsRepository>()).Returns(_companySsiDetailsRepository);
 
-        var credentialSettings = new CredentialSettings();
-        credentialSettings.IssuerBpn = "BPNL000000000000";
+        var credentialSettings = new ReissuanceSettings { IssuerBpn = "BPNL000000000000" };
         A.CallTo(() => _options.Value).Returns(credentialSettings);
 
-        _credentialIssuerHandler = new CredentialIssuerHandler(_serviceScopeFactory, _options);
+        _credentialIssuerHandler = new CredentialIssuerHandler(_issuerRepositories, _options);
     }
 
     [Fact]
-    public async void HandleCredentialProcessCreation_ValidateProcessCreation_NoErrorExpected()
+    public async Task HandleCredentialProcessCreation_ValidateProcessCreation_NoErrorExpected()
     {
         // Arrange
         var documentId = Guid.NewGuid();
+        var ssiCredentialDetails = new List<CompanySsiDetail>();
         var schema = "{\"id\": \"21a1aa1f-b2f9-43bb-9c71-00b62bd1f8e0\", \"name\": \"BpnCredential\"}";
         var processStepRepository = A.Fake<IProcessStepRepository>();
         var process = new Process(Guid.NewGuid(), ProcessTypeId.CREATE_CREDENTIAL, Guid.NewGuid());
@@ -119,14 +108,24 @@ public class CredentialIssuerHandlerTests
             CompanySsiDetailStatusId.ACTIVE,
             _options.Value.IssuerBpn,
             request.IdentiyId,
-            A<Action<CompanySsiDetail>?>._)).Returns(companySsiDetail);
+            A<Action<CompanySsiDetail>?>._))
+            .Invokes((string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId,
+                CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId,
+                Action<CompanySsiDetail>? setOptionalFields) =>
+            {
+                var detail = new CompanySsiDetail(Guid.NewGuid(), bpnl, verifiedCredentialTypeId, companySsiDetailStatusId, issuerBpn, userId, DateTimeOffset.UtcNow);
+                setOptionalFields?.Invoke(detail);
+                ssiCredentialDetails.Add(detail);
+            })
+            .Returns(companySsiDetail);
 
         // Act
         await _credentialIssuerHandler.HandleCredentialProcessCreation(request);
 
         // Assert
+        ssiCredentialDetails.Should().ContainSingle().And.Satisfy(
+            c => c.ReissuedCredentialId == request.Id);
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, companySsiDetail.Id)).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _reissuanceRepository.CreateReissuanceProcess(request.Id, companySsiDetail.Id)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _companySsiDetailsRepository.CreateProcessData(companySsiDetail.Id, A<JsonDocument>._, A<VerifiedCredentialTypeKindId>._, A<Action<CompanySsiProcessData>?>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
     }

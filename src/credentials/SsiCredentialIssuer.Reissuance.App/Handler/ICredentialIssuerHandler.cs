@@ -17,7 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handler;
 
 /// <summary>
 /// Handles the re-issuance of a new credential then creates a new create credential process 

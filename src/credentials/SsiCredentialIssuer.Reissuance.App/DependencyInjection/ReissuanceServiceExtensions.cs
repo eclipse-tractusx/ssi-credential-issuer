@@ -20,7 +20,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handler;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Services;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
@@ -38,16 +38,16 @@ public static class ReissuanceServiceExtensions
     /// <returns>the enriched service collection</returns>
     public static IServiceCollection AddReissuanceService(this IServiceCollection services, IConfigurationSection section)
     {
-        services.AddOptions<ReissuanceExpirySettings>().Bind(section);
+        services
+            .AddOptions<ReissuanceSettings>()
+            .ValidateOnStart()
+            .ValidateDataAnnotations()
+            .Bind(section);
         services
             .AddTransient<IReissuanceService, ReissuanceService>()
             .AddTransient<IDateTimeProvider, UtcDateTimeProvider>()
-            .AddCredentialIssuerHandlerService();
+            .AddTransient<ICredentialIssuerHandler, CredentialIssuerHandler>();
 
         return services;
     }
-
-    private static IServiceCollection AddCredentialIssuerHandlerService(this IServiceCollection services) =>
-        services
-            .AddTransient<ICredentialIssuerHandler, CredentialIssuerHandler>();
 }

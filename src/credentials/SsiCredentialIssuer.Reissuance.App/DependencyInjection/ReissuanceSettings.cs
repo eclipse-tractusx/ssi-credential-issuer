@@ -17,17 +17,21 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
+using System.ComponentModel.DataAnnotations;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
 
-public interface IReissuanceRepository
+/// <summary>
+/// Settings for the ReissuanceExpirySettings
+/// </summary>
+public class ReissuanceSettings
 {
-    void CreateReissuanceProcess(Guid id, Guid reissuedCredentialId);
+    [Required(AllowEmptyStrings = false)]
+    public string IssuerBpn { get; set; } = null!;
 
-    Guid GetCompanySsiDetailId(Guid companySsiDetaillId);
-
-    bool IsReissuedCredential(Guid companySsiDetaillId);
-
-    bool IsCredentialRevokedByReissuance(Guid companySsiDetaillId);
+    /// <summary>
+    /// Vcs which are about to expire in the next day(s).
+    /// </summary>
+    [Required]
+    public int ExpiredVcsToReissueInDays { get; init; }
 }

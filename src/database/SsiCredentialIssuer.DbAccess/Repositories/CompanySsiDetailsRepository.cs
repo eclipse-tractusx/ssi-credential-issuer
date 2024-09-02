@@ -303,7 +303,7 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 IsDateAboutToExpire = x.ExpiryDate != null && x.ExpiryDate.Value.Date.CompareTo(expirationDate.Date) == 0,
                 IsSsiStatusIdActive = x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE,
                 IsValidCredendialType = x.CompanySsiProcessData != null && (x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.BPN || x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.MEMBERSHIP),
-                IsCredentialNotReissued = x.ReissuanceProcess == null
+                IsCredentialNotReissued = x.ReissuedCredentialId == null
             })
             .Where(ssi => ssi.IsSsiStatusIdActive && ssi.IsDateAboutToExpire && ssi.IsValidCredendialType && ssi.IsCredentialNotReissued)
             .Select(x => new CredentialAboutToExpireData(
@@ -319,4 +319,13 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 ))
             .AsAsyncEnumerable();
     }
+
+    public Task<bool> IsCredentialRevokedByReissuance(Guid credentialId) =>
+        context.CompanySsiDetails.AnyAsync(x => x.Id == credentialId && x.ReissuedCredentialId != null);
+
+    public Task<Guid?> GetCredentialToRevoke(Guid credentialId) =>
+        context.CompanySsiDetails
+            .Where(x => x.Id == credentialId)
+            .Select(x => x.ReissuedCredentialId)
+            .SingleOrDefaultAsync();
 }

@@ -42,7 +42,6 @@ public class CredentialExpiryProcessHandlerTests
     private readonly IWalletService _walletService;
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly ICredentialRepository _credentialRepository;
-    private readonly IReissuanceRepository _reissuanceRepository;
     private readonly IPortalService _portalService;
 
     private readonly CredentialExpiryProcessHandler _sut;
@@ -59,11 +58,9 @@ public class CredentialExpiryProcessHandlerTests
         _issuerRepositories = A.Fake<IIssuerRepositories>();
         _credentialRepository = A.Fake<ICredentialRepository>();
         _documentRepository = A.Fake<IDocumentRepository>();
-        _reissuanceRepository = A.Fake<IReissuanceRepository>();
 
         A.CallTo(() => _issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
-        A.CallTo(() => _issuerRepositories.GetInstance<IReissuanceRepository>()).Returns(_reissuanceRepository);
 
         _walletService = A.Fake<IWalletService>();
         _portalService = A.Fake<IPortalService>();
@@ -170,7 +167,7 @@ public class CredentialExpiryProcessHandlerTests
         // Arrange
         var requesterId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
-            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString()));
+            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString(), false));
 
         // Act
         var result = await _sut.TriggerNotification(_credentialId, CancellationToken.None);
@@ -189,9 +186,8 @@ public class CredentialExpiryProcessHandlerTests
     {
         // Arrange
         var requesterId = Guid.NewGuid();
-        A.CallTo(() => _reissuanceRepository.IsCredentialRevokedByReissuance(_credentialId)).Returns(true);
         A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
-            .Returns((VerifiedCredentialExternalTypeId.BUSINESS_PARTNER_NUMBER, requesterId.ToString()));
+            .Returns((VerifiedCredentialExternalTypeId.BUSINESS_PARTNER_NUMBER, requesterId.ToString(), true));
 
         // Act
         var result = await _sut.TriggerNotification(_credentialId, CancellationToken.None);
@@ -204,6 +200,7 @@ public class CredentialExpiryProcessHandlerTests
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
         result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_MAIL);
     }
+
     #endregion
 
     #region TriggerMail
@@ -214,7 +211,7 @@ public class CredentialExpiryProcessHandlerTests
         // Arrange
         var requesterId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
-            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString()));
+            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString(), false));
 
         // Act
         var result = await _sut.TriggerMail(_credentialId, CancellationToken.None);
@@ -233,9 +230,8 @@ public class CredentialExpiryProcessHandlerTests
     {
         // Arrange
         var requesterId = Guid.NewGuid();
-        A.CallTo(() => _reissuanceRepository.IsCredentialRevokedByReissuance(_credentialId)).Returns(true);
         A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
-            .Returns((VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, requesterId.ToString()));
+            .Returns((VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, requesterId.ToString(), true));
 
         // Act
         var result = await _sut.TriggerMail(_credentialId, CancellationToken.None);

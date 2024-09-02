@@ -85,19 +85,20 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     #endregion
 
-    #region GetWalletCredentialId
+    #region GetSigningData
 
     [Fact]
-    public async Task GetWalletCredentialId_ReturnsExpectedDocument()
+    public async Task GetSigningData_ReturnsExpectedDocument()
     {
         // Arrange
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetWalletCredentialId(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"));
+        var result = await sut.GetSigningData(new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03"));
 
         // Assert
-        result.Should().Be(new Guid("bd474c60-e7ce-450f-bdf4-73604546fc5e"));
+        result.ExternalCredentialId.Should().Be(new Guid("bd474c60-e7ce-450f-bdf4-73604546fc5e"));
+        result.IsReissuance.Should().BeFalse();
     }
 
     #endregion

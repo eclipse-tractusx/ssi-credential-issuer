@@ -41,7 +41,6 @@ public class CredentialCreationProcessHandlerTests
     private readonly Guid _credentialId = Guid.NewGuid();
 
     private readonly IWalletBusinessLogic _walletBusinessLogic;
-    private readonly IIssuerRepositories _issuerRepositories;
     private readonly ICredentialRepository _credentialRepository;
 
     private readonly CredentialCreationProcessHandler _sut;
@@ -55,15 +54,15 @@ public class CredentialCreationProcessHandlerTests
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        _issuerRepositories = A.Fake<IIssuerRepositories>();
+        var issuerRepositories = A.Fake<IIssuerRepositories>();
         _credentialRepository = A.Fake<ICredentialRepository>();
 
-        A.CallTo(() => _issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
+        A.CallTo(() => issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
 
         _walletBusinessLogic = A.Fake<IWalletBusinessLogic>();
         _callbackService = A.Fake<ICallbackService>();
 
-        _sut = new CredentialCreationProcessHandler(_issuerRepositories, _walletBusinessLogic, _callbackService);
+        _sut = new CredentialCreationProcessHandler(issuerRepositories, _walletBusinessLogic, _callbackService);
     }
 
     #region CreateCredential
@@ -96,8 +95,8 @@ public class CredentialCreationProcessHandlerTests
     public async Task SignCredential_WithNotExisting_ReturnsExpected()
     {
         // Arrange
-        A.CallTo(() => _credentialRepository.GetWalletCredentialId(_credentialId))
-            .Returns<Guid?>(null);
+        A.CallTo(() => _credentialRepository.GetSigningData(_credentialId))
+            .Returns(new ValueTuple<Guid?, bool>(null, false));
         Task Act() => _sut.SignCredential(_credentialId, CancellationToken.None);
 
         // Act
@@ -107,13 +106,15 @@ public class CredentialCreationProcessHandlerTests
         ex.Message.Should().Be("ExternalCredentialId must be set here");
     }
 
-    [Fact]
-    public async Task SignCredential_WithValidData_ReturnsExpected()
+    [Theory]
+    [InlineData(true, ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL)]
+    [InlineData(false, ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT)]
+    public async Task SignCredential_WithValidData_ReturnsExpected(bool reissuanceProcess, ProcessStepTypeId nextStep)
     {
         // Arrange
         var externalCredentialId = Guid.NewGuid();
-        A.CallTo(() => _credentialRepository.GetWalletCredentialId(_credentialId))
-            .Returns(externalCredentialId);
+        A.CallTo(() => _credentialRepository.GetSigningData(_credentialId))
+            .Returns(new ValueTuple<Guid?, bool>(externalCredentialId, reissuanceProcess));
 
         // Act
         var result = await _sut.SignCredential(_credentialId, CancellationToken.None);
@@ -125,7 +126,7 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(nextStep);
     }
 
     #endregion

@@ -17,79 +17,64 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Configuration;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handlers;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Handler;
 
 /// <inheritdoc />
-public class CredentialIssuerHandler : ICredentialIssuerHandler
+public class CredentialIssuerHandler(IIssuerRepositories repositories, IOptions<ReissuanceSettings> options) : ICredentialIssuerHandler
 {
-    private readonly CredentialSettings _settings;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="serviceScopeFactory"></param>
-    /// <param name="options"></param>
-    public CredentialIssuerHandler(IServiceScopeFactory serviceScopeFactory, IOptions<CredentialSettings> options)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        _settings = options.Value;
-    }
+    private readonly ReissuanceSettings _settings = options.Value;
 
     /// <inheritdoc />
-    public async Task HandleCredentialProcessCreation(IssuerCredentialRequest credentialRequest)
+    public async Task HandleCredentialProcessCreation(IssuerCredentialRequest issuerCredentialRequest)
     {
-        var documentContent = Encoding.UTF8.GetBytes(credentialRequest.Schema);
+        var documentContent = Encoding.UTF8.GetBytes(issuerCredentialRequest.Schema);
         var hash = SHA512.HashData(documentContent);
-        using var processServiceScope = _serviceScopeFactory.CreateScope();
-        var repositories = processServiceScope.ServiceProvider.GetRequiredService<IIssuerRepositories>();
         var documentRepository = repositories.GetInstance<IDocumentRepository>();
-        var reissuanceRepository = repositories.GetInstance<IReissuanceRepository>();
         var companyCredentialDetailsRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
-        var docId = documentRepository.CreateDocument($"{credentialRequest.TypeId}.json", documentContent,
+        var docId = documentRepository.CreateDocument($"{issuerCredentialRequest.TypeId}.json", documentContent,
             hash, MediaTypeId.JSON, DocumentTypeId.PRESENTATION, x =>
             {
-                x.IdentityId = credentialRequest.IdentiyId;
+                x.IdentityId = issuerCredentialRequest.IdentiyId;
                 x.DocumentStatusId = DocumentStatusId.ACTIVE;
             }).Id;
 
         Guid? processId = CreateProcess(repositories);
 
         var ssiDetailId = companyCredentialDetailsRepository.CreateSsiDetails(
-            credentialRequest.Bpnl,
-            credentialRequest.TypeId,
+            issuerCredentialRequest.Bpnl,
+            issuerCredentialRequest.TypeId,
             CompanySsiDetailStatusId.ACTIVE,
             _settings.IssuerBpn,
-            credentialRequest.IdentiyId,
+            issuerCredentialRequest.IdentiyId,
             c =>
             {
-                c.VerifiedCredentialExternalTypeDetailVersionId = credentialRequest.DetailVersionId;
+                c.VerifiedCredentialExternalTypeDetailVersionId = issuerCredentialRequest.DetailVersionId;
                 c.ProcessId = processId;
-                c.ExpiryDate = credentialRequest.ExpiryDate;
+                c.ExpiryDate = issuerCredentialRequest.ExpiryDate;
+                c.ReissuedCredentialId = issuerCredentialRequest.Id;
             }).Id;
 
         documentRepository.AssignDocumentToCompanySsiDetails(docId, ssiDetailId);
 
-        reissuanceRepository.CreateReissuanceProcess(credentialRequest.Id, ssiDetailId);
-
-        companyCredentialDetailsRepository.CreateProcessData(ssiDetailId, JsonDocument.Parse(credentialRequest.Schema), credentialRequest.KindId,
+        companyCredentialDetailsRepository.CreateProcessData(ssiDetailId, JsonDocument.Parse(issuerCredentialRequest.Schema), issuerCredentialRequest.KindId,
             c =>
             {
-                c.HolderWalletUrl = credentialRequest.HolderWalletUrl;
-                c.CallbackUrl = credentialRequest.CallbackUrl;
+                c.HolderWalletUrl = issuerCredentialRequest.HolderWalletUrl;
+                c.CallbackUrl = issuerCredentialRequest.CallbackUrl;
             });
 
         await repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
     }
+
     private static Guid CreateProcess(IIssuerRepositories repositories)
     {
         var processStepRepository = repositories.GetInstance<IProcessStepRepository>();

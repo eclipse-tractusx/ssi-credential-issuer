@@ -20,7 +20,9 @@
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Reissuance;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -33,85 +35,62 @@ public class CredentialReissuanceProcessHandlerTests
 {
     private readonly ICredentialReissuanceProcessHandler _sut;
     private readonly IIssuerRepositories _issuerRepositories;
-    private readonly IReissuanceRepository _reissuanceRepository;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
     private readonly IProcessStepRepository _processStepRepository;
-    private readonly ILogger<CredentialReissuanceProcessHandler> _logger;
 
     public CredentialReissuanceProcessHandlerTests()
     {
         _issuerRepositories = A.Fake<IIssuerRepositories>();
-        _reissuanceRepository = A.Fake<IReissuanceRepository>();
         _companySsiDetailsRepository = A.Fake<ICompanySsiDetailsRepository>();
         _processStepRepository = A.Fake<IProcessStepRepository>();
 
-        A.CallTo(() => _issuerRepositories.GetInstance<IReissuanceRepository>()).Returns(_reissuanceRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<ICompanySsiDetailsRepository>()).Returns(_companySsiDetailsRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<IProcessStepRepository>()).Returns(_processStepRepository);
 
-        _logger = A.Fake<ILogger<CredentialReissuanceProcessHandler>>();
-        _sut = new CredentialReissuanceProcessHandler(_issuerRepositories, _logger);
+        _sut = new CredentialReissuanceProcessHandler(_issuerRepositories);
     }
 
     [Fact]
-    public void RevokeReissuedCredential_isReissuedCredentialFalse_ReturnsExpected()
+    public async Task RevokeReissuedCredential_WithNoCredentialFound_ThrowsConflictException()
     {
         // Arrange
         var credentialId = Guid.NewGuid();
-        A.CallTo(() => _issuerRepositories.GetInstance<IReissuanceRepository>().IsReissuedCredential(credentialId)).Returns(false);
+        A.CallTo(() => _companySsiDetailsRepository.GetCredentialToRevoke(credentialId)).Returns<Guid?>(null);
+        Task Act() => _sut.RevokeReissuedCredential(credentialId);
 
         // Act
-        var revokeCredentialResponse = _sut.RevokeReissuedCredential(credentialId);
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        AssertSuccessResult(revokeCredentialResponse);
+        ex.Message.Should().Be("Id of the credential to revoke should always be set here");
     }
 
     [Fact]
-    public void RevokeReissuedCredential_CreateProcessStepThrowsException_ReturnsExpected()
+    public async Task RevokeReissuedCredential_CreateProcessStep_ReturnsExpected()
     {
         // Arrage Ids
         var credentialId = Guid.NewGuid();
-        var process = new Entities.Entities.Process(Guid.NewGuid(), ProcessTypeId.DECLINE_CREDENTIAL, Guid.NewGuid());
-
-        // Arrange
-        A.CallTo(() => _issuerRepositories.GetInstance<IReissuanceRepository>().IsReissuedCredential(credentialId)).Returns(true);
-        A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL)).Returns(process);
-        A.CallTo(() => _processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, process.Id))
-            .Throws(new Exception("not possible to create step process exception"));
-
-        //Act
-        var revokeCredentialResponse = _sut.RevokeReissuedCredential(credentialId);
-
-        // Assert
-        AssertSuccessResult(revokeCredentialResponse);
-    }
-
-    [Fact]
-    public void RevokeReissuedCredential_CreateProcessStep_ReturnsExpected()
-    {
-        // Arrage Ids
-        var credentialId = Guid.NewGuid();
-        var process = new Entities.Entities.Process(Guid.NewGuid(), ProcessTypeId.DECLINE_CREDENTIAL, Guid.NewGuid());
+        var credentialIdToRevoke = Guid.NewGuid();
+        var process = new Process(Guid.NewGuid(), ProcessTypeId.DECLINE_CREDENTIAL, Guid.NewGuid());
         var processStep = A.Fake<ProcessStep>();
+        var companySsiDetail = new CompanySsiDetail(credentialIdToRevoke, "BPNL000001TEST", VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.ACTIVE, "BPNL00001ISSUER", "test", DateTimeOffset.UtcNow);
 
         // Arrange
-        A.CallTo(() => _issuerRepositories.GetInstance<IReissuanceRepository>().IsReissuedCredential(credentialId)).Returns(true);
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL)).Returns(process);
         A.CallTo(() => _processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, process.Id)).Returns(processStep);
-        A.CallTo(() => _reissuanceRepository.GetCompanySsiDetailId(credentialId)).Returns(credentialId);
+        A.CallTo(() => _companySsiDetailsRepository.GetCredentialToRevoke(credentialId)).Returns(credentialIdToRevoke);
+        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(credentialIdToRevoke, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
+            .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> modify) =>
+            {
+                initialize?.Invoke(companySsiDetail);
+                modify(companySsiDetail);
+            });
 
         //Act
-        var revokeCredentialResponse = _sut.RevokeReissuedCredential(credentialId);
+        var result = await _sut.RevokeReissuedCredential(credentialId);
 
         // Assert
-        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(credentialId, null, null)).WithAnyArguments().MustHaveHappened();
-        AssertSuccessResult(revokeCredentialResponse);
-    }
-
-    private static void AssertSuccessResult(Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> revokeCredentialResponse)
-    {
-        var result = revokeCredentialResponse.Result;
+        companySsiDetail.ProcessId.Should().Be(process.Id);
         result.nextStepTypeIds.Should().HaveCount(1).And.Satisfy(
             x => x == ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT);
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
