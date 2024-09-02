@@ -20,7 +20,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
-using Org.Eclipse.TractusX.Portal.Backend.Tests.Shared;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.Tests;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using System.Security.Claims;
 

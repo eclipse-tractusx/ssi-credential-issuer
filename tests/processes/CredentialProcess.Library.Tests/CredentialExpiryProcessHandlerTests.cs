@@ -162,12 +162,12 @@ public class CredentialExpiryProcessHandlerTests
     #region TriggerNotification
 
     [Fact]
-    public async Task TriggerNotification_WithValid_CallsExpected()
+    public async Task TriggerNotification_CredentialRejected_WithValid_CallsExpected()
     {
         // Arrange
         var requesterId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
-            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString()));
+            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString(), false));
 
         // Act
         var result = await _sut.TriggerNotification(_credentialId, CancellationToken.None);
@@ -181,17 +181,37 @@ public class CredentialExpiryProcessHandlerTests
         result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_MAIL);
     }
 
+    [Fact]
+    public async Task TriggerNotification_CredentialRenewal_WithValid_CallsExpected()
+    {
+        // Arrange
+        var requesterId = Guid.NewGuid();
+        A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
+            .Returns((VerifiedCredentialExternalTypeId.BUSINESS_PARTNER_NUMBER, requesterId.ToString(), true));
+
+        // Act
+        var result = await _sut.TriggerNotification(_credentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _portalService.AddNotification(A<string>._, requesterId, NotificationTypeId.CREDENTIAL_RENEWAL, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_MAIL);
+    }
+
     #endregion
 
     #region TriggerMail
 
     [Fact]
-    public async Task TriggerMail_WithValid_CallsExpected()
+    public async Task TriggerMail_CredentialRejected_WithValid_CallsExpected()
     {
         // Arrange
         var requesterId = Guid.NewGuid();
         A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
-            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString()));
+            .Returns((VerifiedCredentialExternalTypeId.PCF_CREDENTIAL, requesterId.ToString(), false));
 
         // Act
         var result = await _sut.TriggerMail(_credentialId, CancellationToken.None);
@@ -205,5 +225,24 @@ public class CredentialExpiryProcessHandlerTests
         result.nextStepTypeIds.Should().BeNull();
     }
 
+    [Fact]
+    public async Task TriggerMail_CredentialRenewal_WithValid_CallsExpected()
+    {
+        // Arrange
+        var requesterId = Guid.NewGuid();
+        A.CallTo(() => _credentialRepository.GetCredentialNotificationData(_credentialId))
+            .Returns((VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, requesterId.ToString(), true));
+
+        // Act
+        var result = await _sut.TriggerMail(_credentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _portalService.TriggerMail("CredentialRenewal", requesterId, A<IEnumerable<MailParameter>>._, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().BeNull();
+    }
     #endregion
 }

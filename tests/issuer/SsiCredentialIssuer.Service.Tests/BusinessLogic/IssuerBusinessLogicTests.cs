@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Credential.Library.Context;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -40,7 +41,6 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.BusinessLogic;
 
 public class IssuerBusinessLogicTests
 {
-    private static readonly IEnumerable<string> Context = new[] { "https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0" };
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private static readonly Guid CredentialId = Guid.NewGuid();
     private static readonly string Bpnl = "BPNL00000001TEST";
@@ -470,7 +470,7 @@ public class IssuerBusinessLogicTests
     {
         var schemaData = new FrameworkCredential(
             Guid.NewGuid(),
-            Context,
+            CredentialContext.Context,
             new[] { "VerifiableCredential", VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL.ToString() },
             DateTimeOffset.UtcNow,
             DateTimeOffset.UtcNow,

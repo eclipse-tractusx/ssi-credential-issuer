@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
@@ -39,3 +40,16 @@ public record CredentialScheduleData(
     bool IsOneMonthNotification,
     bool IsVcToDecline
 );
+
+public record CredentialAboutToExpireData(
+    Guid Id,
+    string HolderBpn,
+    VerifiedCredentialTypeId VerifiedCredentialTypeId,
+    VerifiedCredentialTypeKindId VerifiedCredentialTypeKindId,
+    JsonDocument Schema,
+    string IdentityId,
+    string? WalletUrl,
+    Guid? DetailVersionId,
+    string? CallbackUrl
+);
+

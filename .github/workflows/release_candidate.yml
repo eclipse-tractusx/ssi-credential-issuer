@@ -45,6 +45,9 @@ jobs:
           - image: tractusx/ssi-credential-expiry-app
             dockerfile: ./docker/Dockerfile-credential-expiry-app
             dockernotice: ./docker/notice-credential-expiry-app.md
+          - image: tractusx/ssi-credential-reissuance-app
+            dockerfile: ./docker/Dockerfile-credential-reissuance-app
+            dockernotice: ./docker/notice-credential-reissuance-app.md
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1

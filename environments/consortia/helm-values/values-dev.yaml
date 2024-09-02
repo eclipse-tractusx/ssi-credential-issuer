@@ -86,6 +86,13 @@ credentialExpiry:
   logging:
     default: "Debug"
 
+credentialReissuance:
+  image:
+    tag: "main"
+  imagePullPolicy: "Always"
+  logging:
+    default: "Debug"
+
 centralidp:
   address: "https://centralidp.dev.demo.catena-x.net"
   jwtBearerOptions:

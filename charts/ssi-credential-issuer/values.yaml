@@ -157,6 +157,27 @@ credentialExpiry:
     expiredVcsToDeleteInMonth: 12
     inactiveVcsToDeleteInWeeks: 12
 
+credentialReissuance:
+  name: "reissuance"
+  image:
+    name: "docker.io/tractusx/ssi-credential-reissuance-app"
+    tag: ""
+  imagePullPolicy: "IfNotPresent"
+  # -- We recommend to review the default resource limits as this should a conscious choice.
+  resources:
+    requests:
+      cpu: 15m
+      memory: 105M
+    limits:
+      cpu: 45m
+      memory: 105M
+  processIdentity:
+    identityId: 23db9ff3-20c7-476c-ba70-6bdfe5c97104
+  logging:
+    default: "Information"
+  expiry:
+    expiredVcsToReissueInDays: 1
+
 # -- Secret containing the client-secrets for the connection to portal and wallet
 # as well as encryptionKeys for issuer.credential and processesworker.wallet
 existingSecret: ""

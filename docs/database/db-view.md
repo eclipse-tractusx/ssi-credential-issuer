@@ -135,6 +135,10 @@ erDiagram
         timestamp lock_expiry_date
         uuid version
     }
+    REISSUANCES {
+        uuid id FK
+        uuid reissued_credential_id
+    }    
     USE_CASES {
         uuid id PK
         text name
@@ -187,6 +191,7 @@ erDiagram
     PROCESS_STEPS ||--|| PROCESS_STEP_TYPES : process_step_type_id
     PROCESS_STEPS ||--|| PROCESSES : process_id
     PROCESSES ||--|| PROCESS_TYPES : process_type_id
+    REISSUANCES ||--|| COMPANY_SSI_DETAILS : company_ssi_detail_id
     VERIFIED_CREDENTIAL_EXTERNAL_TYPE_DETAIL_VERSIONS ||--|| VERIFIED_CREDENTIAL_EXTERNAL_TYPES : verified_credential_external_type_id
     VERIFIED_CREDENTIAL_TYPE_ASSIGNED_EXTERNAL_TYPES ||--|| VERIFIED_CREDENTIAL_EXTERNAL_TYPES : has
     VERIFIED_CREDENTIAL_TYPE_ASSIGNED_EXTERNAL_TYPES ||--|| VERIFIED_CREDENTIAL_TYPES : has
@@ -321,6 +326,7 @@ The database is organized into several key tables, each serving a specific purpo
 
 - `CREATE_CREDENTIAL`: Creates a credential in the issuer wallet.
 - `SIGN_CREDENTIAL`: Signs the credential in the issuer wallet.
+- `REVOKE_REISSUED_CREDENTIAL`: Revoke reissued credentials.
 - `SAVE_CREDENTIAL_DOCUMENT`: Saves the credential in the database.
 - `CREATE_CREDENTIAL_FOR_HOLDER`: Creates the credential in the holder wallet.
 - `TRIGGER_CALLBACK`: Triggers the callback to the portal.
@@ -354,6 +360,11 @@ The database is organized into several key tables, each serving a specific purpo
 - **process_type_id (INTEGER)**: A foreign key referencing `id` in the `PROCESS_TYPES` table.
 - **lock_expiry_date (TIMESTAMP)**: The lock expiry date of the process.
 - **version (UUID)**: The version of the process.
+
+### REISSUANCES
+
+id (UUID): A foreign key referencing id in the COMPANY_SSI_DETAILS.
+reissued_credential_id(UUID): Id that identifies the reissued credential added to the COMPANY_SSI_DETAILS.
 
 ### USE_CASES
 

@@ -22,6 +22,8 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -292,4 +294,39 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
         context.CompanySsiProcessData.Attach(companySsiDetailData);
         setOptionalFields(companySsiDetailData);
     }
+
+    public IAsyncEnumerable<CredentialAboutToExpireData> GetCredentialsAboutToExpire(DateTimeOffset expirationDate)
+    {
+        return context.CompanySsiDetails
+            .Select(x => new
+            {
+                Details = x,
+                IsDateAboutToExpire = x.ExpiryDate != null && x.ExpiryDate.Value.Date.CompareTo(expirationDate.Date) == 0,
+                IsSsiStatusIdActive = x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE,
+                IsValidCredendialType = x.CompanySsiProcessData != null && (x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.BPN || x.CompanySsiProcessData.CredentialTypeKindId == VerifiedCredentialTypeKindId.MEMBERSHIP),
+                IsCredentialNotReissued = x.ReissuedCredentialId == null
+            })
+            .Where(ssi => ssi.IsSsiStatusIdActive && ssi.IsDateAboutToExpire && ssi.IsValidCredendialType && ssi.IsCredentialNotReissued)
+            .Select(x => new CredentialAboutToExpireData(
+                    x.Details.Id,
+                    x.Details.Bpnl,
+                    x.Details.VerifiedCredentialTypeId,
+                    x.Details.CompanySsiProcessData!.CredentialTypeKindId,
+                    x.Details.CompanySsiProcessData.Schema,
+                    x.Details.Documents.Select(document => document.IdentityId).SingleOrDefault()!,
+                    x.Details.CompanySsiProcessData.HolderWalletUrl!,
+                    x.Details.VerifiedCredentialExternalTypeDetailVersion!.Id,
+                    x.Details.CompanySsiProcessData.CallbackUrl
+                ))
+            .AsAsyncEnumerable();
+    }
+
+    public Task<bool> IsCredentialRevokedByReissuance(Guid credentialId) =>
+        context.CompanySsiDetails.AnyAsync(x => x.Id == credentialId && x.ReissuedCredentialId != null);
+
+    public Task<Guid?> GetCredentialToRevoke(Guid credentialId) =>
+        context.CompanySsiDetails
+            .Where(x => x.Id == credentialId)
+            .Select(x => x.ReissuedCredentialId)
+            .SingleOrDefaultAsync();
 }

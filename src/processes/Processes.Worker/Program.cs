@@ -22,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
@@ -45,7 +46,8 @@ try
                 .AddCallbackService(hostContext.Configuration.GetSection("Callback"))
                 .AddWalletService(hostContext.Configuration)
                 .AddCredentialCreationProcessExecutor()
-                .AddCredentialExpiryProcessExecutor();
+                .AddCredentialExpiryProcessExecutor()
+                .AddCredentialReissuedProcessHandler();
         })
         .AddLogging()
         .Build();

@@ -107,6 +107,14 @@ dependencies:
 | credentialExpiry.logging.default | string | `"Information"` |  |
 | credentialExpiry.expiry.expiredVcsToDeleteInMonth | int | `12` |  |
 | credentialExpiry.expiry.inactiveVcsToDeleteInWeeks | int | `12` |  |
+| credentialReissuance.name | string | `"reissuance"` |  |
+| credentialReissuance.image.name | string | `"docker.io/tractusx/ssi-credential-reissuance-app"` |  |
+| credentialReissuance.image.tag | string | `""` |  |
+| credentialReissuance.imagePullPolicy | string | `"IfNotPresent"` |  |
+| credentialReissuance.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| credentialReissuance.processIdentity.identityId | string | `"23db9ff3-20c7-476c-ba70-6bdfe5c97104"` |  |
+| credentialReissuance.logging.default | string | `"Information"` |  |
+| credentialReissuance.expiry.expiredVcsToReissueInDays | int | `1` |  |
 | existingSecret | string | `""` | Secret containing the client-secrets for the connection to portal and wallet as well as encryptionKeys for issuer.credential and processesworker.wallet |
 | dotnetEnvironment | string | `"Production"` |  |
 | dbConnection.schema | string | `"issuer"` |  |

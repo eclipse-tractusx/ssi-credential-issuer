@@ -103,4 +103,7 @@ public interface ICompanySsiDetailsRepository
     void RemoveSsiDetail(Guid companySsiDetailId, string bpnl, string userId);
     void CreateProcessData(Guid companySsiDetailId, JsonDocument schema, VerifiedCredentialTypeKindId credentialTypeKindId, Action<CompanySsiProcessData>? setOptionalFields);
     void AttachAndModifyProcessData(Guid companySsiDetailId, Action<CompanySsiProcessData>? initialize, Action<CompanySsiProcessData> setOptionalFields);
+    IAsyncEnumerable<CredentialAboutToExpireData> GetCredentialsAboutToExpire(DateTimeOffset expirationDate);
+    Task<bool> IsCredentialRevokedByReissuance(Guid credentialId);
+    Task<Guid?> GetCredentialToRevoke(Guid credentialId);
 }

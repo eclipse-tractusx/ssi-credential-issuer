@@ -22,7 +22,9 @@ using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
 using FluentAssertions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Reissuance;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Creation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -36,6 +38,7 @@ public class CredentialCreationProcessTypeExecutorTests
     private readonly CredentialCreationProcessTypeExecutor _sut;
     private readonly ICredentialCreationProcessHandler _credentialCreationProcessHandler;
     private readonly ICredentialRepository _credentialRepository;
+    private readonly ICredentialReissuanceProcessHandler _credentialReissuanceProcessHandler;
 
     public CredentialCreationProcessTypeExecutorTests()
     {
@@ -46,12 +49,12 @@ public class CredentialCreationProcessTypeExecutorTests
 
         var issuerRepositories = A.Fake<IIssuerRepositories>();
         _credentialCreationProcessHandler = A.Fake<ICredentialCreationProcessHandler>();
-
+        _credentialReissuanceProcessHandler = A.Fake<ICredentialReissuanceProcessHandler>();
         _credentialRepository = A.Fake<ICredentialRepository>();
 
         A.CallTo(() => issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
 
-        _sut = new CredentialCreationProcessTypeExecutor(issuerRepositories, _credentialCreationProcessHandler);
+        _sut = new CredentialCreationProcessTypeExecutor(issuerRepositories, _credentialCreationProcessHandler, _credentialReissuanceProcessHandler);
     }
 
     [Fact]
@@ -69,12 +72,20 @@ public class CredentialCreationProcessTypeExecutorTests
     }
 
     [Fact]
+    public void IsExecutableStepTypeId_Withdalid_RevokeReissuedCredential_ReturnsExpected()
+    {
+        // Assert
+        _sut.IsExecutableStepTypeId(ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL).Should().BeTrue();
+    }
+
+    [Fact]
     public void GetExecutableStepTypeIds_ReturnsExpected()
     {
         // Assert
-        _sut.GetExecutableStepTypeIds().Should().HaveCount(5).And.Satisfy(
+        _sut.GetExecutableStepTypeIds().Should().HaveCount(6).And.Satisfy(
             x => x == ProcessStepTypeId.CREATE_CREDENTIAL,
             x => x == ProcessStepTypeId.SIGN_CREDENTIAL,
+            x => x == ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL,
             x => x == ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             x => x == ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
             x => x == ProcessStepTypeId.TRIGGER_CALLBACK);
@@ -229,6 +240,37 @@ public class CredentialCreationProcessTypeExecutorTests
         result.ScheduleStepTypeIds.Should().BeNull();
         result.ProcessStepStatusId.Should().Be(ProcessStepStatusId.FAILED);
         result.ProcessMessage.Should().Be("this is a test");
+        result.SkipStepTypeIds.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ExecuteProcessStep_RevokeIssuedCredential_WithValidData_CallsExpected()
+    {
+        // Arrange InitializeProcess
+        var validProcessId = Guid.NewGuid();
+        var credentialId = Guid.NewGuid();
+        A.CallTo(() => _credentialRepository.GetDataForProcessId(validProcessId))
+            .Returns((true, credentialId));
+
+        // Act InitializeProcess
+        var initializeResult = await _sut.InitializeProcess(validProcessId, Enumerable.Empty<ProcessStepTypeId>());
+
+        // Assert InitializeProcess
+        initializeResult.Modified.Should().BeFalse();
+        initializeResult.ScheduleStepTypeIds.Should().BeNull();
+
+        // Arrange
+        A.CallTo(() => _credentialReissuanceProcessHandler.RevokeReissuedCredential(credentialId))
+            .Returns((null, ProcessStepStatusId.DONE, false, null));
+
+        // Act
+        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_REISSUED_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+
+        // Assert
+        result.Modified.Should().BeFalse();
+        result.ScheduleStepTypeIds.Should().BeNull();
+        result.ProcessStepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.ProcessMessage.Should().BeNull();
         result.SkipStepTypeIds.Should().BeNull();
     }
 

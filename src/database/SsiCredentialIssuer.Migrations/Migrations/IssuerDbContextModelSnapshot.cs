@@ -35,7 +35,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
             modelBuilder
                 .HasDefaultSchema("issuer")
                 .UseCollation("en_US.utf8")
-                .HasAnnotation("ProductVersion", "8.0.5")
+                .HasAnnotation("ProductVersion", "8.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -213,6 +213,98 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         .HasName("pk_audit_company_ssi_detail20240419");
 
                     b.ToTable("audit_company_ssi_detail20240419", "issuer");
+                });
+
+            modelBuilder.Entity("Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.AuditEntities.AuditCompanySsiDetail20240902", b =>
+                {
+                    b.Property<Guid>("AuditV2Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("audit_v2id");
+
+                    b.Property<DateTimeOffset>("AuditV2DateLastChanged")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_v2date_last_changed");
+
+                    b.Property<string>("AuditV2LastEditorId")
+                        .HasColumnType("text")
+                        .HasColumnName("audit_v2last_editor_id");
+
+                    b.Property<int>("AuditV2OperationId")
+                        .HasColumnType("integer")
+                        .HasColumnName("audit_v2operation_id");
+
+                    b.Property<string>("Bpnl")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bpnl");
+
+                    b.Property<int>("CompanySsiDetailStatusId")
+                        .HasColumnType("integer")
+                        .HasColumnName("company_ssi_detail_status_id");
+
+                    b.Property<string>("CreatorUserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("creator_user_id");
+
+                    b.Property<string>("Credential")
+                        .HasColumnType("text")
+                        .HasColumnName("credential");
+
+                    b.Property<DateTimeOffset>("DateCreated")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_created");
+
+                    b.Property<DateTimeOffset?>("DateLastChanged")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_last_changed");
+
+                    b.Property<int?>("ExpiryCheckTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("expiry_check_type_id");
+
+                    b.Property<DateTimeOffset?>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expiry_date");
+
+                    b.Property<Guid?>("ExternalCredentialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("external_credential_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("IssuerBpn")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("issuer_bpn");
+
+                    b.Property<string>("LastEditorId")
+                        .HasColumnType("text")
+                        .HasColumnName("last_editor_id");
+
+                    b.Property<Guid?>("ProcessId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("process_id");
+
+                    b.Property<Guid?>("ReissuedCredentialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reissued_credential_id");
+
+                    b.Property<Guid?>("VerifiedCredentialExternalTypeDetailVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("verified_credential_external_type_detail_version_id");
+
+                    b.Property<int>("VerifiedCredentialTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("verified_credential_type_id");
+
+                    b.HasKey("AuditV2Id")
+                        .HasName("pk_audit_company_ssi_detail20240902");
+
+                    b.ToTable("audit_company_ssi_detail20240902", "issuer");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.AuditEntities.AuditDocument20240305", b =>
@@ -411,6 +503,10 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("process_id");
 
+                    b.Property<Guid?>("ReissuedCredentialId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reissued_credential_id");
+
                     b.Property<Guid?>("VerifiedCredentialExternalTypeDetailVersionId")
                         .HasColumnType("uuid")
                         .HasColumnName("verified_credential_external_type_detail_version_id");
@@ -431,6 +527,10 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                     b.HasIndex("ProcessId")
                         .HasDatabaseName("ix_company_ssi_details_process_id");
 
+                    b.HasIndex("ReissuedCredentialId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_company_ssi_details_reissued_credential_id");
+
                     b.HasIndex("VerifiedCredentialExternalTypeDetailVersionId")
                         .HasDatabaseName("ix_company_ssi_details_verified_credential_external_type_detai");
 
@@ -445,8 +545,8 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL", "CREATE FUNCTION \"issuer\".\"LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL$\r\nBEGIN\r\n  INSERT INTO \"issuer\".\"audit_company_ssi_detail20240419\" (\"id\", \"bpnl\", \"issuer_bpn\", \"verified_credential_type_id\", \"company_ssi_detail_status_id\", \"date_created\", \"creator_user_id\", \"expiry_date\", \"verified_credential_external_type_detail_version_id\", \"expiry_check_type_id\", \"process_id\", \"external_credential_id\", \"credential\", \"date_last_changed\", \"last_editor_id\", \"audit_v2id\", \"audit_v2operation_id\", \"audit_v2date_last_changed\", \"audit_v2last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"bpnl\", \r\n  NEW.\"issuer_bpn\", \r\n  NEW.\"verified_credential_type_id\", \r\n  NEW.\"company_ssi_detail_status_id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"creator_user_id\", \r\n  NEW.\"expiry_date\", \r\n  NEW.\"verified_credential_external_type_detail_version_id\", \r\n  NEW.\"expiry_check_type_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"external_credential_id\", \r\n  NEW.\"credential\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL AFTER INSERT\r\nON \"issuer\".\"company_ssi_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"issuer\".\"LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL", "CREATE FUNCTION \"issuer\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL$\r\nBEGIN\r\n  INSERT INTO \"issuer\".\"audit_company_ssi_detail20240419\" (\"id\", \"bpnl\", \"issuer_bpn\", \"verified_credential_type_id\", \"company_ssi_detail_status_id\", \"date_created\", \"creator_user_id\", \"expiry_date\", \"verified_credential_external_type_detail_version_id\", \"expiry_check_type_id\", \"process_id\", \"external_credential_id\", \"credential\", \"date_last_changed\", \"last_editor_id\", \"audit_v2id\", \"audit_v2operation_id\", \"audit_v2date_last_changed\", \"audit_v2last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"bpnl\", \r\n  NEW.\"issuer_bpn\", \r\n  NEW.\"verified_credential_type_id\", \r\n  NEW.\"company_ssi_detail_status_id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"creator_user_id\", \r\n  NEW.\"expiry_date\", \r\n  NEW.\"verified_credential_external_type_detail_version_id\", \r\n  NEW.\"expiry_check_type_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"external_credential_id\", \r\n  NEW.\"credential\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL AFTER UPDATE\r\nON \"issuer\".\"company_ssi_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"issuer\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL", "CREATE FUNCTION \"issuer\".\"LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL$\r\nBEGIN\r\n  INSERT INTO \"issuer\".\"audit_company_ssi_detail20240902\" (\"id\", \"bpnl\", \"issuer_bpn\", \"verified_credential_type_id\", \"company_ssi_detail_status_id\", \"date_created\", \"creator_user_id\", \"expiry_date\", \"verified_credential_external_type_detail_version_id\", \"expiry_check_type_id\", \"process_id\", \"external_credential_id\", \"credential\", \"reissued_credential_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v2id\", \"audit_v2operation_id\", \"audit_v2date_last_changed\", \"audit_v2last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"bpnl\", \r\n  NEW.\"issuer_bpn\", \r\n  NEW.\"verified_credential_type_id\", \r\n  NEW.\"company_ssi_detail_status_id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"creator_user_id\", \r\n  NEW.\"expiry_date\", \r\n  NEW.\"verified_credential_external_type_detail_version_id\", \r\n  NEW.\"expiry_check_type_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"external_credential_id\", \r\n  NEW.\"credential\", \r\n  NEW.\"reissued_credential_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL AFTER INSERT\r\nON \"issuer\".\"company_ssi_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"issuer\".\"LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL", "CREATE FUNCTION \"issuer\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL$\r\nBEGIN\r\n  INSERT INTO \"issuer\".\"audit_company_ssi_detail20240902\" (\"id\", \"bpnl\", \"issuer_bpn\", \"verified_credential_type_id\", \"company_ssi_detail_status_id\", \"date_created\", \"creator_user_id\", \"expiry_date\", \"verified_credential_external_type_detail_version_id\", \"expiry_check_type_id\", \"process_id\", \"external_credential_id\", \"credential\", \"reissued_credential_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v2id\", \"audit_v2operation_id\", \"audit_v2date_last_changed\", \"audit_v2last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"bpnl\", \r\n  NEW.\"issuer_bpn\", \r\n  NEW.\"verified_credential_type_id\", \r\n  NEW.\"company_ssi_detail_status_id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"creator_user_id\", \r\n  NEW.\"expiry_date\", \r\n  NEW.\"verified_credential_external_type_detail_version_id\", \r\n  NEW.\"expiry_check_type_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"external_credential_id\", \r\n  NEW.\"credential\", \r\n  NEW.\"reissued_credential_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL AFTER UPDATE\r\nON \"issuer\".\"company_ssi_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"issuer\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYSSIDETAIL\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities.CompanySsiDetailAssignedDocument", b =>
@@ -971,6 +1071,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         },
                         new
                         {
+                            Id = 6,
+                            Label = "REVOKE_REISSUED_CREDENTIAL"
+                        },
+                        new
+                        {
                             Id = 100,
                             Label = "REVOKE_CREDENTIAL"
                         },
@@ -1359,6 +1464,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         .HasForeignKey("ProcessId")
                         .HasConstraintName("fk_company_ssi_details_processes_process_id");
 
+                    b.HasOne("Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities.CompanySsiDetail", "ReissuedCredential")
+                        .WithOne()
+                        .HasForeignKey("Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities.CompanySsiDetail", "ReissuedCredentialId")
+                        .HasConstraintName("fk_company_ssi_details_company_ssi_details_reissued_credential");
+
                     b.HasOne("Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities.VerifiedCredentialExternalTypeDetailVersion", "VerifiedCredentialExternalTypeDetailVersion")
                         .WithMany("CompanySsiDetails")
                         .HasForeignKey("VerifiedCredentialExternalTypeDetailVersionId")
@@ -1375,6 +1485,8 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                     b.Navigation("ExpiryCheckType");
 
                     b.Navigation("Process");
+
+                    b.Navigation("ReissuedCredential");
 
                     b.Navigation("VerifiedCredentialExternalTypeDetailVersion");
 

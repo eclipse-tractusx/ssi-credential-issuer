@@ -73,8 +73,8 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
         // Assert
         ca.LastEditorId.Should().NotBeNull().And.Be("ac1cf001-7fbc-1f2f-817f-bce058020001");
         ca.DateLastChanged.Should().Be(now);
-        var auditEntries = await sut.AuditCompanySsiDetail20240419.Where(x => x.Id == id).ToListAsync();
-        auditEntries.Should().ContainSingle().Which.Should().Match<AuditCompanySsiDetail20240419>(
+        var auditEntries = await sut.AuditCompanySsiDetail20240902.Where(x => x.Id == id).ToListAsync();
+        auditEntries.Should().ContainSingle().Which.Should().Match<AuditCompanySsiDetail20240902>(
             x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV2OperationId == AuditOperationId.INSERT && (x.AuditV2DateLastChanged - now) < TimeSpan.FromSeconds(1) && x.LastEditorId == "ac1cf001-7fbc-1f2f-817f-bce058020001");
         await trans.RollbackAsync();
     }
@@ -103,7 +103,7 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
         // Assert
         ca.LastEditorId.Should().NotBeNull().And.Be("ac1cf001-7fbc-1f2f-817f-bce058020001");
         ca.DateLastChanged.Should().Be(later);
-        var auditEntries = await sut.AuditCompanySsiDetail20240419.Where(x => x.Id == id).ToListAsync();
+        var auditEntries = await sut.AuditCompanySsiDetail20240902.Where(x => x.Id == id).ToListAsync();
         auditEntries.Should().HaveCount(2).And.Satisfy(
             x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV2OperationId == AuditOperationId.INSERT && x.LastEditorId == "ac1cf001-7fbc-1f2f-817f-bce058020001",
             x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE && (x.DateCreated - before) < TimeSpan.FromSeconds(1) && x.AuditV2OperationId == AuditOperationId.DELETE && (x.AuditV2DateLastChanged - later) < TimeSpan.FromSeconds(1) && x.LastEditorId == "ac1cf001-7fbc-1f2f-817f-bce058020001");

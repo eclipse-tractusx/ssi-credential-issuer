@@ -24,7 +24,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 
-[AuditEntityV2(typeof(AuditCompanySsiDetail20240419))]
+[AuditEntityV2(typeof(AuditCompanySsiDetail20240902))]
 public class CompanySsiDetail : IAuditableV2, IBaseEntity
 {
     private CompanySsiDetail()
@@ -61,6 +61,7 @@ public class CompanySsiDetail : IAuditableV2, IBaseEntity
     public Guid? ProcessId { get; set; }
     public Guid? ExternalCredentialId { get; set; }
     public string? Credential { get; set; }
+    public Guid? ReissuedCredentialId { get; set; }
 
     [LastChangedV2]
     public DateTimeOffset? DateLastChanged { get; set; }
@@ -73,6 +74,7 @@ public class CompanySsiDetail : IAuditableV2, IBaseEntity
     public virtual ExpiryCheckType? ExpiryCheckType { get; set; }
     public virtual CompanySsiDetailStatus? CompanySsiDetailStatus { get; set; }
     public virtual Process? Process { get; set; }
+    public virtual CompanySsiDetail? ReissuedCredential { get; set; }
     public virtual VerifiedCredentialExternalTypeDetailVersion? VerifiedCredentialExternalTypeDetailVersion { get; set; }
     public virtual CompanySsiProcessData? CompanySsiProcessData { get; set; }
     public virtual ICollection<Document> Documents { get; private set; }
