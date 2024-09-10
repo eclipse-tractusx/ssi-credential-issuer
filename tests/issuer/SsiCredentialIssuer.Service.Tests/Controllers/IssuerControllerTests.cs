@@ -47,9 +47,10 @@ public class IssuerControllerTests(IntegrationTestFactory factory) : IClassFixtu
         var types = await _client.GetFromJsonAsync<IEnumerable<VerifiedCredentialTypeId>>($"{BaseUrl}/certificateTypes", JsonOptions);
 
         // Assert
-        types.Should().NotBeNull().And.HaveCount(2).And.Satisfy(
+        types.Should().NotBeNull().And.HaveCount(3).And.Satisfy(
             x => x == VerifiedCredentialTypeId.MEMBERSHIP,
-            x => x == VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER
+            x => x == VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER,
+            x => x == VerifiedCredentialTypeId.FRAMEWORK_AGREEMENT
         );
     }
 
