@@ -17,14 +17,14 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
 public interface IWalletService
 {
-    Task<Guid> CreateCredential(JsonDocument payload, CancellationToken cancellationToken);
-    Task<string> SignCredential(Guid credentialId, CancellationToken cancellationToken);
+    Task<CreateSignedCredentialResponse> CreateSignedCredential(JsonDocument payload, CancellationToken cancellationToken);
     Task<Guid> CreateCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, string credential, CancellationToken cancellationToken);
     Task<JsonDocument> GetCredential(Guid externalCredentialId, CancellationToken cancellationToken);
     Task RevokeCredentialForIssuer(Guid externalCredentialId, CancellationToken cancellationToken);

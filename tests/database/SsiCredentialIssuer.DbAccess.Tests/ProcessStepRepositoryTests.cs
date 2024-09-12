@@ -120,7 +120,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         var changeTracker = dbContext.ChangeTracker;
 
         // Act
-        sut.CreateProcessStep(ProcessStepTypeId.SIGN_CREDENTIAL, ProcessStepStatusId.TODO, processId);
+        sut.CreateProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, ProcessStepStatusId.TODO, processId);
 
         // Assert
         changeTracker.HasChanges().Should().BeTrue();
@@ -129,7 +129,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
             .Which.State.Should().Be(EntityState.Added);
         changeTracker.Entries().Select(x => x.Entity).Cast<ProcessStep>()
             .Should().Satisfy(
-                x => x.ProcessId == processId && x.ProcessStepTypeId == ProcessStepTypeId.SIGN_CREDENTIAL && x.ProcessStepStatusId == ProcessStepStatusId.TODO
+                x => x.ProcessId == processId && x.ProcessStepTypeId == ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL && x.ProcessStepStatusId == ProcessStepStatusId.TODO
             );
     }
 
@@ -287,8 +287,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         // Arrange
         var processTypeIds = new[] { ProcessTypeId.CREATE_CREDENTIAL };
         var processStepTypeIds = new[] {
-            ProcessStepTypeId.CREATE_CREDENTIAL,
-            ProcessStepTypeId.SIGN_CREDENTIAL,
+            ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
         };
@@ -309,8 +308,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         // Arrange
         var processTypeIds = new[] { ProcessTypeId.CREATE_CREDENTIAL };
         var processStepTypeIds = new[] {
-            ProcessStepTypeId.CREATE_CREDENTIAL,
-            ProcessStepTypeId.SIGN_CREDENTIAL,
+            ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
         };

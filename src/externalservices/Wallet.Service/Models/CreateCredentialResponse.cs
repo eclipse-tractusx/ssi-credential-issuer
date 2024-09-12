@@ -22,6 +22,22 @@ using System.Text.Json.Serialization;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 
+public record CreateSignedCredentialRequest(
+    [property: JsonPropertyName("application")] string Application,
+    [property: JsonPropertyName("payload")] CreateSignedPayload Payload
+);
+
+public record CreateSignedPayload(
+    [property: JsonPropertyName("content")] JsonDocument Issue,
+    [property: JsonPropertyName("signature")] SignData Signature
+);
+
+public record SignData(
+    [property: JsonPropertyName("proofMechanism")] string ProofMechanism,
+    [property: JsonPropertyName("proofType")] string ProofType,
+    [property: JsonPropertyName("keyName")] string? KeyName
+);
+
 public record CreateCredentialRequest(
     [property: JsonPropertyName("application")] string Application,
     [property: JsonPropertyName("payload")] CredentialPayload Payload
@@ -29,6 +45,11 @@ public record CreateCredentialRequest(
 
 public record CredentialPayload(
     [property: JsonPropertyName("issue")] JsonDocument Issue
+);
+
+public record CreateSignedCredentialResponse(
+    [property: JsonPropertyName("id")] Guid Id,
+    [property: JsonPropertyName("jwt")] string Jwt
 );
 
 public record CreateCredentialResponse(

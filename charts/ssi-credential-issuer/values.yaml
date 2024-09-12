@@ -128,8 +128,8 @@ processesworker:
     application: "catena-x-portal"
     # -- path to create a credential
     createCredentialPath: "api/v2.0.0/credentials"
-    # -- path to sign a specific credential; {0} will be replaced by the credential id
-    signCredentialPath: "/api/v2.0.0/credentials/{0}"
+    # -- path to create a specific credential which is directly signed
+    createSignedCredentialPath: "/api/v2.0.0/credentials"
     # -- path to get a specific credential; {0} will be replaced by the credential id
     getCredentialPath: "/api/v2.0.0/credentials/{0}"
     # -- path to revoke a specific credential; {0} will be replaced by the credential id

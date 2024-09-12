@@ -130,7 +130,7 @@ public class CredentialExpiryProcessTypeExecutorTests
     public async Task ExecuteProcessStep_WithoutRegistrationId_ThrowsUnexpectedConditionException()
     {
         // Act
-        async Task Act() => await _sut.ExecuteProcessStep(ProcessStepTypeId.SIGN_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+        async Task Act() => await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(Act);

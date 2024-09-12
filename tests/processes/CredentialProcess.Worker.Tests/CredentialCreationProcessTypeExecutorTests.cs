@@ -65,16 +65,15 @@ public class CredentialCreationProcessTypeExecutorTests
     public void IsExecutableStepTypeId_WithValid_ReturnsExpected()
     {
         // Assert
-        _sut.IsExecutableStepTypeId(ProcessStepTypeId.SIGN_CREDENTIAL).Should().BeTrue();
+        _sut.IsExecutableStepTypeId(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL).Should().BeTrue();
     }
 
     [Fact]
     public void GetExecutableStepTypeIds_ReturnsExpected()
     {
         // Assert
-        _sut.GetExecutableStepTypeIds().Should().HaveCount(5).And.Satisfy(
-            x => x == ProcessStepTypeId.CREATE_CREDENTIAL,
-            x => x == ProcessStepTypeId.SIGN_CREDENTIAL,
+        _sut.GetExecutableStepTypeIds().Should().HaveCount(4).And.Satisfy(
+            x => x == ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             x => x == ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             x => x == ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
             x => x == ProcessStepTypeId.TRIGGER_CALLBACK);
@@ -84,7 +83,7 @@ public class CredentialCreationProcessTypeExecutorTests
     public async Task IsLockRequested_ReturnsExpected()
     {
         // Act
-        var result = await _sut.IsLockRequested(ProcessStepTypeId.SIGN_CREDENTIAL);
+        var result = await _sut.IsLockRequested(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL);
 
         // Assert
         result.Should().BeFalse();
@@ -132,7 +131,7 @@ public class CredentialCreationProcessTypeExecutorTests
     public async Task ExecuteProcessStep_WithoutRegistrationId_ThrowsUnexpectedConditionException()
     {
         // Act
-        async Task Act() => await _sut.ExecuteProcessStep(ProcessStepTypeId.SIGN_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+        async Task Act() => await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<UnexpectedConditionException>(Act);
@@ -156,11 +155,11 @@ public class CredentialCreationProcessTypeExecutorTests
         initializeResult.ScheduleStepTypeIds.Should().BeNull();
 
         // Arrange
-        A.CallTo(() => _credentialCreationProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialCreationProcessHandler.CreateSignedCredential(credentialId, A<CancellationToken>._))
             .Returns((null, ProcessStepStatusId.DONE, false, null));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeFalse();
@@ -187,11 +186,11 @@ public class CredentialCreationProcessTypeExecutorTests
         initializeResult.ScheduleStepTypeIds.Should().BeNull();
 
         // Arrange
-        A.CallTo(() => _credentialCreationProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialCreationProcessHandler.CreateSignedCredential(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test", true));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeTrue();
@@ -218,11 +217,11 @@ public class CredentialCreationProcessTypeExecutorTests
         initializeResult.ScheduleStepTypeIds.Should().BeNull();
 
         // Arrange
-        A.CallTo(() => _credentialCreationProcessHandler.CreateCredential(credentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialCreationProcessHandler.CreateSignedCredential(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeTrue();

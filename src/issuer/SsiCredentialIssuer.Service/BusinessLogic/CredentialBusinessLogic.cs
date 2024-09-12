@@ -28,20 +28,14 @@ using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
-public class CredentialBusinessLogic : ICredentialBusinessLogic
+public class CredentialBusinessLogic(IIssuerRepositories repositories, IIdentityService identityService)
+    : ICredentialBusinessLogic
 {
-    private readonly IIssuerRepositories _repositories;
-    private readonly IIdentityData _identityData;
-
-    public CredentialBusinessLogic(IIssuerRepositories repositories, IIdentityService identityService)
-    {
-        _repositories = repositories;
-        _identityData = identityService.IdentityData;
-    }
+    private readonly IIdentityData _identityData = identityService.IdentityData;
 
     public async Task<JsonDocument> GetCredentialDocument(Guid credentialId)
     {
-        var (exists, isSameCompany, documents) = await _repositories.GetInstance<ICredentialRepository>().GetSignedCredentialForCredentialId(credentialId, _identityData.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (exists, isSameCompany, documents) = await repositories.GetInstance<ICredentialRepository>().GetSignedCredentialForCredentialId(credentialId, _identityData.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!exists)
         {
             throw NotFoundException.Create(CredentialErrors.CREDENTIAL_NOT_FOUND, new[] { new ErrorParameter("credentialId", credentialId.ToString()) });
@@ -64,7 +58,7 @@ public class CredentialBusinessLogic : ICredentialBusinessLogic
 
     public async Task<(string FileName, byte[] Content, string MediaType)> GetCredentialDocumentById(Guid documentId)
     {
-        var (exists, isSameCompany, fileName, documentStatusId, content, mediaTypeId) = await _repositories.GetInstance<ICredentialRepository>().GetDocumentById(documentId, _identityData.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (exists, isSameCompany, fileName, documentStatusId, content, mediaTypeId) = await repositories.GetInstance<ICredentialRepository>().GetDocumentById(documentId, _identityData.Bpnl).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!exists)
         {
             throw NotFoundException.Create(CredentialErrors.DOCUMENT_NOT_FOUND, new[] { new ErrorParameter("documentId", documentId.ToString()) });
