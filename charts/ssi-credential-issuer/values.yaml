@@ -88,11 +88,13 @@ migrations:
       memory: 200M
   seeding:
     testDataEnvironments: ""
-    testDataPaths: "Seeder/Data"
+    testData:
+      # -- ConfigMap containing json files for the tables to seed, e.g. companies.test.json, addresses.test.json, etc.
+      configMap: ""
+      # -- Filename identifying the test data files e.g. for companies.test.json the value would be "test"
+      filename: ""
   logging:
     default: "Information"
-  processIdentity:
-    identityId: ac1cf001-7fbc-1f2f-817f-bce058020006
 
 processesworker:
   name: "processesworker"

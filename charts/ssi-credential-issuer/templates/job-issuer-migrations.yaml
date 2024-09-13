@@ -70,11 +70,17 @@ spec:
           - name: "SEEDING__TESTDATAENVIRONMENTS__0"
             value: "{{ .Values.migrations.seeding.testDataEnvironments }}"
           - name: "SEEDING__DATAPATHS__0"
-            value: "{{ .Values.migrations.seeding.testDataPaths }}"
+            value: "Seeder/Data"           
+          {{- if and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename) }}
+          - name: "SEEDING__DATAPATHS__1"
+             value: "Seeder/Data/import"
+          - name: "SEEDING__TESTDATAENVIRONMENTS__1"
+             value: "{{ .Values.migrations.seeding.testData.filename }}"
+          {{- end }}
           - name: "SERILOG__MINIMUMLEVEL__Default"
             value: "{{ .Values.migrations.logging.default }}"
           - name: "PROCESSIDENTITY__IDENTITYID"
-            value: "{{ .Values.migrations.processIdentity.identityId }}"
+            value: "ac1cf001-7fbc-1f2f-817f-bce058020006"
         ports:
         - name: http
           containerPort: {{ .Values.portContainer }}
