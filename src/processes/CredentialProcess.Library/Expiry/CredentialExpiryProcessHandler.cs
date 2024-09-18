@@ -30,23 +30,17 @@ using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
 
-public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
+public class CredentialExpiryProcessHandler(
+    IIssuerRepositories repositories,
+    IWalletService walletService,
+    IPortalService portalService)
+    : ICredentialExpiryProcessHandler
 {
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-    private readonly IIssuerRepositories _repositories;
-    private readonly IWalletService _walletService;
-    private readonly IPortalService _portalService;
-
-    public CredentialExpiryProcessHandler(IIssuerRepositories repositories, IWalletService walletService, IPortalService portalService)
-    {
-        _repositories = repositories;
-        _walletService = walletService;
-        _portalService = portalService;
-    }
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RevokeCredential(Guid credentialId, CancellationToken cancellationToken)
     {
-        var credentialRepository = _repositories.GetInstance<ICredentialRepository>();
+        var credentialRepository = repositories.GetInstance<ICredentialRepository>();
         var data = await credentialRepository.GetRevocationDataById(credentialId, string.Empty)
             .ConfigureAwait(ConfigureAwaitOptions.None);
         if (!data.Exists)
@@ -60,9 +54,9 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
         }
 
         // call walletService
-        await _walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
-        _repositories.GetInstance<IDocumentRepository>().AttachAndModifyDocuments(
+        repositories.GetInstance<IDocumentRepository>().AttachAndModifyDocuments(
             data.Documents.Select(d => new ValueTuple<Guid, Action<Document>?, Action<Document>>(
                 d.DocumentId,
                 document => document.DocumentStatusId = d.DocumentStatusId,
@@ -82,11 +76,11 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerNotification(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (typeId, requesterId) = await _repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (typeId, requesterId) = await repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (Guid.TryParse(requesterId, out var companyUserId))
         {
             var content = JsonSerializer.Serialize(new { Type = typeId, CredentialId = credentialId }, Options);
-            await _portalService.AddNotification(content, companyUserId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
+            await portalService.AddNotification(content, companyUserId, NotificationTypeId.CREDENTIAL_REJECTED, cancellationToken);
         }
 
         return (
@@ -98,7 +92,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerMail(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (typeId, requesterId) = await _repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (typeId, requesterId) = await repositories.GetInstance<ICredentialRepository>().GetCredentialNotificationData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
 
         var typeValue = typeId.GetEnumValue() ?? throw new UnexpectedConditionException($"VerifiedCredentialType {typeId} does not exists");
         if (Guid.TryParse(requesterId, out var companyUserId))
@@ -107,7 +101,7 @@ public class CredentialExpiryProcessHandler : ICredentialExpiryProcessHandler
             {
                 new("requestName", typeValue), new("reason", "The credential is already expired")
             };
-            await _portalService.TriggerMail("CredentialRejected", companyUserId, mailParameters, cancellationToken);
+            await portalService.TriggerMail("CredentialRejected", companyUserId, mailParameters, cancellationToken);
         }
 
         return (

@@ -41,16 +41,18 @@ public class WalletBusinessLogic(
 {
     private readonly WalletSettings _settings = options.Value;
 
-    public async Task CreateCredential(Guid companySsiDetailId, JsonDocument schema, CancellationToken cancellationToken)
+    public async Task CreateSignedCredential(Guid companySsiDetailId, JsonDocument schema, CancellationToken cancellationToken)
     {
-        var credentialId = await walletService.CreateCredential(schema, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c => c.ExternalCredentialId = null, c => c.ExternalCredentialId = credentialId);
-    }
-
-    public async Task SignCredential(Guid companySsiDetailId, Guid credentialId, CancellationToken cancellationToken)
-    {
-        var credential = await walletService.SignCredential(credentialId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c => c.Credential = null, c => c.Credential = credential);
+        var credential = await walletService.CreateSignedCredential(schema, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c =>
+        {
+            c.ExternalCredentialId = null;
+            c.Credential = null;
+        }, c =>
+        {
+            c.ExternalCredentialId = credential.Id;
+            c.Credential = credential.Jwt;
+        });
     }
 
     public async Task GetCredential(Guid credentialId, Guid externalCredentialId, VerifiedCredentialTypeKindId kindId, CancellationToken cancellationToken)

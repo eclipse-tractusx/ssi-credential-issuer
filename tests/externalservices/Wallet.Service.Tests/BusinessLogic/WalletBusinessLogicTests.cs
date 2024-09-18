@@ -81,48 +81,18 @@ public class WalletBusinessLogicTests
                 initialize?.Invoke(ssiDetail);
                 setupOptionalFields(ssiDetail);
             });
-        A.CallTo(() => _walletService.CreateCredential(schema, A<CancellationToken>._))
-            .Returns(externalId);
+        A.CallTo(() => _walletService.CreateSignedCredential(schema, A<CancellationToken>._))
+            .Returns(new CreateSignedCredentialResponse(externalId, "cred"));
 
         // Act
-        await _sut.CreateCredential(id, schema, CancellationToken.None);
+        await _sut.CreateSignedCredential(id, schema, CancellationToken.None);
 
         // Assert
         A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(id, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _walletService.CreateCredential(schema, A<CancellationToken>._))
+        A.CallTo(() => _walletService.CreateSignedCredential(schema, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
-        ssiDetail.ExternalCredentialId = externalId;
-    }
-
-    #endregion
-
-    #region SignCredential
-
-    [Fact]
-    public async Task SignCredential_CallsExpected()
-    {
-        // Arrange
-        var id = Guid.NewGuid();
-        var credentialId = Guid.NewGuid();
-        var ssiDetail = new CompanySsiDetail(id, null!, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, Guid.NewGuid().ToString(), DateTimeOffset.UtcNow);
-        A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(A<Guid>._, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
-            .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> setupOptionalFields) =>
-            {
-                initialize?.Invoke(ssiDetail);
-                setupOptionalFields(ssiDetail);
-            });
-        A.CallTo(() => _walletService.SignCredential(credentialId, A<CancellationToken>._))
-            .Returns("cred");
-
-        // Act
-        await _sut.SignCredential(id, credentialId, CancellationToken.None);
-
-        // Assert
-        A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(id, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
-            .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _walletService.SignCredential(credentialId, A<CancellationToken>._))
-            .MustHaveHappenedOnceExactly();
+        ssiDetail.ExternalCredentialId.Should().Be(externalId);
         ssiDetail.Credential.Should().Be("cred");
     }
 

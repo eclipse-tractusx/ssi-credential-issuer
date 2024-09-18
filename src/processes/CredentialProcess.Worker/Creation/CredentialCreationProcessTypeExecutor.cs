@@ -27,27 +27,18 @@ using System.Collections.Immutable;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Creation;
 
-public class CredentialCreationProcessTypeExecutor : IProcessTypeExecutor
+public class CredentialCreationProcessTypeExecutor(
+    IIssuerRepositories issuerRepositories,
+    ICredentialCreationProcessHandler credentialCreationProcessHandler)
+    : IProcessTypeExecutor
 {
-    private readonly IIssuerRepositories _issuerRepositories;
-    private readonly ICredentialCreationProcessHandler _credentialCreationProcessHandler;
-
     private readonly IEnumerable<ProcessStepTypeId> _executableProcessSteps = ImmutableArray.Create(
-        ProcessStepTypeId.CREATE_CREDENTIAL,
-        ProcessStepTypeId.SIGN_CREDENTIAL,
+        ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
         ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
         ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
         ProcessStepTypeId.TRIGGER_CALLBACK);
 
     private Guid _credentialId;
-
-    public CredentialCreationProcessTypeExecutor(
-        IIssuerRepositories issuerRepositories,
-        ICredentialCreationProcessHandler credentialCreationProcessHandler)
-    {
-        _issuerRepositories = issuerRepositories;
-        _credentialCreationProcessHandler = credentialCreationProcessHandler;
-    }
 
     public ProcessTypeId GetProcessTypeId() => ProcessTypeId.CREATE_CREDENTIAL;
     public bool IsExecutableStepTypeId(ProcessStepTypeId processStepTypeId) => _executableProcessSteps.Contains(processStepTypeId);
@@ -56,7 +47,7 @@ public class CredentialCreationProcessTypeExecutor : IProcessTypeExecutor
 
     public async ValueTask<IProcessTypeExecutor.InitializationResult> InitializeProcess(Guid processId, IEnumerable<ProcessStepTypeId> processStepTypeIds)
     {
-        var (exists, credentialId) = await _issuerRepositories.GetInstance<ICredentialRepository>().GetDataForProcessId(processId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (exists, credentialId) = await issuerRepositories.GetInstance<ICredentialRepository>().GetDataForProcessId(processId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!exists)
         {
             throw new NotFoundException($"process {processId} does not exist or is not associated with an credential");
@@ -82,15 +73,13 @@ public class CredentialCreationProcessTypeExecutor : IProcessTypeExecutor
         {
             (nextStepTypeIds, stepStatusId, modified, processMessage) = processStepTypeId switch
             {
-                ProcessStepTypeId.CREATE_CREDENTIAL => await _credentialCreationProcessHandler.CreateCredential(_credentialId, cancellationToken)
+                ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL => await credentialCreationProcessHandler.CreateSignedCredential(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
-                ProcessStepTypeId.SIGN_CREDENTIAL => await _credentialCreationProcessHandler.SignCredential(_credentialId, cancellationToken)
+                ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => await credentialCreationProcessHandler.SaveCredentialDocument(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
-                ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => await _credentialCreationProcessHandler.SaveCredentialDocument(_credentialId, cancellationToken)
+                ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await credentialCreationProcessHandler.CreateCredentialForHolder(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
-                ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await _credentialCreationProcessHandler.CreateCredentialForHolder(_credentialId, cancellationToken)
-                    .ConfigureAwait(ConfigureAwaitOptions.None),
-                ProcessStepTypeId.TRIGGER_CALLBACK => await _credentialCreationProcessHandler.TriggerCallback(_credentialId, cancellationToken)
+                ProcessStepTypeId.TRIGGER_CALLBACK => await credentialCreationProcessHandler.TriggerCallback(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 _ => (null, ProcessStepStatusId.TODO, false, null)
             };
