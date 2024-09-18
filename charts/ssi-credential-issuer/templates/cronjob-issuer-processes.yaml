@@ -34,6 +34,10 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
+          {{- with .Values.processesworker.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
           containers:
           - name: {{ include "issuer.fullname" . }}-{{ .Values.processesworker.name }}
             securityContext:
