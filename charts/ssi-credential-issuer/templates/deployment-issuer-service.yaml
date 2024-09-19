@@ -36,6 +36,10 @@ spec:
       labels:
         {{- include "issuer.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.service.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ include "issuer.fullname" . }}
         securityContext:

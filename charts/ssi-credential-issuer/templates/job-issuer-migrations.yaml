@@ -31,6 +31,10 @@ spec:
       name: {{ include "issuer.fullname" . }}-{{ .Values.migrations.name }}
     spec:
       restartPolicy: Never
+      {{- with .Values.migrations.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ include "issuer.fullname" . }}-{{ .Values.migrations.name }}
         securityContext:
