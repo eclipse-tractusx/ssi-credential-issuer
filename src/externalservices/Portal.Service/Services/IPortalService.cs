@@ -23,6 +23,6 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 
 public interface IPortalService
 {
-    Task AddNotification(string content, Guid requester, NotificationTypeId notificationTypeId, CancellationToken cancellationToken);
+    Task AddNotification(string content, Guid receiver, NotificationTypeId notificationTypeId, CancellationToken cancellationToken);
     Task TriggerMail(string template, Guid requester, IEnumerable<MailParameter> mailParameters, CancellationToken cancellationToken);
 }
