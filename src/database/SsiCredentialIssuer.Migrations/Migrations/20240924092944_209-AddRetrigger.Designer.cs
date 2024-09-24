@@ -32,7 +32,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240823073030_209-AddRetrigger")]
+    [Migration("20240924092944_209-AddRetrigger")]
     partial class _209AddRetrigger
     {
         /// <inheritdoc />
