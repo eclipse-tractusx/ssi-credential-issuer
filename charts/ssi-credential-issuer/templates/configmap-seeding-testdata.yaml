@@ -17,14 +17,14 @@
 * SPDX-License-Identifier: Apache-2.0
 */}}
 
-{{- if .Values.migrations.seeding.testData.useDefaultTestData -}}
+{{- if .Values.migrations.seeding.testData.useDefault -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-issuer-cm-seeding-testdata
+  name:  {{ include "issuer.fullname" . }}-default-testdata 
   namespace: {{ .Release.Namespace }}
 data:
-  use_cases.test.json: |-
+  use_cases.defaulttest.json: |-
     [
       {
         "id": "1aacde78-35ec-4df3-ba1e-f988cddcbbd9",
@@ -32,7 +32,7 @@ data:
          "shortname": "None"
       }
     ]
-  verified_credential_external_type_detail_versions.test.json: |-
+  verified_credential_external_type_detail_versions.defaulttest.json: |-
     [
       {
         "id": "d0f05b79-792c-4cb8-9b8d-6e476ac2e926",
@@ -51,14 +51,14 @@ data:
         "expiry": "2025-10-16 00:00:00.000000 +00:00"
       }
     ]
-  verified_credential_type_assigned_external_types.test.json: |-
+  verified_credential_type_assigned_external_types.defaulttest.json: |-
     [
       {
         "verified_credential_external_type_id": 11,
         "verified_credential_type_id": 11
       }
     ]
-  verified_credential_type_assigned_use_cases.test.json: |-
+  verified_credential_type_assigned_use_cases.defaulttest.json: |-
     [
       {
         "verified_credential_type_id": 11,

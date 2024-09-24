@@ -59,7 +59,7 @@ migrations:
   logging:
     default: "Debug"
   testData:
-      useDefaultTestData: true
+      useDefault: true
 
 processesworker:
   logging:
