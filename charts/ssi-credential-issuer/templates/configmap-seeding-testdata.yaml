@@ -17,6 +17,7 @@
 * SPDX-License-Identifier: Apache-2.0
 */}}
 
+{{- if .Values.migrations.seeding.testData.useDefaultTestData -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -64,3 +65,4 @@ data:
         "use_case_id": "1aacde78-35ec-4df3-ba1e-f988cddcbbd9"
       }
     ]
+{{- end -}}

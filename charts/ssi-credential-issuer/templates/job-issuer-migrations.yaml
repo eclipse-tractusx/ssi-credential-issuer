@@ -70,12 +70,25 @@ spec:
           - name: "SEEDING__TESTDATAENVIRONMENTS__0"
             value: "{{ .Values.migrations.seeding.testDataEnvironments }}"
           - name: "SEEDING__DATAPATHS__0"
-            value: "Seeder/Data"           
-          {{- if and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename) }}
+            value: "Seeder/Data"
+          {{- if (.Values.migrations.seeding.testData.useDefaultTestData) }}
           - name: "SEEDING__DATAPATHS__1"
-             value: "Seeder/Data/import"
+            value: "Seeder/Data/import/default"
           - name: "SEEDING__TESTDATAENVIRONMENTS__1"
-             value: "{{ .Values.migrations.seeding.testData.filename }}"
+            value: "test"
+          {{- end }}           
+          {{- if and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename) }}
+          {{- if (.Values.migrations.seeding.testData.useDefaultTestData) }}
+          - name: "SEEDING__DATAPATHS__2"
+            value: "Seeder/Data/import/custom"
+          - name: "SEEDING__TESTDATAENVIRONMENTS__2"
+            value: "{{ .Values.migrations.seeding.testData.filename }}"
+          {{ else }}
+          - name: "SEEDING__DATAPATHS__1"
+            value: "Seeder/Data/import/custom"
+          - name: "SEEDING__TESTDATAENVIRONMENTS__1"
+            value: "{{ .Values.migrations.seeding.testData.filename }}"
+          {{- end }}
           {{- end }}
           - name: "SERILOG__MINIMUMLEVEL__Default"
             value: "{{ .Values.migrations.logging.default }}"
@@ -87,4 +100,29 @@ spec:
           protocol: TCP
         resources:
           {{- toYaml .Values.migrations.resources | nindent 10 }}
-          {{- if and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename) }}
+        {{- if or (.Values.migrations.seeding.testData.useDefaultTestData) (and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename)) }}
+        volumeMounts:
+        {{- if (.Values.migrations.seeding.testData.useDefaultTestData) }}
+           - name: test-data-default
+             mountPath: /migrations/Seeder/Data/import/default
+        {{- end }}
+        {{- if and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename) }}
+           - name: test-data-custom
+             mountPath: /migrations/Seeder/Data/import/custom
+        {{- end }}
+        {{- end }}
+    {{- if or (.Values.migrations.seeding.testData.useDefaultTestData) (and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename)) }}
+    volumes:
+    {{- if (.Values.migrations.seeding.testData.useDefaultTestData) }}
+      - name: test-data-default
+        configMap:
+          name: "{{ .Release.Name }}-issuer-cm-seeding-testdata"
+          optional: true
+    {{- end }}
+    {{- if and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename) }}
+      - name: test-data-custom
+        configMap:
+          name: "{{ .Values.migrations.seeding.testData.configMap }}"
+          optional: true
+    {{- end }}
+    {{- end }}
