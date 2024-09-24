@@ -115,6 +115,7 @@ public class ExpiryCheckServiceTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
+        var processId = Guid.NewGuid();
         var expiredVcsToDeleteInMonth = now.AddMonths(-_settings.ExpiredVcsToDeleteInMonth);
         var creatorUserId = Guid.NewGuid();
         var ssiDetail = new CompanySsiDetail(Guid.NewGuid(), Bpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.PENDING, IssuerBpnl, creatorUserId.ToString(), now)
@@ -132,6 +133,14 @@ public class ExpiryCheckServiceTests
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
             .Returns(data.ToAsyncEnumerable());
+        A.CallTo(() => _processStepRepository.CreateProcess(A<ProcessTypeId>._))
+            .Returns(new Process(processId, ProcessTypeId.CREATE_CREDENTIAL, processId));
+        A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(A<Guid>._, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
+            .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> modify) =>
+            {
+                initialize?.Invoke(ssiDetail);
+                modify(ssiDetail);
+            });
 
         // Act
         await _sut.ExecuteAsync(CancellationToken.None);
@@ -141,6 +150,7 @@ public class ExpiryCheckServiceTests
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, A<Guid>._)).MustHaveHappenedOnceExactly();
+        ssiDetail.ProcessId.Should().Be(processId);
     }
 
     [Theory]

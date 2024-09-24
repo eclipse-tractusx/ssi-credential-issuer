@@ -168,8 +168,11 @@ public class CredentialExpiryProcessTypeExecutorTests
         result.SkipStepTypeIds.Should().BeNull();
     }
 
-    [Fact]
-    public async Task ExecuteProcessStep_WithRecoverableServiceException_ReturnsToDo()
+    [Theory]
+    [InlineData(ProcessStepTypeId.REVOKE_CREDENTIAL)]
+    [InlineData(ProcessStepTypeId.TRIGGER_NOTIFICATION)]
+    [InlineData(ProcessStepTypeId.TRIGGER_MAIL)]
+    public async Task ExecuteProcessStep_WithRecoverableServiceException_ReturnsToDo(ProcessStepTypeId processStepTypeId)
     {
         // Arrange InitializeProcess
         var validProcessId = Guid.NewGuid();
@@ -187,9 +190,13 @@ public class CredentialExpiryProcessTypeExecutorTests
         // Arrange
         A.CallTo(() => _credentialExpiryProcessHandler.RevokeCredential(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test", true));
+        A.CallTo(() => _credentialExpiryProcessHandler.TriggerMail(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test", true));
+        A.CallTo(() => _credentialExpiryProcessHandler.TriggerNotification(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test", true));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+        var result = await _sut.ExecuteProcessStep(processStepTypeId, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeTrue();
@@ -199,8 +206,11 @@ public class CredentialExpiryProcessTypeExecutorTests
         result.SkipStepTypeIds.Should().BeNull();
     }
 
-    [Fact]
-    public async Task ExecuteProcessStep_WithServiceException_ReturnsFailedAndRetriggerStep()
+    [Theory]
+    [InlineData(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL)]
+    [InlineData(ProcessStepTypeId.TRIGGER_NOTIFICATION, ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION)]
+    [InlineData(ProcessStepTypeId.TRIGGER_MAIL, ProcessStepTypeId.RETRIGGER_TRIGGER_MAIL)]
+    public async Task ExecuteProcessStep_WithServiceException_ReturnsFailedAndRetriggerStep(ProcessStepTypeId processStepTypeId, ProcessStepTypeId expectedRetriggerStep)
     {
         // Arrange InitializeProcess
         var validProcessId = Guid.NewGuid();
@@ -218,13 +228,17 @@ public class CredentialExpiryProcessTypeExecutorTests
         // Arrange
         A.CallTo(() => _credentialExpiryProcessHandler.RevokeCredential(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialExpiryProcessHandler.TriggerMail(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialExpiryProcessHandler.TriggerNotification(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test"));
 
         // Act
-        var result = await _sut.ExecuteProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
+        var result = await _sut.ExecuteProcessStep(processStepTypeId, Enumerable.Empty<ProcessStepTypeId>(), CancellationToken.None);
 
         // Assert
         result.Modified.Should().BeTrue();
-        result.ScheduleStepTypeIds.Should().BeNull();
+        result.ScheduleStepTypeIds.Should().ContainSingle().Which.Should().Be(expectedRetriggerStep);
         result.ProcessStepStatusId.Should().Be(ProcessStepStatusId.FAILED);
         result.ProcessMessage.Should().Be("this is a test");
         result.SkipStepTypeIds.Should().BeNull();

@@ -31,7 +31,7 @@ public static class VerifyProcessDataExtensions
     public static ManualProcessStepData CreateManualProcessData(
         this VerifyProcessData? processData,
         ProcessStepTypeId processStepTypeId,
-        IIssuerRepositories portalRepositories,
+        IIssuerRepositories repositories,
         Func<string> getProcessEntityName)
     {
         if (processData is null)
@@ -64,7 +64,7 @@ public static class VerifyProcessDataExtensions
             throw new ConflictException($"{getProcessEntityName()}, process step {processStepTypeId} is not eligible to run");
         }
 
-        return new(processStepTypeId, processData.Process, processData.ProcessSteps, portalRepositories);
+        return new(processStepTypeId, processData.Process, processData.ProcessSteps, repositories);
     }
 }
 
@@ -72,7 +72,7 @@ public static class ManualProcessStepDataExtensions
 {
     public static void RequestLock(this ManualProcessStepData context, DateTimeOffset lockExpiryDate)
     {
-        context.PortalRepositories.Attach(context.Process);
+        context.Repositories.Attach(context.Process);
 
         var isLocked = context.Process.TryLock(lockExpiryDate);
         if (!isLocked)
@@ -82,7 +82,7 @@ public static class ManualProcessStepDataExtensions
     }
 
     public static void SkipProcessSteps(this ManualProcessStepData context, IEnumerable<ProcessStepTypeId> processStepTypeIds) =>
-        context.PortalRepositories.GetInstance<IProcessStepRepository>()
+        context.Repositories.GetInstance<IProcessStepRepository>()
             .AttachAndModifyProcessSteps(
                 context.ProcessSteps
                     .Where(step => step.ProcessStepTypeId != context.ProcessStepTypeId)
@@ -91,7 +91,7 @@ public static class ManualProcessStepDataExtensions
                     .SelectMany(group => ModifyStepStatusRange(group, ProcessStepStatusId.SKIPPED)));
 
     public static void SkipProcessStepsExcept(this ManualProcessStepData context, IEnumerable<ProcessStepTypeId> processStepTypeIds) =>
-        context.PortalRepositories.GetInstance<IProcessStepRepository>()
+        context.Repositories.GetInstance<IProcessStepRepository>()
             .AttachAndModifyProcessSteps(
                 context.ProcessSteps
                     .Where(step => step.ProcessStepTypeId != context.ProcessStepTypeId)
@@ -101,10 +101,10 @@ public static class ManualProcessStepDataExtensions
 
     public static void FinalizeProcessStep(this ManualProcessStepData context)
     {
-        context.PortalRepositories.GetInstance<IProcessStepRepository>().AttachAndModifyProcessSteps(
+        context.Repositories.GetInstance<IProcessStepRepository>().AttachAndModifyProcessSteps(
             ModifyStepStatusRange(context.ProcessSteps.Where(step => step.ProcessStepTypeId == context.ProcessStepTypeId), ProcessStepStatusId.DONE));
 
-        context.PortalRepositories.Attach(context.Process);
+        context.Repositories.Attach(context.Process);
         if (!context.Process.ReleaseLock())
         {
             context.Process.UpdateVersion();
@@ -128,4 +128,11 @@ public static class ManualProcessStepDataExtensions
                     : ProcessStepStatusId.DUPLICATE);
         }
     }
+
+    public static void ScheduleProcessSteps(this ManualProcessStepData context, IEnumerable<ProcessStepTypeId> processStepTypeIds) =>
+        context.Repositories.GetInstance<IProcessStepRepository>()
+            .CreateProcessStepRange(
+                processStepTypeIds
+                    .Except(context.ProcessSteps.Select(step => step.ProcessStepTypeId))
+                    .Select(stepTypeId => (stepTypeId, ProcessStepStatusId.TODO, context.Process.Id)));
 }

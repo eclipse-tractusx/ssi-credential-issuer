@@ -18,6 +18,8 @@
  ********************************************************************************/
 
 using Microsoft.AspNetCore.Mvc;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Web;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
@@ -59,6 +61,24 @@ public static class RevocationController
             })
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(Guid), contentType: Constants.JsonContentType);
+        revocation.MapPost("{processId}/retrigger-step/{processStepTypeId}", async ([FromRoute] Guid processId, [FromRoute] ProcessStepTypeId processStepTypeId, CancellationToken cancellationToken, IIssuerBusinessLogic logic) =>
+            {
+                await logic.RetriggerProcessStep(processId, processStepTypeId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+                return Results.NoContent();
+            })
+            .WithSwaggerDescription("Retriggers the failed process step",
+                "POST: api/revocation/{processId}/retrigger-step/RETRIGGER_REVOKE_CREDENTIAL",
+                "Id of the process to retrigger",
+                "The step that should be retriggered")
+            .RequireAuthorization(r =>
+            {
+                r.RequireRole("revoke_credential");
+                r.AddRequirements(new MandatoryIdentityClaimRequirement(PolicyTypeId.ValidIdentity));
+            })
+            .WithDefaultResponses()
+            .Produces(StatusCodes.Status204NoContent, contentType: Constants.JsonContentType)
+            .Produces(StatusCodes.Status404NotFound, typeof(ErrorResponse), Constants.JsonContentType)
+            .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
 
         return group;
     }

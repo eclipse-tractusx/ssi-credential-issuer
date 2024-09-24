@@ -17,9 +17,11 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
@@ -32,6 +34,8 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.Setup;
+using System.Collections.Immutable;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -943,6 +947,131 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _documentRepository.AssignDocumentToCompanySsiDetails(A<Guid>._, A<Guid>._))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
+    }
+
+    #endregion
+
+    #region RetriggerProcessStep
+
+    [Theory]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_MAIL)]
+    public async Task RetriggerProcessStep_WithInvalidProcess_ThrowsNotFoundException(ProcessTypeId processId, ProcessStepTypeId retriggerStep)
+    {
+        // Arrange
+        var process = new Process(Guid.NewGuid(), processId, Guid.NewGuid());
+        var processStep = new ProcessStep(Guid.NewGuid(), retriggerStep, ProcessStepStatusId.TODO, process.Id, DateTimeOffset.UtcNow);
+        var processSteps = new List<ProcessStep>();
+        A.CallTo(() => _processStepRepository.IsValidProcess(A<Guid>._, A<ProcessTypeId>._, A<IEnumerable<ProcessStepTypeId>>._))
+            .Returns(new ValueTuple<bool, VerifyProcessData>(
+                false,
+                new VerifyProcessData(
+                    process,
+                    Enumerable.Repeat(processStep, 1))));
+        A.CallTo(() => _processStepRepository.CreateProcessStepRange(A<IEnumerable<(ProcessStepTypeId ProcessStepTypeId, ProcessStepStatusId ProcessStepStatusId, Guid ProcessId)>>._))
+            .Invokes((IEnumerable<(ProcessStepTypeId ProcessStepTypeId, ProcessStepStatusId ProcessStepStatusId, Guid ProcessId)> processStepTypeStatus) =>
+                {
+                    processSteps.AddRange(processStepTypeStatus.Select(x => new ProcessStep(Guid.NewGuid(), x.ProcessStepTypeId, x.ProcessStepStatusId, x.ProcessId, DateTimeOffset.UtcNow)).ToList());
+                });
+        A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(
+                A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._))
+            .Invokes((IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)> processStepStatus) =>
+                {
+                    foreach (var ps in processStepStatus.Where(p => p.ProcessStepId == processStep.Id))
+                    {
+                        ps.Initialize?.Invoke(processStep);
+                        ps.Modify(processStep);
+                    }
+                });
+        Task Act() => _sut.RetriggerProcessStep(process.Id, retriggerStep, CancellationToken.None);
+
+        // Act
+        var ex = await Assert.ThrowsAsync<NotFoundException>(Act);
+
+        // Assert
+        ex.Message.Should().Be($"process {process.Id} does not exist");
+        processSteps.Should().BeEmpty();
+        processStep.ProcessStepStatusId.Should().Be(ProcessStepStatusId.TODO);
+        A.CallTo(() => _issuerRepositories.SaveAsync()).MustNotHaveHappened();
+    }
+
+    [Theory]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL, ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT, ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER, ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK, ProcessStepTypeId.TRIGGER_CALLBACK)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL, ProcessStepTypeId.REVOKE_CREDENTIAL)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION, ProcessStepTypeId.TRIGGER_NOTIFICATION)]
+    [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_MAIL, ProcessStepTypeId.TRIGGER_MAIL)]
+    public async Task RetriggerProcessStep_ReturnsExpected(ProcessTypeId processTypeId, ProcessStepTypeId retriggerStep, ProcessStepTypeId expectedStepTypeId)
+    {
+        // Arrange
+        var process = new Process(Guid.NewGuid(), processTypeId, Guid.NewGuid());
+        var processStep = new ProcessStep(Guid.NewGuid(), retriggerStep, ProcessStepStatusId.TODO, process.Id, DateTimeOffset.UtcNow);
+        var processSteps = new List<ProcessStep>();
+        A.CallTo(() => _processStepRepository.IsValidProcess(A<Guid>._, A<ProcessTypeId>._, A<IEnumerable<ProcessStepTypeId>>._))
+            .Returns(new ValueTuple<bool, VerifyProcessData>(
+                true,
+                new VerifyProcessData(
+                    process,
+                    Enumerable.Repeat(processStep, 1))));
+        A.CallTo(() => _processStepRepository.CreateProcessStepRange(A<IEnumerable<(ProcessStepTypeId ProcessStepTypeId, ProcessStepStatusId ProcessStepStatusId, Guid ProcessId)>>._))
+            .Invokes((IEnumerable<(ProcessStepTypeId ProcessStepTypeId, ProcessStepStatusId ProcessStepStatusId, Guid ProcessId)> processStepTypeStatus) =>
+                {
+                    processSteps.AddRange(processStepTypeStatus.Select(x => new ProcessStep(Guid.NewGuid(), x.ProcessStepTypeId, x.ProcessStepStatusId, x.ProcessId, DateTimeOffset.UtcNow)).ToList());
+                });
+        A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(
+                A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._))
+            .Invokes((IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)> processStepStatus) =>
+                {
+                    foreach (var ps in processStepStatus.Where(p => p.ProcessStepId == processStep.Id))
+                    {
+                        ps.Initialize?.Invoke(processStep);
+                        ps.Modify(processStep);
+                    }
+                });
+
+        // Act
+        await _sut.RetriggerProcessStep(process.Id, retriggerStep, CancellationToken.None);
+
+        // Assert
+        processSteps.Should().ContainSingle().And.Satisfy(
+            x => x.ProcessStepTypeId == expectedStepTypeId && x.ProcessStepStatusId == ProcessStepStatusId.TODO);
+        processStep.ProcessStepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
+    }
+
+    #endregion
+
+    #region GetCredentials
+
+    [Theory]
+    [InlineData(0, 10, 5, 1, 0, 5)]
+    [InlineData(1, 10, 5, 1, 1, 0)]
+    [InlineData(0, 10, 20, 2, 0, 10)]
+    [InlineData(1, 10, 20, 2, 1, 10)]
+    [InlineData(1, 15, 20, 2, 1, 5)]
+    public async Task GetCredentials_ReturnsExpected(int page, int size, int numberOfElements, int numberOfPages, int resultPage, int resultPageSize)
+    {
+        var data = new AsyncEnumerableStub<CompanySsiDetail>(_fixture.CreateMany<CompanySsiDetail>(numberOfElements));
+        A.CallTo(() => _companySsiDetailsRepository.GetAllCredentialDetails(A<CompanySsiDetailStatusId?>._, A<VerifiedCredentialTypeId?>._, A<CompanySsiDetailApprovalType?>._))
+            .Returns(data.AsQueryable());
+
+        // Act
+        var result = await _sut.GetCredentials(page, size, null, null, null, null);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Meta.NumberOfElements.Should().Be(numberOfElements);
+        result.Meta.NumberOfPages.Should().Be(numberOfPages);
+        result.Meta.Page.Should().Be(resultPage);
+        result.Meta.PageSize.Should().Be(resultPageSize);
+        result.Content.Should().HaveCount(resultPageSize);
     }
 
     #endregion
