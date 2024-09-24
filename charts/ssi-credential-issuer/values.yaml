@@ -89,7 +89,7 @@ migrations:
   seeding:
     testDataEnvironments: ""
     testData:
-      # -- ConfigMap containing json files for the tables to seed, e.g. companies.test.json, addresses.test.json, etc.
+      # -- ConfigMap containing json files for the tables to seed, e.g. use_cases.json, verified_credential_external_type_detail_versions.test.json, etc.
       configMap: ""
       # -- Filename identifying the test data files e.g. for companies.test.json the value would be "test"
       filename: ""

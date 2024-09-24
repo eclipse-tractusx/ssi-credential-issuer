@@ -87,3 +87,4 @@ spec:
           protocol: TCP
         resources:
           {{- toYaml .Values.migrations.resources | nindent 10 }}
+          {{- if and (.Values.migrations.seeding.testData.configMap) (.Values.migrations.seeding.testData.filename) }}

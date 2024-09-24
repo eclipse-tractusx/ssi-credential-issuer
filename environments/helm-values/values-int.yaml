@@ -58,6 +58,9 @@ service:
 migrations:
   logging:
     default: "Debug"
+  testData:
+      configMap: "{{ .Release.Name }}-issuer-cm-seeding-testdata"
+      filename: "test"
 
 processesworker:
   logging:
