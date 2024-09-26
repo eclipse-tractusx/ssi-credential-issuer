@@ -76,14 +76,14 @@ spec:
             value: "Seeder/Data/import/default-test-data"
           - name: "SEEDING__TESTDATAENVIRONMENTS__1"
             value: "defaulttest"
-          {{- end }}           
+          {{- end }}
           {{- if and (.Values.migrations.seeding.testData.useOwnConfigMap.configMap) (.Values.migrations.seeding.testData.useOwnConfigMap.filename) }}
           {{- if (.Values.migrations.seeding.testData.useDefault) }}
           - name: "SEEDING__DATAPATHS__2"
             value: "Seeder/Data/import/custom-test-data"
           - name: "SEEDING__TESTDATAENVIRONMENTS__2"
             value: "{{ .Values.migrations.seeding.testData.useOwnConfigMap.filename }}"
-          {{ else }}
+          {{- else }}
           - name: "SEEDING__DATAPATHS__1"
             value: "Seeder/Data/import/custom-test-data"
           - name: "SEEDING__TESTDATAENVIRONMENTS__1"
@@ -116,7 +116,7 @@ spec:
     {{- if (.Values.migrations.seeding.testData.useDefault) }}
       - name: test-data-default
         configMap:
-          name: "{{ include "issuer.fullname" . }}-default-testdata"  
+          name: "{{ include "issuer.fullname" . }}-default-testdata"
           optional: true
     {{- end }}
     {{- if and (.Values.migrations.seeding.testData.useOwnConfigMap.configMap) (.Values.migrations.seeding.testData.useOwnConfigMap.filename) }}
