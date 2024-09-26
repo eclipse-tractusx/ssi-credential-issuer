@@ -31,7 +31,7 @@ using Xunit;
 using Xunit.Extensions.AssemblyFixture;
 
 [assembly: TestFramework(AssemblyFixtureFramework.TypeName, AssemblyFixtureFramework.AssemblyName)]
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests;
 
 public class TestDbFixture : IAsyncLifetime
 {

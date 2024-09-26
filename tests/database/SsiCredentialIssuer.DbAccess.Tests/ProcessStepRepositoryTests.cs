@@ -21,7 +21,6 @@ using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -37,7 +36,9 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     private readonly IFixture _fixture;
     private readonly TestDbFixture _dbTestDbFixture;
 
+#pragma warning disable xUnit1041
     public ProcessStepRepositoryTests(TestDbFixture testDbFixture)
+#pragma warning restore xUnit1041
     {
         _fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -78,7 +79,6 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     #region CreateProcessStepRange
 
     [Fact]
-
     public async Task CreateProcessStepRange_CreateSuccessfully()
     {
         // Arrange

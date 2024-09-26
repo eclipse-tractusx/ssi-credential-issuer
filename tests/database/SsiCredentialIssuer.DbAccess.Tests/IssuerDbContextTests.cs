@@ -23,7 +23,6 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.AuditEntities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Enums;
@@ -39,7 +38,9 @@ public class IssuerDbContextTests : IAssemblyFixture<TestDbFixture>
     private readonly TestDbFixture _dbTestDbFixture;
     private readonly IDateTimeProvider _dateTimeProvider;
 
+#pragma warning disable xUnit1041
     public IssuerDbContextTests(TestDbFixture testDbFixture)
+#pragma warning restore xUnit1041
     {
         var fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()

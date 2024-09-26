@@ -50,7 +50,7 @@ public class ContentTypeMapperExtensionsTests
     {
         void Act() => ((MediaTypeId)666).MapToMediaType();
 
-        var ex = Assert.Throws<ConflictException>((Action)Act);
+        var ex = Assert.Throws<ConflictException>(Act);
         ex.Message.Should().Be($"document mediatype 666 is not supported");
     }
 
@@ -77,7 +77,7 @@ public class ContentTypeMapperExtensionsTests
     {
         void Act() => "just a test".ParseMediaTypeId();
 
-        var ex = Assert.Throws<UnsupportedMediaTypeException>((Action)Act);
+        var ex = Assert.Throws<UnsupportedMediaTypeException>(Act);
         ex.Message.Should().Be($"mediaType 'just a test' is not supported");
     }
 }

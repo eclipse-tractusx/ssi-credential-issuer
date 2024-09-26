@@ -21,23 +21,25 @@ using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.Text.Json;
 using Xunit;
+using Xunit.Extensions.AssemblyFixture;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests;
 
-public class CompanySsiDetailsRepositoryTests
+public class CompanySsiDetailsRepositoryTests : IAssemblyFixture<TestDbFixture>
 {
     private const string ValidBpnl = "BPNL00000003AYRE";
     private readonly TestDbFixture _dbTestDbFixture;
     private readonly string _userId = "ac1cf001-7fbc-1f2f-817f-bce058020006";
 
+#pragma warning disable xUnit1041
     public CompanySsiDetailsRepositoryTests(TestDbFixture testDbFixture)
+#pragma warning restore xUnit1041
     {
         var fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
