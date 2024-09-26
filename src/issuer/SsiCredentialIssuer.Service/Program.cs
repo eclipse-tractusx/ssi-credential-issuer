@@ -20,6 +20,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Service;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Extensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Web;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
@@ -32,10 +33,10 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using System.Text.Json.Serialization;
 
-const string VERSION = "v1";
+var version = AssemblyExtension.GetApplicationVersion();
 
 await WebApplicationBuildRunner
-    .BuildAndRunWebApplicationAsync<Program>(args, "issuer", VERSION, ".Issuer", builder =>
+    .BuildAndRunWebApplicationAsync<Program>(args, "issuer", version, ".Issuer", builder =>
         {
             builder.Services
                 .AddTransient<IClaimsTransformation, KeycloakClaimsTransformation>()

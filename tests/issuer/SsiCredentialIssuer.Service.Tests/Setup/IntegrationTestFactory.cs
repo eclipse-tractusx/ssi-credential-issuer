@@ -54,11 +54,7 @@ public class IntegrationTestFactory : WebApplicationFactory<IssuerBusinessLogic>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        var projectDir = Directory.GetCurrentDirectory();
-        var configPath = Path.Combine(projectDir, "appsettings.IntegrationTests.json");
-
-        var config = new ConfigurationBuilder().AddJsonFile(configPath, true).Build();
-        builder.UseConfiguration(config);
+        Environment.SetEnvironmentVariable("SKIP_CONFIGURATION_VALIDATION", "true");
         builder.ConfigureTestServices(services =>
         {
             var identityService = services.SingleOrDefault(d => d.ServiceType.GetInterfaces().Contains(typeof(IIdentityService)));

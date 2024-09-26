@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Validation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
@@ -30,10 +31,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddWalletService(this IServiceCollection services, IConfiguration config)
     {
+        var section = config.GetSection("Wallet");
         services.AddOptions<WalletSettings>()
-            .Bind(config.GetSection("Wallet"))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            .Bind(section)
+            .EnvironmentalValidation(section);
 
         services.AddTransient<LoggingHandler<WalletService>>();
 

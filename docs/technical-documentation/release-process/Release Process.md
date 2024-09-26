@@ -7,9 +7,11 @@ The release process for a new version can roughly be divided into the following 
     - [1. Aggregate migrations](#1-aggregate-migrations)
     - [2. Version bump](#2-version-bump)
     - [3. Update README (on chart level)](#3-update-readme-on-chart-level)
+    - [4. Update .tractusx](#4-update-tractusx)
   - [Update CHANGELOG.md](#update-changelogmd)
   - [Merge release branch](#merge-release-branch)
   - [RC: provide successive rc branch and change base of open PRs](#rc-provide-successive-rc-branch-and-change-base-of-open-prs)
+  - [NOTICE](#notice)
 
 The process builds on the [Development Flow](../dev-process/Dev-flow_git-diagram.md) which, usually, takes place within forks and leads to merged pull requests in the repositories of the eclipse-tractusx organization.
 
@@ -50,6 +52,22 @@ helm-docs --chart-search-root [charts-dir] --sort-values-order file
 Example for commit message:
 
 _build: update readme for vx.x.x_
+
+### 4. Update .tractusx
+
+Adjust links of the open api specifications in the .tractusx file.
+
+All stable releases should be listed. In case of a pre-release version (rc, alpha, etc.), only the latest one should be listed.
+
+```md
+openApiSpecs:
+- "https://raw.githubusercontent.com/eclipse-tractusx/ssi-credential-issuer/blob/v1.0.0/docs/api/issuer-service.yaml"
+- "https://raw.githubusercontent.com/eclipse-tractusx/ssi-credential-issuer/blob/v1.1.0/docs/api/issuer-service.yaml"
+```
+
+Example for commit message:
+
+_build: update open api spec for vx.x.x_
 
 ## Update CHANGELOG.md
 

@@ -1,0 +1,915 @@
+openapi: 3.0.1
+info:
+  title: Org.Eclipse.TractusX.SsiCredentialIssuer.Service
+  version: v1.2.0-alpha.1
+paths:
+  /api/issuer/useCaseParticipation:
+    get:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Gets all use case frameworks and the participation status of the acting company
+      description: 'Example: GET: api/issuer/useCaseParticipation'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UseCaseParticipationData'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/issuer/certificates:
+    get:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Gets all company certificate requests and their status
+      description: 'Example: GET: api/issuer/certificates'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CertificateParticipationData'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/issuer/certificateTypes:
+    get:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Gets the certificate types for which the company can apply for
+      description: 'Example: GET: api/issuer/certificateTypes'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VerifiedCredentialTypeId'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/issuer:
+    get:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: 'Gets all outstanding, existing and inactive credentials'
+      description: 'Example: GET: /api/issuer'
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: size
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: companySsiDetailStatusId
+          in: query
+          schema:
+            $ref: '#/components/schemas/CompanySsiDetailStatusId'
+        - name: credentialTypeId
+          in: query
+          schema:
+            $ref: '#/components/schemas/VerifiedCredentialTypeId'
+        - name: approvalType
+          in: query
+          schema:
+            $ref: '#/components/schemas/CompanySsiDetailApprovalType'
+        - name: sorting
+          in: query
+          schema:
+            $ref: '#/components/schemas/CompanySsiDetailSorting'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CredentialDetailData'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/issuer/owned-credentials:
+    get:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: 'Gets all outstanding, existing and inactive credentials for the company of the user'
+      description: 'Example: GET: /api/issuer/owned-credentials'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OwnedVerifiedCredentialData'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/issuer/bpn:
+    post:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Creates a bpn credential for the given data
+      description: 'POST: api/issuer/bpn'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBpnCredentialRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/issuer/membership:
+    post:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Creates a membership credential for the given data
+      description: 'POST: api/issuer/membership'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMembershipCredentialRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/issuer/framework:
+    post:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Creates a framework credential for the given data
+      description: 'POST: api/issuer/framework'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFrameworkCredentialRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/issuer/{credentialId}/approval':
+    put:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Approves the given credential and triggers the verified credential creation
+      description: 'PUT: api/issuer/{credentialId}/approval'
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Void'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/issuer/{credentialId}/reject':
+    put:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Rejects the given credential
+      description: 'PUT: api/issuer/{credentialId}/reject'
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Void'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/issuer/{processId}/retrigger-step/{processStepTypeId}':
+    post:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Retriggers the failed process step
+      description: 'POST: api/issuer/{processId}/retrigger-step/RETRIGGER_CREATE_SIGNED_CREDENTIAL'
+      parameters:
+        - name: processId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: processStepTypeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ProcessStepTypeId'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Void'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/revocation/issuer/credentials/{credentialId}':
+    post:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Revokes an credential which was issued by the given issuer
+      description: 'POST: api/revocation/issuer/credentials/{credentialId}'
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+  '/api/revocation/credentials/{credentialId}':
+    post:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Credential Revocation by holder
+      description: 'POST: api/revocation/credentials/{credentialId}'
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+  '/api/revocation/{processId}/retrigger-step/{processStepTypeId}':
+    post:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: Retriggers the failed process step
+      description: 'POST: api/revocation/{processId}/retrigger-step/RETRIGGER_REVOKE_CREDENTIAL'
+      parameters:
+        - name: processId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: processStepTypeId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ProcessStepTypeId'
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Void'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/credential/{credentialId}':
+    get:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: The endpoint enables users to download the credential (full json) of their own company.
+      description: 'Example: GET: api/credential/{credentialId}'
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  '/api/credential/documents/{documentId}':
+    get:
+      tags:
+        - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
+      summary: The endpoint enables users to download the credential (full json) of their own company.
+      description: 'Example: GET: api/credential/documents/{documentId}'
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    CertificateParticipationData:
+      type: object
+      properties:
+        credentialType:
+          $ref: '#/components/schemas/VerifiedCredentialTypeId'
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanySsiExternalTypeDetailData'
+      additionalProperties: false
+    CompanySsiDetailApprovalType:
+      enum:
+        - Automatic
+        - Manual
+      type: string
+    CompanySsiDetailData:
+      type: object
+      properties:
+        credentialId:
+          type: string
+          format: uuid
+        participationStatus:
+          $ref: '#/components/schemas/CompanySsiDetailStatusId'
+        expiryDate:
+          type: string
+          format: date-time
+          nullable: true
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentData'
+      additionalProperties: false
+    CompanySsiDetailSorting:
+      enum:
+        - BpnlAsc
+        - BpnlDesc
+      type: string
+    CompanySsiDetailStatusId:
+      enum:
+        - PENDING
+        - ACTIVE
+        - REVOKED
+        - INACTIVE
+      type: string
+    CompanySsiExternalTypeDetailData:
+      type: object
+      properties:
+        externalDetailData:
+          $ref: '#/components/schemas/ExternalTypeDetailData'
+        ssiDetailData:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanySsiDetailData'
+      additionalProperties: false
+    CreateBpnCredentialRequest:
+      type: object
+      properties:
+        holder:
+          type: string
+        businessPartnerNumber:
+          type: string
+        technicalUserDetails:
+          $ref: '#/components/schemas/TechnicalUserDetails'
+        callbackUrl:
+          type: string
+          nullable: true
+      additionalProperties: false
+    CreateFrameworkCredentialRequest:
+      type: object
+      properties:
+        holder:
+          type: string
+        businessPartnerNumber:
+          type: string
+        useCaseFrameworkId:
+          $ref: '#/components/schemas/VerifiedCredentialTypeId'
+        useCaseFrameworkVersionId:
+          type: string
+          format: uuid
+        technicalUserDetails:
+          $ref: '#/components/schemas/TechnicalUserDetails'
+        callbackUrl:
+          type: string
+          nullable: true
+      additionalProperties: false
+    CreateMembershipCredentialRequest:
+      type: object
+      properties:
+        holder:
+          type: string
+        businessPartnerNumber:
+          type: string
+        memberOf:
+          type: string
+        technicalUserDetails:
+          $ref: '#/components/schemas/TechnicalUserDetails'
+        callbackUrl:
+          type: string
+          nullable: true
+      additionalProperties: false
+    CredentialDetailData:
+      type: object
+      properties:
+        credentialDetailId:
+          type: string
+          format: uuid
+        bpnl:
+          type: string
+        credentialType:
+          $ref: '#/components/schemas/VerifiedCredentialTypeId'
+        useCase:
+          type: string
+          nullable: true
+        participantStatus:
+          $ref: '#/components/schemas/CompanySsiDetailStatusId'
+        expiryDate:
+          type: string
+          format: date-time
+          nullable: true
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentData'
+        externalTypeDetail:
+          $ref: '#/components/schemas/ExternalTypeDetailData'
+      additionalProperties: false
+    DocumentData:
+      type: object
+      properties:
+        documentId:
+          type: string
+          format: uuid
+        documentName:
+          type: string
+        documentTypeId:
+          $ref: '#/components/schemas/DocumentTypeId'
+      additionalProperties: false
+    DocumentTypeId:
+      enum:
+        - PRESENTATION
+        - CREDENTIAL
+        - VERIFIED_CREDENTIAL
+      type: string
+    ErrorDetails:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorParameter'
+      additionalProperties: false
+    ErrorParameter:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+      additionalProperties: false
+    ErrorResponse:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        errorId:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetails'
+          nullable: true
+      additionalProperties: false
+    ExternalTypeDetailData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        verifiedCredentialExternalTypeId:
+          $ref: '#/components/schemas/VerifiedCredentialExternalTypeId'
+        version:
+          type: string
+          nullable: true
+        template:
+          type: string
+          nullable: true
+        validFrom:
+          type: string
+          format: date-time
+          nullable: true
+        expiry:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+    OwnedVerifiedCredentialData:
+      type: object
+      properties:
+        credentialDetailId:
+          type: string
+          format: uuid
+        credentialType:
+          $ref: '#/components/schemas/VerifiedCredentialTypeId'
+        status:
+          $ref: '#/components/schemas/CompanySsiDetailStatusId'
+        expiryDate:
+          type: string
+          format: date-time
+          nullable: true
+        authority:
+          type: string
+        version:
+          type: string
+          nullable: true
+      additionalProperties: false
+    ProcessStepTypeId:
+      enum:
+        - CREATE_SIGNED_CREDENTIAL
+        - SAVE_CREDENTIAL_DOCUMENT
+        - CREATE_CREDENTIAL_FOR_HOLDER
+        - TRIGGER_CALLBACK
+        - RETRIGGER_CREATE_SIGNED_CREDENTIAL
+        - RETRIGGER_SAVE_CREDENTIAL_DOCUMENT
+        - RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER
+        - RETRIGGER_TRIGGER_CALLBACK
+        - REVOKE_CREDENTIAL
+        - TRIGGER_NOTIFICATION
+        - TRIGGER_MAIL
+        - RETRIGGER_REVOKE_CREDENTIAL
+        - RETRIGGER_TRIGGER_NOTIFICATION
+        - RETRIGGER_TRIGGER_MAIL
+      type: string
+    TechnicalUserDetails:
+      type: object
+      properties:
+        walletUrl:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+      additionalProperties: false
+    UseCaseParticipationData:
+      type: object
+      properties:
+        useCase:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        credentialType:
+          $ref: '#/components/schemas/VerifiedCredentialTypeId'
+        verifiedCredentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanySsiExternalTypeDetailData'
+      additionalProperties: false
+    VerifiedCredentialExternalTypeId:
+      enum:
+        - TRACEABILITY_CREDENTIAL
+        - PCF_CREDENTIAL
+        - BEHAVIOR_TWIN_CREDENTIAL
+        - MEMBERSHIP_CREDENTIAL
+        - CIRCULAR_ECONOMY
+        - QUALITY_CREDENTIAL
+        - BUSINESS_PARTNER_NUMBER
+        - DEMAND_AND_CAPACITY_MANAGEMENT
+        - DEMAND_AND_CAPACITY_MANAGEMENT_PURIS
+        - BUSINESS_PARTNER_DATA_MANAGEMENT
+        - FRAMEWORK_AGREEMENT
+        - DATA_EXCHANGE_GOVERNANCE_CREDENTIAL
+      type: string
+    VerifiedCredentialTypeId:
+      enum:
+        - TRACEABILITY_FRAMEWORK
+        - PCF_FRAMEWORK
+        - BEHAVIOR_TWIN_FRAMEWORK
+        - MEMBERSHIP
+        - CIRCULAR_ECONOMY
+        - FRAMEWORK_AGREEMENT_QUALITY
+        - BUSINESS_PARTNER_NUMBER
+        - DEMAND_AND_CAPACITY_MANAGEMENT
+        - DEMAND_AND_CAPACITY_MANAGEMENT_PURIS
+        - BUSINESS_PARTNER_DATA_MANAGEMENT
+        - FRAMEWORK_AGREEMENT
+        - DATA_EXCHANGE_GOVERNANCE_CREDENTIAL
+      type: string
+    Void:
+      type: object
+      additionalProperties: false
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      description: "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\""
+      name: Authorization
+      in: header
+security:
+  - Bearer: [ ]
