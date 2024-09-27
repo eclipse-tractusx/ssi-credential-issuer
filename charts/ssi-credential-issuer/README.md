@@ -76,8 +76,8 @@ dependencies:
 | migrations.image.pullSecrets | list | `[]` |  |
 | migrations.imagePullPolicy | string | `"IfNotPresent"` |  |
 | migrations.resources | object | `{"limits":{"cpu":"45m","memory":"200M"},"requests":{"cpu":"15m","memory":"200M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
-| migrations.seeding.testDataEnvironments | string | `""` |  |
-| migrations.seeding.testDataPaths | string | `"Seeder/Data"` |  |
+| migrations.seeding.seedTestDataEnvironments | string | `""` |  |
+| migrations.seeding.seedTestDataPaths | string | `"Seeder/Data"` |  |
 | migrations.logging.default | string | `"Information"` |  |
 | migrations.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
 | processesworker.name | string | `"processesworker"` |  |

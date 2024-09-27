@@ -87,8 +87,8 @@ migrations:
       cpu: 45m
       memory: 200M
   seeding:
-    testDataEnvironments: ""
-    testData:
+    # -- Option to seed testdata
+    seedTestData:
       # -- If set to true the data configured in the config map 'configmap-seeding-testdata.yaml' will be taken to insert the default test data
       useDefault: false
       useOwnConfigMap:

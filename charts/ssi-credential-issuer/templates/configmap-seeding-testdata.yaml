@@ -17,7 +17,7 @@
 * SPDX-License-Identifier: Apache-2.0
 */}}
 
-{{- if .Values.migrations.seeding.testData.useDefault -}}
+{{- if .Values.migrations.seeding.seedTestData.useDefault -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
