@@ -76,10 +76,11 @@ dependencies:
 | migrations.image.pullSecrets | list | `[]` |  |
 | migrations.imagePullPolicy | string | `"IfNotPresent"` |  |
 | migrations.resources | object | `{"limits":{"cpu":"45m","memory":"200M"},"requests":{"cpu":"15m","memory":"200M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
-| migrations.seeding.testDataEnvironments | string | `""` |  |
-| migrations.seeding.testDataPaths | string | `"Seeder/Data"` |  |
+| migrations.seeding.seedTestData | object | `{"useDefault":false,"useOwnConfigMap":{"configMap":"","filename":""}}` | Option to seed testdata |
+| migrations.seeding.seedTestData.useDefault | bool | `false` | If set to true the data configured in the config map 'configmap-seeding-testdata.yaml' will be taken to insert the default test data |
+| migrations.seeding.seedTestData.useOwnConfigMap.configMap | string | `""` | ConfigMap containing json files for the tables to seed, e.g. use_cases.json, verified_credential_external_type_detail_versions.test.json, etc. |
+| migrations.seeding.seedTestData.useOwnConfigMap.filename | string | `""` | Filename identifying the test data files e.g. for companies.test.json the value would be "test" |
 | migrations.logging.default | string | `"Information"` |  |
-| migrations.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
 | processesworker.name | string | `"processesworker"` |  |
 | processesworker.image.name | string | `"docker.io/tractusx/ssi-credential-issuer-processes-worker"` |  |
 | processesworker.image.tag | string | `""` |  |
