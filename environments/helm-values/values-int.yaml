@@ -58,9 +58,6 @@ service:
 migrations:
   logging:
     default: "Debug"
-  seeding:
-    seedTestData:
-      useDefault: true
 
 processesworker:
   logging:
