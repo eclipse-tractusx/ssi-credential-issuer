@@ -36,10 +36,10 @@ nuget/nuget/-/Serilog.Sinks.File/5.0.0, Apache-2.0, approved, #11116
 nuget/nuget/-/Serilog/3.1.1, Apache-2.0, approved, #13978
 nuget/nuget/-/SharpZipLib/1.4.2, MIT AND GFDL-1.3-or-later AND (Apache-2.0 AND MIT) AND WTFPL AND bzip2-1.0.6 AND LicenseRef-Permissive-license-with-conditions AND LicenseRef-Permission-Notice, approved, #10058
 nuget/nuget/-/SshNet.Security.Cryptography/1.3.0, MIT, approved, clearlydefined
-nuget/nuget/-/Swashbuckle.AspNetCore.Swagger/6.5.0, MIT AND Apache-2.0, approved, #7160
-nuget/nuget/-/Swashbuckle.AspNetCore.SwaggerGen/6.5.0, MIT AND Apache-2.0, approved, #7156
-nuget/nuget/-/Swashbuckle.AspNetCore.SwaggerUI/6.5.0, MIT AND Apache-2.0, approved, #7158
-nuget/nuget/-/Swashbuckle.AspNetCore/6.5.0, MIT AND Apache-2.0, approved, #7159
+nuget/nuget/-/Swashbuckle.AspNetCore.Swagger/6.8.0, MIT AND Apache-2.0, approved, #16262
+nuget/nuget/-/Swashbuckle.AspNetCore.SwaggerGen/6.8.0, MIT AND Apache-2.0, approved, #16259
+nuget/nuget/-/Swashbuckle.AspNetCore.SwaggerUI/6.8.0, MIT AND Apache-2.0, approved, #16261
+nuget/nuget/-/Swashbuckle.AspNetCore/6.8.0, MIT AND Apache-2.0, approved, #16260
 nuget/nuget/-/Testcontainers.PostgreSql/3.4.0, MIT, approved, #10056
 nuget/nuget/-/Testcontainers/3.4.0, MIT, approved, #10083
 nuget/nuget/-/Xunit.Extensions.AssemblyFixture/2.4.1, MIT, approved, #3502

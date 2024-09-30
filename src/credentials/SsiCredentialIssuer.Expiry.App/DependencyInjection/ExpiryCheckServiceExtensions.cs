@@ -20,6 +20,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Validation;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
 
@@ -36,7 +37,10 @@ public static class ExpiryCheckServiceExtensions
     /// <returns>the enriched service collection</returns>
     public static IServiceCollection AddExpiryCheckService(this IServiceCollection services, IConfigurationSection section)
     {
-        services.AddOptions<ExpiryCheckServiceSettings>().Bind(section);
+        services
+            .AddOptions<ExpiryCheckServiceSettings>()
+            .Bind(section)
+            .EnvironmentalValidation(section);
         services
             .AddTransient<ExpiryCheckService>()
             .AddTransient<IDateTimeProvider, UtcDateTimeProvider>();

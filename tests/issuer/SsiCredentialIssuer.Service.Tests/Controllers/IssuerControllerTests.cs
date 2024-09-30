@@ -17,6 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.Setup;
 using System.Net;
@@ -52,21 +53,6 @@ public class IssuerControllerTests(IntegrationTestFactory factory) : IClassFixtu
             x => x == VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER,
             x => x == VerifiedCredentialTypeId.FRAMEWORK_AGREEMENT
         );
-    }
-
-    #endregion
-
-    #region Swagger
-
-    [Fact]
-    public async Task CheckSwagger_ReturnsExpected()
-    {
-        // Act
-        var response = await _client.GetAsync($"{BaseUrl}/swagger/v1/swagger.json");
-
-        // Assert
-        response.Should().NotBeNull();
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     #endregion

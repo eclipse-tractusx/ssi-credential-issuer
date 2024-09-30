@@ -19,6 +19,7 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Validation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
@@ -29,8 +30,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddOptions<ProcessExecutionServiceSettings>()
             .Bind(section)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            .EnvironmentalValidation(section);
 
         return services
             .AddTransient<IIdentityIdService, ProcessIdentityIdService>();
