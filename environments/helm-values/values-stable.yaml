@@ -53,7 +53,7 @@ service:
         encryptionKey: "<path:portal/data/ssi-credential-issuer/stable/credential#encryptionKey0>"
   portal:
     clientId: "<path:portal/data/ssi-credential-issuer/portal#clientId>"
-    clientSecret: "<path:portal/data/int/iam/centralidp-client-secrets#issuer-sa>"
+    clientSecret: "<path:portal/data/stable/iam/centralidp-client-secrets#issuer-sa>"
 
 migrations:
   logging:
