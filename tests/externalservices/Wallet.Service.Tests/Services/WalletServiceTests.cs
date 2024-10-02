@@ -73,10 +73,10 @@ public class WalletServiceTests
             x.Content is JsonContent &&
             (x.Content as JsonContent)!.ObjectType == typeof(CreateSignedCredentialRequest) &&
             ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Application == "catena-x-portal" &&
-            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Payload.Signature.ProofMechanism == "external" &&
-            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Payload.Signature.ProofType == "jwt" &&
-            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Payload.Signature.KeyName == null &&
-            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Payload.Issue == payload
+            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Issue.Payload.Signature.ProofMechanism == "external" &&
+            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Issue.Payload.Signature.ProofType == "jwt" &&
+            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Issue.Payload.Signature.KeyName == null &&
+            ((x.Content as JsonContent)!.Value as CreateSignedCredentialRequest)!.Issue.Payload.Content == payload
         );
         result.Should().BeOfType<CreateSignedCredentialResponse>().Which.Id.Should().Be(id);
     }

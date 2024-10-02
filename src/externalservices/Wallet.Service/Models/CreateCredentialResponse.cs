@@ -24,11 +24,15 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 
 public record CreateSignedCredentialRequest(
     [property: JsonPropertyName("application")] string Application,
-    [property: JsonPropertyName("payload")] CreateSignedPayload Payload
+    [property: JsonPropertyName("payload")] IssueWithSignature Issue
+);
+
+public record IssueWithSignature(
+    [property: JsonPropertyName("issueWithSignature")] CreateSignedPayload Payload
 );
 
 public record CreateSignedPayload(
-    [property: JsonPropertyName("content")] JsonDocument Issue,
+    [property: JsonPropertyName("content")] JsonDocument Content,
     [property: JsonPropertyName("signature")] SignData Signature
 );
 
