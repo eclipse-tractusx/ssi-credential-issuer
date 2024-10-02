@@ -41,7 +41,7 @@ public class WalletService(
     public async Task<CreateSignedCredentialResponse> CreateSignedCredential(JsonDocument payload, CancellationToken cancellationToken)
     {
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
-        var data = new CreateSignedCredentialRequest(_settings.WalletApplication, new CreateSignedPayload(payload, new SignData("external", "jwt", null)));
+        var data = new CreateSignedCredentialRequest(_settings.WalletApplication, new IssueWithSignature(new CreateSignedPayload(payload, new SignData("external", "jwt", null))));
         var result = await client.PostAsJsonAsync(_settings.CreateSignedCredentialPath, data, Options, cancellationToken)
             .CatchingIntoServiceExceptionFor("create-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
