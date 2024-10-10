@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.2.0-alpha.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.1.0-rc.2...v1.2.0-alpha.2) (2024-10-10)
+
+
+### Features
+
+* add imagePullSecrets ([#236](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/236)) ([bed4ff8](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/bed4ff875abdcca06fbdbb14779812a465773e10))
+* **config:** make wallet application and paths configurable ([#230](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/230)) ([7232f27](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/7232f271f8748d281d2909e5016e251217e88e39)), closes [#226](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/226)
+* create open api spec on build ([#262](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/262)) ([367db2d](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/367db2d3cbfd8a5395a508a31d5db9cd1b8fd975)), closes [#256](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/256)
+* enhanced the owned-credentials endpoint ([#240](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/240)) ([e41722a](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/e41722a4e1d02ff631d8b9d1c4940b391f7fd500))
+* **notification:** adjust notification request parameter ([#233](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/233)) ([37b359d](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/37b359d9a289b58e548c6b4935d0e1016872fbff))
+* **retrigger:** add retrigger process steps ([#242](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/242)) ([f08ddd5](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/f08ddd57af74c9a6d292499e6a062202266f29fc)), closes [#209](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/209)
+* **ssi:** merge create and sign credential into one ([#235](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/235)) ([510de92](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/510de9206f916b7eedbc205ff6d3fe9428b73265)), closes [#232](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/232)
+* **testdata:** enable seeding via configMap, remove consortia files ([#241](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/241)) ([e3c92d3](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/e3c92d3a270d5aca18784315b0f1628bc92806ab)), closes [#205](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/205)
+
+
+### Bug Fixes
+
+* adjust create credential request structure ([#266](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/266)) ([e466fa3](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/e466fa3390b68cc7a51f0aff2be53486a5d6d668)), closes [#265](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/265)
+* **document:** adjust validation to allow the issuer to display documents of credentials ([#229](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/229)) ([a1dd326](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/a1dd326141942de3a873514f6508d42a2400b331)), closes [#225](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/225)
+* update the template framework pdf link ([#251](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/251)) ([3356250](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/3356250fd09c6e406748298e4fca1f15a59f038e))
+
+
+### Miscellaneous Chores
+
+* release 1.2.0-alpha.1 ([5c7ebf5](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/5c7ebf5abd9c0fa407a742e2412df9e064162f1d))
+* release 1.2.0-alpha.2 ([c07cf66](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/c07cf66ff8995defcdb4b3b338964538b6574823))
+
 ## [1.2.0-alpha.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.1.0-rc.2...v1.2.0-alpha.1) (2024-09-23)
 
 
