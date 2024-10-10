@@ -26,7 +26,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     /// <inheritdoc />
-    public partial class _209AddRetrigger : Migration
+    public partial class _120alpha2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
