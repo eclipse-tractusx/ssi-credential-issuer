@@ -24,7 +24,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     /// <inheritdoc />
-    public partial class _200alpha1 : Migration
+    public partial class _120alpha1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

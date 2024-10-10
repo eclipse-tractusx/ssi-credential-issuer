@@ -32,8 +32,8 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
 {
     [DbContext(typeof(IssuerDbContext))]
-    [Migration("20240924092944_209-AddRetrigger")]
-    partial class _209AddRetrigger
+    [Migration("20241010142309_1.2.0-alpha.2")]
+    partial class _120alpha2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
