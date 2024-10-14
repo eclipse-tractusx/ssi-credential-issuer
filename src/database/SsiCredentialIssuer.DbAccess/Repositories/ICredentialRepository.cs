@@ -26,8 +26,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 
 public interface ICredentialRepository
 {
-    Task<Guid?> GetWalletCredentialId(Guid credentialId);
-    Task<(HolderWalletData HolderWalletData, string? Credential, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId);
+    Task<(bool IsIssuerCompany, HolderWalletData HolderWalletData, string? Credential, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId);
     Task<(bool Exists, Guid CredentialId)> GetDataForProcessId(Guid processId);
     Task<(VerifiedCredentialTypeKindId CredentialTypeKindId, JsonDocument Schema)> GetCredentialStorageInformationById(Guid credentialId);
     Task<(Guid? ExternalCredentialId, VerifiedCredentialTypeKindId KindId, bool HasEncryptionInformation, string? CallbackUrl)> GetExternalCredentialAndKindId(Guid credentialId);

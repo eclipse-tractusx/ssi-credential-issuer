@@ -66,7 +66,16 @@ public class CredentialCreationProcessHandler(
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CreateCredentialForHolder(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (holderWalletData, credential, encryptionInformation, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (isIssuerCompany, holderWalletData, credential, encryptionInformation, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (isIssuerCompany)
+        {
+            return (
+                callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
+                ProcessStepStatusId.SKIPPED,
+                false,
+                "ProcessStep was skipped because the holder is the issuer");
+        }
+
         if (credential is null)
         {
             throw new ConflictException("Credential must be set here");
