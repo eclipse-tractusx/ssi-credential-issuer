@@ -28,15 +28,11 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 
 public class CredentialRepository(IssuerDbContext dbContext) : ICredentialRepository
 {
-    public Task<Guid?> GetWalletCredentialId(Guid credentialId) =>
-        dbContext.CompanySsiDetails.Where(x => x.Id == credentialId)
-            .Select(x => x.ExternalCredentialId)
-            .SingleOrDefaultAsync();
-
-    public Task<(HolderWalletData HolderWalletData, string? Credential, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId) =>
+    public Task<(bool IsIssuerCompany, HolderWalletData HolderWalletData, string? Credential, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId) =>
         dbContext.CompanySsiDetails
             .Where(x => x.Id == credentialId)
-            .Select(x => new ValueTuple<HolderWalletData, string?, EncryptionTransformationData, string?>(
+            .Select(x => new ValueTuple<bool, HolderWalletData, string?, EncryptionTransformationData, string?>(
+                x.Bpnl == x.IssuerBpn,
                 new HolderWalletData(x.CompanySsiProcessData!.HolderWalletUrl, x.CompanySsiProcessData.ClientId),
                 x.Credential,
                 new EncryptionTransformationData(x.CompanySsiProcessData!.ClientSecret, x.CompanySsiProcessData.InitializationVector, x.CompanySsiProcessData.EncryptionMode),

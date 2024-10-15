@@ -136,7 +136,7 @@ public class CredentialCreationProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns(default((HolderWalletData, string?, EncryptionTransformationData, string?)));
+            .Returns(default((bool, HolderWalletData, string?, EncryptionTransformationData, string?)));
         Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Act
@@ -151,7 +151,7 @@ public class CredentialCreationProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((new HolderWalletData(null, null), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
+            .Returns((false, new HolderWalletData(null, null), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
         Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Act
@@ -166,7 +166,7 @@ public class CredentialCreationProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((new HolderWalletData(null, "c1"), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
+            .Returns((false, new HolderWalletData(null, "c1"), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
         Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Act
@@ -182,6 +182,7 @@ public class CredentialCreationProcessHandlerTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
             .Returns((
+                false,
                 new HolderWalletData("https://example.org", "c1"),
                 "test",
                 new EncryptionTransformationData("test"u8.ToArray(), "test"u8.ToArray(), 0),
@@ -203,6 +204,7 @@ public class CredentialCreationProcessHandlerTests
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
             .Returns((
+                false,
                 new HolderWalletData("https://example.org", "c1"),
                 "test",
                 _fixture.Create<EncryptionTransformationData>(),
@@ -218,6 +220,31 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+    }
+
+    [Fact]
+    public async Task CreateCredentialForHolder_WithIssuerAsHolder_ReturnsExpected()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
+            .Returns((
+                true,
+                new HolderWalletData("https://example.org", "c1"),
+                "test",
+                _fixture.Create<EncryptionTransformationData>(),
+                "https://example.org"));
+
+        // Act
+        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _walletBusinessLogic.CreateCredentialForHolder(A<Guid>._, A<string>._, A<string>._, A<EncryptionInformation>._, A<string>._, A<CancellationToken>._))
+            .MustNotHaveHappened();
+
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().Be("ProcessStep was skipped because the holder is the issuer");
+        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
         result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
     }
 
