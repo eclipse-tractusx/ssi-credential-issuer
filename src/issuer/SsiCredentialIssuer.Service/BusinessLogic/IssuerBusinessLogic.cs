@@ -85,10 +85,10 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     }
 
     /// <inheritdoc />
-    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationAsync() =>
+    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationAsync(StatusType? statusType) =>
         _repositories
             .GetInstance<ICompanySsiDetailsRepository>()
-            .GetUseCaseParticipationForCompany(_identity.Bpnl, _dateTimeProvider.OffsetNow);
+            .GetUseCaseParticipationForCompany(_identity.Bpnl, _dateTimeProvider.OffsetNow, statusType);
 
     /// <inheritdoc />
     public IAsyncEnumerable<CertificateParticipationData> GetSsiCertificatesAsync() =>

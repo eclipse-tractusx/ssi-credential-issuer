@@ -42,7 +42,8 @@ public static class IssuerController
     {
         var issuer = group.MapGroup("/issuer");
 
-        issuer.MapGet("useCaseParticipation", (IIssuerBusinessLogic logic) => logic.GetUseCaseParticipationAsync())
+        issuer.MapGet("useCaseParticipation", (IIssuerBusinessLogic logic,
+                [FromQuery(Name = "status")] StatusType? statusType) => logic.GetUseCaseParticipationAsync(statusType))
             .WithSwaggerDescription("Gets all use case frameworks and the participation status of the acting company",
                 "Example: GET: api/issuer/useCaseParticipation")
             .RequireAuthorization(r =>

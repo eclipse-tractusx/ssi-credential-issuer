@@ -31,8 +31,9 @@ public interface ICompanySsiDetailsRepository
     /// </summary>
     /// <param name="bpnl">Bpnl of the company</param>
     /// <param name="minExpiry">The minimum datetime the expiry date should have</param>
+    /// <param name="statusType">the status type on how the credentials should be filtered</param>
     /// <returns>AsyncEnumerable of UseCaseParticipation</returns>
-    IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry);
+    IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry, StatusType? statusType);
 
     /// <summary>
     /// Gets the company credential details for the given company id

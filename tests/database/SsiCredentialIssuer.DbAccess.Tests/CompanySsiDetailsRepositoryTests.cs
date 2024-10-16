@@ -22,6 +22,7 @@ using AutoFixture.AutoFakeItEasy;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -49,14 +50,16 @@ public class CompanySsiDetailsRepositoryTests
 
     #region GetDetailsForCompany
 
-    [Fact]
-    public async Task GetDetailsForCompany_WithValidData_ReturnsExpected()
+    [Theory]
+    [InlineData(null)]
+    [InlineData(StatusType.All)]
+    public async Task GetDetailsForCompany_WithValidData_And_StatusType_ReturnsExpected(StatusType? statusType)
     {
         // Arrange
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.MinValue).ToListAsync();
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.MinValue, statusType).ToListAsync();
 
         // Assert
         result.Should().HaveCount(10);
@@ -84,7 +87,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, dt).ToListAsync();
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, dt, null).ToListAsync();
 
         // Assert
         result.Should().HaveCount(10);
@@ -104,6 +107,100 @@ public class CompanySsiDetailsRepositoryTests
             x => x.ExternalDetailData.Version == "3.0" && !x.SsiDetailData.Any());
     }
 
+    [Fact]
+    public async Task GetAllCredentialDetails_WithValidData_and_StatusType_Active_ReturnsExpected()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+        var expectedCredentialId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b11");
+        var expectedExpiryDate = DateTimeOffset.UtcNow.AddDays(1);
+
+        //Act
+        await UpdateCompanySsiDetail(context, expectedCredentialId, CompanySsiDetailStatusId.ACTIVE, expectedExpiryDate);
+
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.UtcNow, StatusType.Active).ToListAsync();
+
+        // Assert
+        result.Should().HaveCount(10);
+        result.SelectMany(x => x.VerifiedCredentials)
+            .SelectMany(x => x.SsiDetailData)
+                .Should().HaveCount(1).And
+                .Satisfy(x => x.ExpiryDate == expectedExpiryDate);
+    }
+
+    [Fact]
+    public async Task GetAllCredentialDetails_WithWrongData_and_StatusType_Active_ReturnsExpected()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+        var expectedCredentialId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b11");
+        var expectedExpiryDate = DateTimeOffset.UtcNow.AddDays(1);
+
+        //Act
+        await UpdateCompanySsiDetail(context, expectedCredentialId, CompanySsiDetailStatusId.PENDING, expectedExpiryDate);
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.UtcNow, StatusType.Active).ToListAsync();
+
+        // Assert
+        result.Should().HaveCount(10);
+        result.SelectMany(x => x.VerifiedCredentials)
+            .SelectMany(x => x.SsiDetailData)
+                .Should().HaveCount(0);
+    }
+
+    [Fact]
+    public async Task GetAllCredentialDetails_WithValidData_and_StatusType_All_ReturnsExpected()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+
+        //Act
+
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.UtcNow, StatusType.All).ToListAsync();
+
+        // Assert
+        result.Should().HaveCount(10);
+        var test = result.SelectMany(x => x.VerifiedCredentials)
+            .SelectMany(x => x.SsiDetailData);
+
+        result.SelectMany(x => x.VerifiedCredentials)
+            .SelectMany(x => x.SsiDetailData)
+                .Should().HaveCount(4);
+    }
+
+    [Fact]
+    public async Task GetAllCredentialDetails_WithValidData_and_StatusType_Expired_ReturnsExpected()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+        var expectedCredentialId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b11");
+        var expectedExpiryDate = DateTimeOffset.UtcNow.AddDays(-1);
+
+        //Act
+        await UpdateCompanySsiDetail(context, expectedCredentialId, CompanySsiDetailStatusId.ACTIVE, expectedExpiryDate);
+
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.UtcNow, StatusType.Expired).ToListAsync();
+
+        // Assert
+        result.Should().HaveCount(10);
+        var test = result.SelectMany(x => x.VerifiedCredentials)
+            .SelectMany(x => x.SsiDetailData);
+
+        result.SelectMany(x => x.VerifiedCredentials)
+            .SelectMany(x => x.SsiDetailData)
+                .Should().HaveCount(4);
+    }
+
+    private static async Task UpdateCompanySsiDetail(IssuerDbContext context, Guid id, CompanySsiDetailStatusId companySsiDetailStatusId, DateTimeOffset expiryDate)
+    {
+        var companySsiDetail = await context.CompanySsiDetails.FindAsync(id);
+        if (companySsiDetail != null)
+        {
+            companySsiDetail.ExpiryDate = expiryDate;
+            companySsiDetail.CompanySsiDetailStatusId = companySsiDetailStatusId;
+            context.CompanySsiDetails.Update(companySsiDetail);
+            await context.SaveChangesAsync();
+        }
+    }
     #endregion
 
     #region GetAllCredentialDetails
@@ -112,23 +209,28 @@ public class CompanySsiDetailsRepositoryTests
     public async Task GetAllCredentialDetails_WithValidData_ReturnsExpected()
     {
         // Arrange
-        var sut = await CreateSut();
+        var (sut, context) = await CreateSutWithContext();
+        var credentialId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b11");
+        var expiryDate = DateTimeOffset.UtcNow.AddDays(-1);
+
+        await UpdateCompanySsiDetail(context, credentialId, CompanySsiDetailStatusId.INACTIVE, expiryDate);
 
         // Act
         var result = await sut.GetAllCredentialDetails(null, null, null).ToListAsync();
 
         // Assert
         result.Should().NotBeNull();
-        result.Count.Should().Be(7);
-        result.Should().HaveCount(7);
-        result.Where(x => x.Bpnl == ValidBpnl).Should().HaveCount(6)
+        result.Count.Should().Be(8);
+        result.Should().HaveCount(8);
+        result.Where(x => x.Bpnl == ValidBpnl).Should().HaveCount(7)
             .And.Satisfy(
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
                 x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE);
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
+                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE);
         result.Where(x => x.Bpnl == "BPNL00000001LLHA").Should().ContainSingle()
             .And.Satisfy(x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
     }
@@ -158,14 +260,20 @@ public class CompanySsiDetailsRepositoryTests
     public async Task GetAllCredentialDetails_WithWithCredentialType_ReturnsExpected()
     {
         // Arrange
-        var sut = await CreateSut();
+        var (sut, context) = await CreateSutWithContext();
+        var credentialId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b11");
+        var expiryDate = DateTimeOffset.UtcNow.AddDays(-1);
 
-        // Act
+        await UpdateCompanySsiDetail(context, credentialId, CompanySsiDetailStatusId.INACTIVE, expiryDate);
+
+        //Act        
         var result = await sut.GetAllCredentialDetails(null, VerifiedCredentialTypeId.PCF_FRAMEWORK, null).ToListAsync();
 
         // Assert
-        result.Should().NotBeNull().And.ContainSingle().Which.Bpnl.Should().Be(ValidBpnl);
-        result.Count.Should().Be(1);
+        result.Should().NotBeNull().And.HaveCount(2).And
+            .Satisfy(x => x.Bpnl == ValidBpnl && x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
+                     x => x.Bpnl == ValidBpnl && x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE);
+        result.Count.Should().Be(2);
     }
 
     #endregion
@@ -199,20 +307,25 @@ public class CompanySsiDetailsRepositoryTests
     public async Task GetOwnCredentialDetails_WithValidData_ReturnsExpected()
     {
         // Arrange
-        var sut = await CreateSut();
+        var (sut, context) = await CreateSutWithContext();
+        var credentialId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b11");
+        var expiryDate = DateTimeOffset.UtcNow.AddDays(-1);
+
+        await UpdateCompanySsiDetail(context, credentialId, CompanySsiDetailStatusId.INACTIVE, expiryDate);
 
         // Act
         var result = await sut.GetOwnCredentialDetails(ValidBpnl).ToListAsync();
 
         // Assert
-        result.Should().HaveCount(6)
+        result.Should().HaveCount(7)
             .And.Satisfy(
                 x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK && x.Status == CompanySsiDetailStatusId.PENDING,
                 x => x.CredentialType == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.Status == CompanySsiDetailStatusId.PENDING,
                 x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.Status == CompanySsiDetailStatusId.PENDING,
                 x => x.CredentialType == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK && x.Status == CompanySsiDetailStatusId.INACTIVE,
                 x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.Status == CompanySsiDetailStatusId.INACTIVE,
-                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.Status == CompanySsiDetailStatusId.INACTIVE
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.Status == CompanySsiDetailStatusId.INACTIVE,
+                x => x.CredentialType == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.Status == CompanySsiDetailStatusId.INACTIVE
             );
     }
 
@@ -505,7 +618,11 @@ public class CompanySsiDetailsRepositoryTests
         var now = new DateTimeOffset(2025, 01, 1, 1, 1, 1, TimeSpan.Zero);
         var inactiveVcsToDelete = now.AddMonths(-12);
         var expiredVcsToDelete = now.AddDays(-42);
-        var sut = await CreateSut();
+        var (sut, context) = await CreateSutWithContext();
+        var credentialId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b11");
+        var expiryDate = DateTimeOffset.UtcNow.AddDays(-1);
+
+        await UpdateCompanySsiDetail(context, credentialId, CompanySsiDetailStatusId.REVOKED, expiryDate);
 
         // Act
         var result = await sut.GetExpiryData(now, inactiveVcsToDelete, expiredVcsToDelete).ToListAsync();
