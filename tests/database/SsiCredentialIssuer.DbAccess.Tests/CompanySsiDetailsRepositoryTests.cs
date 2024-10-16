@@ -124,7 +124,8 @@ public class CompanySsiDetailsRepositoryTests
         result.Should().HaveCount(10);
         result.SelectMany(x => x.VerifiedCredentials)
             .SelectMany(x => x.SsiDetailData)
-                .Should().HaveCount(1);
+                .Should().HaveCount(1).And
+                .Satisfy(x => x.ExpiryDate == expectedExpiryDate);
     }
 
     [Fact]
@@ -150,7 +151,7 @@ public class CompanySsiDetailsRepositoryTests
     public async Task GetAllCredentialDetails_WithValidData_and_StatusType_All_ReturnsExpected()
     {
         // Arrange
-        var sut = await CreateSut();
+        var (sut, context) = await CreateSutWithContext();
 
         //Act
 
@@ -158,6 +159,9 @@ public class CompanySsiDetailsRepositoryTests
 
         // Assert
         result.Should().HaveCount(10);
+        var test = result.SelectMany(x => x.VerifiedCredentials)
+            .SelectMany(x => x.SsiDetailData);
+
         result.SelectMany(x => x.VerifiedCredentials)
             .SelectMany(x => x.SsiDetailData)
                 .Should().HaveCount(4);
@@ -178,6 +182,9 @@ public class CompanySsiDetailsRepositoryTests
 
         // Assert
         result.Should().HaveCount(10);
+        var test = result.SelectMany(x => x.VerifiedCredentials)
+            .SelectMany(x => x.SsiDetailData);
+
         result.SelectMany(x => x.VerifiedCredentials)
             .SelectMany(x => x.SsiDetailData)
                 .Should().HaveCount(4);
@@ -263,7 +270,7 @@ public class CompanySsiDetailsRepositoryTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Data.Count().Should().Be(2);
+        result!.Count.Should().Be(2);
         result.Data.Should().Satisfy(x => x.Bpnl == ValidBpnl && x.CredentialType == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.ParticipantStatus == CompanySsiDetailStatusId.PENDING,
                      x => x.Bpnl == ValidBpnl && x.CredentialType == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.ParticipantStatus == CompanySsiDetailStatusId.INACTIVE);
         result.Count.Should().Be(2);
