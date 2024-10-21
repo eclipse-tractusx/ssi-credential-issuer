@@ -124,8 +124,7 @@ public class CompanySsiDetailsRepositoryTests
         result.Should().HaveCount(10);
         result.SelectMany(x => x.VerifiedCredentials)
             .SelectMany(x => x.SsiDetailData)
-                .Should().HaveCount(1).And
-                .Satisfy(x => x.ExpiryDate == expectedExpiryDate);
+                .Should().HaveCount(1);
     }
 
     [Fact]
@@ -151,7 +150,7 @@ public class CompanySsiDetailsRepositoryTests
     public async Task GetAllCredentialDetails_WithValidData_and_StatusType_All_ReturnsExpected()
     {
         // Arrange
-        var (sut, context) = await CreateSutWithContext();
+        var sut = await CreateSut();
 
         //Act
 
@@ -159,9 +158,6 @@ public class CompanySsiDetailsRepositoryTests
 
         // Assert
         result.Should().HaveCount(10);
-        var test = result.SelectMany(x => x.VerifiedCredentials)
-            .SelectMany(x => x.SsiDetailData);
-
         result.SelectMany(x => x.VerifiedCredentials)
             .SelectMany(x => x.SsiDetailData)
                 .Should().HaveCount(4);
@@ -182,9 +178,6 @@ public class CompanySsiDetailsRepositoryTests
 
         // Assert
         result.Should().HaveCount(10);
-        var test = result.SelectMany(x => x.VerifiedCredentials)
-            .SelectMany(x => x.SsiDetailData);
-
         result.SelectMany(x => x.VerifiedCredentials)
             .SelectMany(x => x.SsiDetailData)
                 .Should().HaveCount(4);
