@@ -8,15 +8,12 @@ paths:
       tags:
         - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
       summary: Gets all use case frameworks and the participation status of the acting company
-      description: 'Example: GET: api/issuer/useCaseParticipation'
-<<<<<<< HEAD
-=======
+      description: 'Example: GET: api/issuer/useCaseParticipation<br><h3>Available values:</h3> All, Active, Expired'
       parameters:
         - name: status
           in: query
           schema:
-            $ref: '#/components/schemas/StatusType'
->>>>>>> 0e8c76c (feat: Enhanced the endpoint api/issuer/useCaseParticipation adding a status type and created unit tests)
+            type: string
       responses:
         '200':
           description: OK
@@ -34,6 +31,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -854,15 +857,6 @@ components:
         - RETRIGGER_TRIGGER_NOTIFICATION
         - RETRIGGER_TRIGGER_MAIL
       type: string
-<<<<<<< HEAD
-=======
-    StatusType:
-      enum:
-        - Active
-        - Expired
-        - All
-      type: string
->>>>>>> 0e8c76c (feat: Enhanced the endpoint api/issuer/useCaseParticipation adding a status type and created unit tests)
     TechnicalUserDetails:
       type: object
       properties:
