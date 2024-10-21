@@ -85,10 +85,22 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     }
 
     /// <inheritdoc />
-    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationAsync(StatusType? statusType) =>
-        _repositories
+    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationAsync(string? status)
+    {
+        StatusType? statusTypeResult = null;
+        if (!string.IsNullOrEmpty(status))
+        {
+            if (!(Enum.TryParse<StatusType>(status, ignoreCase: true, out var statusType) || !Enum.IsDefined(typeof(StatusType), statusType)))
+            {
+                throw new ArgumentException($"Status value {status} is not valid; please use Active, Expired or All");
+            }
+            statusTypeResult = statusType;
+        }
+
+        return _repositories
             .GetInstance<ICompanySsiDetailsRepository>()
-            .GetUseCaseParticipationForCompany(_identity.Bpnl, _dateTimeProvider.OffsetNow, statusType);
+            .GetUseCaseParticipationForCompany(_identity.Bpnl, _dateTimeProvider.OffsetNow, statusTypeResult);
+    }
 
     /// <inheritdoc />
     public IAsyncEnumerable<CertificateParticipationData> GetSsiCertificatesAsync() =>

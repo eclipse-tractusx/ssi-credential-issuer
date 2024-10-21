@@ -26,7 +26,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
 public interface IIssuerBusinessLogic
 {
-    IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationAsync(StatusType? statusType);
+    IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationAsync(string? status);
 
     IAsyncEnumerable<CertificateParticipationData> GetSsiCertificatesAsync();
 

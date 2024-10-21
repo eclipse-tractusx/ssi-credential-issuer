@@ -163,6 +163,93 @@ public class IssuerBusinessLogicTests
         result.Should().HaveCount(5);
     }
 
+    [Fact]
+    public async Task GetUseCaseParticipationAsync_WithValidStatus_ReturnsExpectedResults()
+    {
+        // Arrange
+        var status = "Active";
+        var now = DateTimeOffset.Now;
+        var verifiedCredentials = _fixture.Build<CompanySsiExternalTypeDetailData>()
+            .With(x => x.SsiDetailData, _fixture.CreateMany<CompanySsiDetailData>(1))
+            .CreateMany(5);
+        var expectedData = new List<UseCaseParticipationData>
+        {
+            new UseCaseParticipationData("Test", "Test", VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, verifiedCredentials)
+        }.ToAsyncEnumerable();
+
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        A.CallTo(() => _companySsiDetailsRepository.GetUseCaseParticipationForCompany(_identity.Bpnl, now, StatusType.Active))
+            .Returns(expectedData);
+
+        // Act
+        var result = await _sut.GetUseCaseParticipationAsync(status).ToListAsync();
+
+        // Assert
+        result.Should().BeEquivalentTo(expectedData.ToEnumerable());
+    }
+
+    [Fact]
+    public async Task GetUseCaseParticipationAsync_WithInvalidStatus_ThrowsArgumentException()
+    {
+        // Arrange
+        var status = "InvalidStatus";
+
+        // Act
+        Func<Task> act = async () => await _sut.GetUseCaseParticipationAsync(status).ToListAsync();
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("Status value InvalidStatus is not valid; please use Active, Expired or All");
+    }
+
+    [Fact]
+    public async Task GetUseCaseParticipationAsync_WithNullStatus_ReturnsExpectedResults()
+    {
+        // Arrange
+        var now = DateTimeOffset.Now;
+        var verifiedCredentials = _fixture.Build<CompanySsiExternalTypeDetailData>()
+            .With(x => x.SsiDetailData, _fixture.CreateMany<CompanySsiDetailData>(1))
+            .CreateMany(5);
+        var expectedData = new List<UseCaseParticipationData>
+        {
+            new UseCaseParticipationData("Test", "Test", VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, verifiedCredentials)
+        }.ToAsyncEnumerable();
+
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        A.CallTo(() => _companySsiDetailsRepository.GetUseCaseParticipationForCompany(_identity.Bpnl, now, null))
+            .Returns(expectedData);
+
+        // Act
+        var result = await _sut.GetUseCaseParticipationAsync(null).ToListAsync();
+
+        // Assert
+        result.Should().BeEquivalentTo(expectedData.ToEnumerable());
+    }
+
+    [Fact]
+    public async Task GetUseCaseParticipationAsync_WithAllStatus_ReturnsExpectedResults()
+    {
+        // Arrange
+        var now = DateTimeOffset.Now;
+        var verifiedCredentials = _fixture.Build<CompanySsiExternalTypeDetailData>()
+            .With(x => x.SsiDetailData, _fixture.CreateMany<CompanySsiDetailData>(1))
+            .CreateMany(5);
+        var expectedData = new List<UseCaseParticipationData>
+        {
+            new UseCaseParticipationData("Test", "Test", VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, verifiedCredentials)
+        }.ToAsyncEnumerable();
+
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        A.CallTo(() => _companySsiDetailsRepository.GetUseCaseParticipationForCompany(_identity.Bpnl, now, StatusType.All))
+            .Returns(expectedData);
+
+        // Act
+        var result = await _sut.GetUseCaseParticipationAsync("All").ToListAsync();
+
+        // Assert
+        result.Should().BeEquivalentTo(expectedData.ToEnumerable());
+    }
+
     #endregion
 
     #region ApproveCredential
