@@ -896,12 +896,6 @@ components:
         - RETRIGGER_TRIGGER_NOTIFICATION
         - RETRIGGER_TRIGGER_MAIL
       type: string
-    StatusType:
-      enum:
-        - Active
-        - Expired
-        - All
-      type: string
     TechnicalUserDetails:
       type: object
       properties:
