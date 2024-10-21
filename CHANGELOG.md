@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.1.0-rc.2...v1.2.0-rc.1) (2024-10-21)
+## [1.2.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.2.0-alpha.1...v1.2.0-rc.1) (2024-10-21)
 
 ### Features
 
