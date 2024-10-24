@@ -20,4 +20,4 @@
 product: "SSI Credential Issuer"
 leadingRepository: "https://github.com/eclipse-tractusx/ssi-credential-issuer"
 openApiSpecs:
-- "https://raw.githubusercontent.com/eclipse-tractusx/ssi-credential-issuer/refs/tags/v1.2.0-rc.1/docs/api/issuer-service.yaml"
+- "https://raw.githubusercontent.com/eclipse-tractusx/ssi-credential-issuer/refs/tags/v1.2.0-rc.2/docs/api/issuer-service.yaml"
