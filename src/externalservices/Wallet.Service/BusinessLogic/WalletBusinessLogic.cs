@@ -50,6 +50,7 @@ public class WalletBusinessLogic(
             c.Credential = null;
         }, c =>
         {
+            c.CompanySsiDetailStatusId = CompanySsiDetailStatusId.ACTIVE;
             c.ExternalCredentialId = credential.Id;
             c.Credential = credential.Jwt;
         });
