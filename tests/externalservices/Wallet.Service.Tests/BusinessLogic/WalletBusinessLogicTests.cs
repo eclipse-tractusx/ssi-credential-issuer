@@ -74,7 +74,7 @@ public class WalletBusinessLogicTests
         var id = Guid.NewGuid();
         var externalId = Guid.NewGuid();
         var schema = JsonDocument.Parse("{}");
-        var ssiDetail = new CompanySsiDetail(id, null!, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, Guid.NewGuid().ToString(), DateTimeOffset.UtcNow);
+        var ssiDetail = new CompanySsiDetail(id, null!, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.PENDING, IssuerBpnl, Guid.NewGuid().ToString(), DateTimeOffset.UtcNow);
         A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(A<Guid>._, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
             .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> setupOptionalFields) =>
             {
@@ -94,6 +94,7 @@ public class WalletBusinessLogicTests
             .MustHaveHappenedOnceExactly();
         ssiDetail.ExternalCredentialId.Should().Be(externalId);
         ssiDetail.Credential.Should().Be("cred");
+        ssiDetail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.ACTIVE);
     }
 
     #endregion

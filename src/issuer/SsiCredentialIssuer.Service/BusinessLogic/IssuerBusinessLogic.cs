@@ -160,13 +160,11 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         UpdateIssuanceDate(credentialId, data, companySsiRepository);
         companySsiRepository.AttachAndModifyCompanySsiDetails(credentialId, c =>
             {
-                c.CompanySsiDetailStatusId = data.Status;
                 c.ExpiryDate = DateTimeOffset.MinValue;
                 c.ProcessId = null;
             },
             c =>
             {
-                c.CompanySsiDetailStatusId = CompanySsiDetailStatusId.ACTIVE;
                 c.DateLastChanged = _dateTimeProvider.OffsetNow;
                 c.ExpiryDate = expiry;
                 c.ProcessId = processId;

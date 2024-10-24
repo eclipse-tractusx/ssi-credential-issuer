@@ -408,7 +408,6 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
             .MustHaveHappenedOnceExactly();
 
-        detail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.ACTIVE);
         detail.DateLastChanged.Should().Be(now);
         processData.Schema.Deserialize<FrameworkCredential>()!.IssuanceDate.Should().Be(now);
     }
@@ -465,7 +464,6 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL))
             .MustHaveHappenedOnceExactly();
 
-        detail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.ACTIVE);
         detail.DateLastChanged.Should().Be(now);
         processData.Schema.Deserialize<FrameworkCredential>()!.IssuanceDate.Should().Be(now);
     }
