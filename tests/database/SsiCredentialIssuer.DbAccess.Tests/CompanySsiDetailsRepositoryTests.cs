@@ -22,6 +22,7 @@ using AutoFixture.AutoFakeItEasy;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -49,14 +50,16 @@ public class CompanySsiDetailsRepositoryTests
 
     #region GetDetailsForCompany
 
-    [Fact]
-    public async Task GetDetailsForCompany_WithValidData_ReturnsExpected()
+    [Theory]
+    [InlineData(null)]
+    [InlineData(StatusType.All)]
+    public async Task GetDetailsForCompany_WithValidData_And_StatusType_ReturnsExpected(StatusType? statusType)
     {
         // Arrange
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.MinValue).ToListAsync();
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.MinValue, statusType).ToListAsync();
 
         // Assert
         result.Should().HaveCount(10);
@@ -84,7 +87,7 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, dt).ToListAsync();
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, dt, null).ToListAsync();
 
         // Assert
         result.Should().HaveCount(10);
@@ -102,6 +105,56 @@ public class CompanySsiDetailsRepositoryTests
             x => x.ExternalDetailData.Version == "1.0" && x.SsiDetailData.Count() == 1,
             x => x.ExternalDetailData.Version == "2.0" && !x.SsiDetailData.Any(),
             x => x.ExternalDetailData.Version == "3.0" && !x.SsiDetailData.Any());
+    }
+
+    [Fact]
+    public async Task GetAllExternalTypeDetailDataWithValidData_WithValidData_and_StatusType_Active_ReturnsExpected()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+
+        //Act
+
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.UtcNow, StatusType.Active).ToListAsync();
+
+        // Assert
+        result.Should().HaveCount(10);
+        result.SelectMany(x => x.VerifiedCredentials)
+            .Select(x => x.ExternalDetailData)
+                .Should().HaveCount(1);
+    }
+
+    [Fact]
+    public async Task GetAllExternalTypeDetailDataWithValidData_and_StatusType_All_ReturnsExpected()
+    {
+        // Arrange
+        var sut = await CreateSut();
+
+        //Act
+
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.UtcNow, StatusType.All).ToListAsync();
+
+        // Assert
+        result.Should().HaveCount(10);
+        result.SelectMany(x => x.VerifiedCredentials)
+            .Select(x => x.ExternalDetailData)
+                .Should().HaveCount(11);
+    }
+
+    [Fact]
+    public async Task GetAllExternalTypeDetailDataWithValidData_WithValidData_and_StatusType_Expired_ReturnsExpected()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+        //Act
+
+        var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.UtcNow, StatusType.Expired).ToListAsync();
+
+        // Assert
+        result.Should().HaveCount(10);
+        result.SelectMany(x => x.VerifiedCredentials)
+            .Select(x => x.ExternalDetailData)
+                .Should().HaveCount(10);
     }
 
     #endregion

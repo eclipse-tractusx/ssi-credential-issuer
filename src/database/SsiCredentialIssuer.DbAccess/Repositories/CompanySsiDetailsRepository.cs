@@ -30,7 +30,7 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
     : ICompanySsiDetailsRepository
 {
     /// <inheritdoc />
-    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry) =>
+    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry, StatusType? statusType) =>
         context.VerifiedCredentialTypes
             .Where(t => t.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.FRAMEWORK)
             .Select(t => new
@@ -38,6 +38,11 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 t.VerifiedCredentialTypeAssignedUseCase!.UseCase,
                 TypeId = t.Id,
                 ExternalTypeDetails = t.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalType!.VerifiedCredentialExternalTypeDetailVersions
+                .Where(x => !statusType.HasValue || statusType == StatusType.All
+                                        || (statusType == StatusType.Active
+                                            && (x.Expiry > minExpiry))
+                                        || (statusType == StatusType.Expired && x.Expiry <= DateTimeOffset.UtcNow)
+                                    )
             })
             .Select(x => new UseCaseParticipationData(
                 x.UseCase!.Name,
