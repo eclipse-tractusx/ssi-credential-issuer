@@ -99,28 +99,34 @@ paths:
       parameters:
         - name: page
           in: query
+          description: The page to get
           schema:
             type: integer
             format: int32
         - name: size
           in: query
+          description: Amount of entries
           schema:
             type: integer
             format: int32
         - name: companySsiDetailStatusId
           in: query
+          description: 'OPTIONAL: Filter for the status'
           schema:
             $ref: '#/components/schemas/CompanySsiDetailStatusId'
         - name: credentialTypeId
           in: query
+          description: 'OPTIONAL: The type of the credential that should be returned'
           schema:
             $ref: '#/components/schemas/VerifiedCredentialTypeId'
         - name: approvalType
           in: query
+          description: 'OPTIONAL: Search string for the company name'
           schema:
             $ref: '#/components/schemas/CompanySsiDetailApprovalType'
         - name: sorting
           in: query
+          description: Defines the sorting of the list
           schema:
             $ref: '#/components/schemas/CompanySsiDetailSorting'
       responses:
@@ -276,6 +282,7 @@ paths:
       parameters:
         - name: credentialId
           in: path
+          description: Id of the entry that should be approved
           required: true
           schema:
             type: string
@@ -320,6 +327,7 @@ paths:
       parameters:
         - name: credentialId
           in: path
+          description: Id of the entry that should be rejected
           required: true
           schema:
             type: string
@@ -364,12 +372,14 @@ paths:
       parameters:
         - name: processId
           in: path
+          description: Id of the process to retrigger
           required: true
           schema:
             type: string
             format: uuid
         - name: processStepTypeId
           in: path
+          description: The step that should be retriggered
           required: true
           schema:
             $ref: '#/components/schemas/ProcessStepTypeId'
@@ -413,6 +423,7 @@ paths:
       parameters:
         - name: credentialId
           in: path
+          description: Id of the credential that should be revoked
           required: true
           schema:
             type: string
@@ -446,6 +457,7 @@ paths:
       parameters:
         - name: credentialId
           in: path
+          description: Id of the credential that should be revoked
           required: true
           schema:
             type: string
@@ -479,12 +491,14 @@ paths:
       parameters:
         - name: processId
           in: path
+          description: Id of the process to retrigger
           required: true
           schema:
             type: string
             format: uuid
         - name: processStepTypeId
           in: path
+          description: The step that should be retriggered
           required: true
           schema:
             $ref: '#/components/schemas/ProcessStepTypeId'
