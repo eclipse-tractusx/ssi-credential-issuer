@@ -1207,7 +1207,7 @@ public class IssuerBusinessLogicTests
     #region GetCredentialsForBpn
 
     [Fact]
-    public async void GetCredentialsForBpn_WithVersion_ReturnExpected()
+    public async Task GetCredentialsForBpn_WithVersion_ReturnExpected()
     {
         OwnedVerifiedCredentialData[] ownedVerifiedCredentialData = [new OwnedVerifiedCredentialData(
             Guid.NewGuid(),
@@ -1228,7 +1228,7 @@ public class IssuerBusinessLogicTests
     }
 
     [Fact]
-    public async void GetCredentialsForBpn_WithoutVersion_ReturnExpected()
+    public async Task GetCredentialsForBpn_WithoutVersion_ReturnExpected()
     {
         OwnedVerifiedCredentialData[] ownedVerifiedCredentialData = [new OwnedVerifiedCredentialData(
             Guid.NewGuid(),
