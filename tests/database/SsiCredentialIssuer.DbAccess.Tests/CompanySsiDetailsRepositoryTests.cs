@@ -111,7 +111,7 @@ public class CompanySsiDetailsRepositoryTests
     public async Task GetAllExternalTypeDetailDataWithValidData_WithValidData_and_StatusType_Active_ReturnsExpected()
     {
         // Arrange
-        var (sut, context) = await CreateSutWithContext();
+        var sut = await CreateSut();
 
         //Act
 
@@ -145,7 +145,7 @@ public class CompanySsiDetailsRepositoryTests
     public async Task GetAllExternalTypeDetailDataWithValidData_WithValidData_and_StatusType_Expired_ReturnsExpected()
     {
         // Arrange
-        var (sut, context) = await CreateSutWithContext();
+        var sut = await CreateSut();
         //Act
 
         var result = await sut.GetUseCaseParticipationForCompany(ValidBpnl, DateTimeOffset.UtcNow, StatusType.Expired).ToListAsync();
