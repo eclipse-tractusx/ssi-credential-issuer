@@ -122,6 +122,8 @@ spec:
           value: "{{ .Values.service.credential.issuerBpn }}"
         - name: "CREDENTIAL__STATUSLISTURL"
           value: "{{ .Values.service.credential.statusListUrl }}"
+        - name: "CREDENTIAL__STATUSLISTTYPE"
+          value: "{{ .Values.service.credential.statusListType }}"
         - name: "CREDENTIAL__ENCRYPTIONCONFIG__ENCRYPTIONCONFIGINDEX"
           value: "{{ .Values.service.credential.encryptionConfigIndex }}"
         - name: "CREDENTIAL__ENCRYPTIONCONFIGS__0__INDEX"

@@ -591,7 +591,7 @@ public class IssuerBusinessLogicTests
                 VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL,
                 CompanyUserId.ToString(),
                 Guid.NewGuid(),
-                Enumerable.Repeat<Guid>(Guid.NewGuid(), 1)));
+                Enumerable.Repeat(Guid.NewGuid(), 1)));
         A.CallTo(() => _companySsiDetailsRepository.AttachAndModifyCompanySsiDetails(CredentialId, A<Action<CompanySsiDetail>?>._, A<Action<CompanySsiDetail>>._!))
             .Invokes((Guid _, Action<CompanySsiDetail>? initialize, Action<CompanySsiDetail> updateFields) =>
             {
@@ -678,15 +678,14 @@ public class IssuerBusinessLogicTests
         var data = new CreateBpnCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, null, null);
         var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, DateTimeOffset.Now);
 
-        HttpRequestMessage? request = null;
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
-        }, requestMessage => request = requestMessage);
+        });
 
         A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
-            .Invokes((string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
+            .Invokes((string _, VerifiedCredentialTypeId _, CompanySsiDetailStatusId _, string _, string _, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
 
         // Act
         await _sut.CreateBpnCredential(data, CancellationToken.None);
@@ -718,12 +717,11 @@ public class IssuerBusinessLogicTests
         var didId = Guid.NewGuid().ToString();
         var didDocument = new DidDocument(didId);
         var data = new CreateBpnCredentialRequest(holderUrl, Bpnl, null, null);
-        HttpRequestMessage? request = null;
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
-        }, requestMessage => request = requestMessage);
+        });
         Task Act() => _sut.CreateBpnCredential(data, CancellationToken.None);
 
         // Act
@@ -754,17 +752,16 @@ public class IssuerBusinessLogicTests
         var data = new CreateMembershipCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, "Test", null, null);
         var detail = new CompanySsiDetail(CredentialId, _identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, DateTimeOffset.Now);
 
-        HttpRequestMessage? request = null;
         A.CallTo(() => _companySsiDetailsRepository.GetCertificateTypes(A<string>._))
             .Returns(Enum.GetValues<VerifiedCredentialTypeId>().ToAsyncEnumerable());
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
-        }, requestMessage => request = requestMessage);
+        });
 
         A.CallTo(() => _companySsiDetailsRepository.CreateSsiDetails(_identity.Bpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.ACTIVE, IssuerBpnl, _identity.IdentityId, A<Action<CompanySsiDetail>>._))
-            .Invokes((string bpnl, VerifiedCredentialTypeId verifiedCredentialTypeId, CompanySsiDetailStatusId companySsiDetailStatusId, string issuerBpn, string userId, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
+            .Invokes((string _, VerifiedCredentialTypeId _, CompanySsiDetailStatusId _, string _, string _, Action<CompanySsiDetail>? setOptionalFields) => setOptionalFields?.Invoke(detail));
 
         // Act
         await _sut.CreateMembershipCredential(data, CancellationToken.None);
@@ -925,14 +922,13 @@ public class IssuerBusinessLogicTests
         var now = DateTimeOffset.Now;
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         var data = new CreateFrameworkCredentialRequest("https://example.org/holder/BPNL12343546/did.json", Bpnl, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, useCaseId, null, null);
-        HttpRequestMessage? request = null;
         A.CallTo(() => _companySsiDetailsRepository.CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(useCaseId, VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK, Bpnl))
             .Returns((true, "1.0.0", "https://example.org/tempalte", Enumerable.Repeat(VerifiedCredentialExternalTypeId.TRACEABILITY_CREDENTIAL, 1), now.AddDays(5), false));
         ConfigureHttpClientFactoryFixture(new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(JsonSerializer.Serialize(didDocument))
-        }, requestMessage => request = requestMessage);
+        });
 
         // Act
         await _sut.CreateFrameworkCredential(data, CancellationToken.None);
