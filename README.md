@@ -25,7 +25,7 @@ dotnet run
 
 ## Known Issues and Limitations
 
-See [Known Knowns](/docs/technical-documentation/known-knowns/known-issues-and-limitations.md).
+See [Known Knowns](/docs/admin/known-issues-and-limitations.md).
 
 ## Notice for Docker image
 

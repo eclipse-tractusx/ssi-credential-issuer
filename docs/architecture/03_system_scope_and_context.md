@@ -1,4 +1,4 @@
-# Content and Scope
+# System Context and Scope
 
 ## Business Context
 
