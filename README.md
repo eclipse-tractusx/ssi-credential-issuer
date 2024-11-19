@@ -6,6 +6,8 @@ For **information about the SSI Credential Issuer**, please refer to the documen
 
 For **installation** details, please refer to the [README.md](./charts/ssi-credential-issuer/README.md) of the provided helm chart.
 
+To see the latest open API specs you can have a look at the [API Hub](https://eclipse-tractusx.github.io/api-hub/ssi-credential-issuer/)
+
 ## How to build and run
 
 Install the [.NET 8.0 SDK](https://www.microsoft.com/net/download).
