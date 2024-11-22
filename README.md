@@ -42,7 +42,7 @@ See Docker notice files for more information:
 
 ## Contributing
 
-See [Contribution details](/docs/technical-documentation/dev-process/How%20to%20contribute.md).
+See [Contribution details](/docs/admin/dev-process/How%20to%20contribute.md).
 
 ## License
 
