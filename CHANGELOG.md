@@ -1,16 +1,12 @@
 # Changelog
 
-## [1.2.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.2.0-rc.1...v1.2.0-rc2) (2024-10-24)
+## [1.2.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2024-10-24)
 
 ### Bug Fixes
 
 * set credential to active after credential exists ([#286](https://github.com/eclipse-tractusx/ssi-credential-issuer/pull/286)) ([af759bf](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/af759bf20ec56a3098dc87d357916dcd67638a29))
 
-### Miscellaneous Chores
-
-* release 1.2.0-rc.1 ([8ada2a3](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/8ada2a30d68d200b615c3f912d61e0066d7fdcad))
-
-## [1.2.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2024-10-21)
+## [1.2.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.2.0-alpha.1...v1.2.0-rc.1) (2024-10-21)
 
 ### Features
 
