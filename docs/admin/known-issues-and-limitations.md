@@ -4,9 +4,7 @@
 
 - The DIM Status List is presently included in both the configuration file and the outbound wallet post body, which is against our recommendation as we believe this function should be autonomously managed by the wallet. The status list is defined within the component configuration, suggesting an interim solution with an intention to phase out this approach, reinforcing that the status list should not be integral to the interface in the long term.
 
-- The Operator is currently not able to review the supporting documents for a credential request of another company. See [225](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/225)
-
-- The application of the wallet and the paths of the wallet calls are not configurable. Thus the application is set to catena-x-portal. See [226](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/226)
+- Type of the status list is not yet configurable and currently still set to StatusList2021, see [299](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/299).
 
 ## NOTICE
 
