@@ -288,6 +288,10 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -333,6 +337,10 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -384,6 +392,10 @@ paths:
           schema:
             $ref: '#/components/schemas/ProcessStepTypeId'
       responses:
+        '200':
+          description: OK
+          content:
+            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -429,6 +441,13 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
         '401':
           description: Unauthorized
           content:
@@ -441,13 +460,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
   '/api/revocation/credentials/{credentialId}':
     post:
       tags:
@@ -463,6 +475,13 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
         '401':
           description: Unauthorized
           content:
@@ -475,13 +494,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
   '/api/revocation/{processId}/retrigger-step/{processStepTypeId}':
     post:
       tags:
@@ -503,6 +515,10 @@ paths:
           schema:
             $ref: '#/components/schemas/ProcessStepTypeId'
       responses:
+        '200':
+          description: OK
+          content:
+            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -584,6 +600,13 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
         '401':
           description: Unauthorized
           content:
@@ -596,13 +619,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: binary
         '409':
           description: Conflict
           content:
@@ -736,6 +752,15 @@ components:
             $ref: '#/components/schemas/DocumentData'
         externalTypeDetail:
           $ref: '#/components/schemas/ExternalTypeDetailData'
+        processId:
+          type: string
+          format: uuid
+          nullable: true
+        processSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessStepDetailData'
+          nullable: true
       additionalProperties: false
     DocumentData:
       type: object
@@ -843,6 +868,22 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    ProcessStepDetailData:
+      type: object
+      properties:
+        processStepStatusId:
+          $ref: '#/components/schemas/ProcessStepStatusId'
+        processStepTypeId:
+          $ref: '#/components/schemas/ProcessStepTypeId'
+      additionalProperties: false
+    ProcessStepStatusId:
+      enum:
+        - TODO
+        - DONE
+        - SKIPPED
+        - FAILED
+        - DUPLICATE
+      type: string
     ProcessStepTypeId:
       enum:
         - CREATE_SIGNED_CREDENTIAL
