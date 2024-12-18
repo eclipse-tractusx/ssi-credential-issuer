@@ -22,6 +22,7 @@ using AutoFixture.AutoFakeItEasy;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -115,22 +116,21 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(null, null, null).ToListAsync();
+        var result = await sut.GetAllCredentialDetails(null, null, null, null)(0, 15);
 
         // Assert
         result.Should().NotBeNull();
-        result.Count.Should().Be(7);
-        result.Should().HaveCount(7);
-        result.Where(x => x.Bpnl == ValidBpnl).Should().HaveCount(6)
+        result!.Count.Should().Be(7);
+        result.Data.Where(x => x.Bpnl == ValidBpnl).Should().HaveCount(6)
             .And.Satisfy(
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK && x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE);
-        result.Where(x => x.Bpnl == "BPNL00000001LLHA").Should().ContainSingle()
-            .And.Satisfy(x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
+                x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK && x.ParticipantStatus == CompanySsiDetailStatusId.PENDING,
+                x => x.CredentialType == VerifiedCredentialTypeId.PCF_FRAMEWORK && x.ParticipantStatus == CompanySsiDetailStatusId.PENDING,
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.ParticipantStatus == CompanySsiDetailStatusId.PENDING,
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.ParticipantStatus == CompanySsiDetailStatusId.INACTIVE,
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP && x.ParticipantStatus == CompanySsiDetailStatusId.INACTIVE,
+                x => x.CredentialType == VerifiedCredentialTypeId.BEHAVIOR_TWIN_FRAMEWORK && x.ParticipantStatus == CompanySsiDetailStatusId.INACTIVE);
+        result.Data.Where(x => x.Bpnl == "BPNL00000001LLHA").Should().ContainSingle()
+            .And.Satisfy(x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
     }
 
     [Fact]
@@ -140,18 +140,18 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(CompanySsiDetailStatusId.PENDING, null, null).ToListAsync();
+        var result = await sut.GetAllCredentialDetails(null, CompanySsiDetailStatusId.PENDING, null, null)(0, 15);
 
         // Assert
-        result.Should().NotBeNull().And.HaveCount(4);
-        result.Count.Should().Be(4);
-        result.Where(x => x.Bpnl == ValidBpnl).Should().HaveCount(3)
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(4);
+        result.Data.Where(x => x.Bpnl == ValidBpnl).Should().HaveCount(3)
             .And.Satisfy(
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.PCF_FRAMEWORK,
-                x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.MEMBERSHIP);
-        result.Should().ContainSingle(x => x.Bpnl == "BPNL00000001LLHA")
-            .Which.Should().Match<CompanySsiDetail>(x => x.VerifiedCredentialTypeId == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
+                x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK,
+                x => x.CredentialType == VerifiedCredentialTypeId.PCF_FRAMEWORK,
+                x => x.CredentialType == VerifiedCredentialTypeId.MEMBERSHIP);
+        result.Data.Should().ContainSingle(x => x.Bpnl == "BPNL00000001LLHA")
+            .Which.Should().Match<CredentialDetailData>(x => x.CredentialType == VerifiedCredentialTypeId.TRACEABILITY_FRAMEWORK);
     }
 
     [Fact]
@@ -161,11 +161,12 @@ public class CompanySsiDetailsRepositoryTests
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.GetAllCredentialDetails(null, VerifiedCredentialTypeId.PCF_FRAMEWORK, null).ToListAsync();
+        var result = await sut.GetAllCredentialDetails(null, null, VerifiedCredentialTypeId.PCF_FRAMEWORK, null)(0, 15);
 
         // Assert
-        result.Should().NotBeNull().And.ContainSingle().Which.Bpnl.Should().Be(ValidBpnl);
-        result.Count.Should().Be(1);
+        result.Should().NotBeNull();
+        result!.Count.Should().Be(1);
+        result.Data.Should().ContainSingle().Which.Bpnl.Should().Be(ValidBpnl);
     }
 
     #endregion
