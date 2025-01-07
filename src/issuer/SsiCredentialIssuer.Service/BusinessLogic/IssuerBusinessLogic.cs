@@ -47,7 +47,6 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
 public class IssuerBusinessLogic : IIssuerBusinessLogic
 {
-    private const string StatusList = "StatusList2021";
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private static readonly IEnumerable<string> Context = new[] { "https://www.w3.org/2018/credentials/v1", "https://w3id.org/catenax/credentials/v1.0.0" };
     private static readonly Regex UrlPathInvalidCharsRegex = new("""[""<>#%{}|\\^~\[\]`]+""", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
@@ -355,7 +354,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             ),
             new CredentialStatus(
                 _settings.StatusListUrl,
-                StatusList)
+                _settings.StatusListType)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
         return await HandleCredentialProcessCreation(requestData.BusinessPartnerNumber, VerifiedCredentialTypeKindId.BPN, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, expiryDate, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
@@ -383,7 +382,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             ),
             new CredentialStatus(
                 _settings.StatusListUrl,
-                StatusList)
+                _settings.StatusListType)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
         return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.MEMBERSHIP, expiryDate, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
@@ -452,7 +451,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             ),
             new CredentialStatus(
                 _settings.StatusListUrl,
-                StatusList)
+                _settings.StatusListType)
         );
         var schema = JsonSerializer.Serialize(schemaData, Options);
         return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.FRAMEWORK, requestData.UseCaseFrameworkId, result.Expiry, schema, requestData.TechnicalUserDetails, requestData.UseCaseFrameworkVersionId, requestData.CallbackUrl, companyCredentialDetailsRepository);
