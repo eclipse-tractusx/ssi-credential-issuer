@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Microsoft.EntityFrameworkCore;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -159,12 +160,46 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
             .SingleOrDefaultAsync();
 
     /// <inheritdoc />
-    public IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType) =>
-        context.CompanySsiDetails.AsNoTracking()
-            .Where(c =>
-                (!companySsiDetailStatusId.HasValue || c.CompanySsiDetailStatusId == companySsiDetailStatusId.Value) &&
-                (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId) &&
-                (!approvalType.HasValue || (approvalType.Value == CompanySsiDetailApprovalType.Automatic && c.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.FRAMEWORK) || (approvalType.Value == CompanySsiDetailApprovalType.Manual && c.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId != VerifiedCredentialTypeKindId.FRAMEWORK)));
+    public Func<int, int, Task<Pagination.Source<CredentialDetailData>?>> GetAllCredentialDetails(CompanySsiDetailSorting? sorting, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType) =>
+        (skip, take) => Pagination.CreateSourceQueryAsync(
+            skip,
+            take,
+            context.CompanySsiDetails.AsNoTracking()
+                .Where(c =>
+                    (!companySsiDetailStatusId.HasValue || c.CompanySsiDetailStatusId == companySsiDetailStatusId.Value) &&
+                    (!credentialTypeId.HasValue || c.VerifiedCredentialTypeId == credentialTypeId) &&
+                    (!approvalType.HasValue ||
+                     (approvalType.Value == CompanySsiDetailApprovalType.Automatic && c.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.FRAMEWORK) ||
+                     (approvalType.Value == CompanySsiDetailApprovalType.Manual && c.VerifiedCredentialType!.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId != VerifiedCredentialTypeKindId.FRAMEWORK)))
+                .GroupBy(x => x.IssuerBpn),
+            credentials => sorting == null || sorting == CompanySsiDetailSorting.BpnlAsc ?
+                credentials.OrderBy(c => c.Bpnl) :
+                credentials.OrderByDescending(c => c.Bpnl),
+            credential => new CredentialDetailData(
+                credential.Id,
+                credential.Bpnl,
+                credential.VerifiedCredentialTypeId,
+                credential.VerifiedCredentialType!.VerifiedCredentialTypeAssignedUseCase!.UseCase!.Name,
+                credential.CompanySsiDetailStatusId,
+                credential.ExpiryDate,
+                credential.Documents.Select(d => new DocumentData(d.Id, d.DocumentName, d.DocumentTypeId)),
+                credential.VerifiedCredentialExternalTypeDetailVersion == null
+                    ? null
+                    : new ExternalTypeDetailData(
+                        credential.VerifiedCredentialExternalTypeDetailVersion.Id,
+                        credential.VerifiedCredentialExternalTypeDetailVersion.VerifiedCredentialExternalTypeId,
+                        credential.VerifiedCredentialExternalTypeDetailVersion.Version,
+                        credential.VerifiedCredentialExternalTypeDetailVersion.Template,
+                        credential.VerifiedCredentialExternalTypeDetailVersion.ValidFrom,
+                        credential.VerifiedCredentialExternalTypeDetailVersion.Expiry),
+                credential.ProcessId,
+                credential.ProcessId == null ?
+                    null :
+                    credential.Process!.ProcessSteps.Select(ps =>
+                        new ProcessStepDetailData(
+                            ps.ProcessStepStatusId,
+                            ps.ProcessStepTypeId)))
+        ).SingleOrDefaultAsync();
 
     /// <inheritdoc />
     public IAsyncEnumerable<OwnedVerifiedCredentialData> GetOwnCredentialDetails(string bpnl) =>
