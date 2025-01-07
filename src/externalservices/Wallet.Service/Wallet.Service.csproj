@@ -30,7 +30,7 @@
     <ProjectReference Include="..\..\database\SsiCredentialIssuer.Entities\SsiCredentialIssuer.Entities.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="JsonSchema.Net" Version="7.3.0" />
+    <PackageReference Include="JsonSchema.Net" Version="7.3.1" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
     <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Models" Version="2.13.0" />
     <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Token" Version="2.13.0" />
