@@ -30,7 +30,7 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
     : ICompanySsiDetailsRepository
 {
     /// <inheritdoc />
-    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry) =>
+    public IAsyncEnumerable<UseCaseParticipationData> GetUseCaseParticipationForCompany(string bpnl, DateTimeOffset minExpiry, StatusType? statusType) =>
         context.VerifiedCredentialTypes
             .Where(t => t.VerifiedCredentialTypeAssignedKind!.VerifiedCredentialTypeKindId == VerifiedCredentialTypeKindId.FRAMEWORK)
             .Select(t => new
@@ -57,9 +57,13 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                                 .Where(ssi =>
                                     ssi.Bpnl == bpnl &&
                                     ssi.VerifiedCredentialTypeId == x.TypeId &&
-                                    (ssi.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE || ssi.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING) &&
                                     ssi.VerifiedCredentialExternalTypeDetailVersionId == e.Id &&
-                                    (ssi.ExpiryDate == null || ssi.ExpiryDate > minExpiry))
+                                    (!statusType.HasValue || statusType == StatusType.All
+                                        || (statusType == StatusType.Active
+                                            && (ssi.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE)
+                                            && (ssi.ExpiryDate == null || ssi.ExpiryDate > minExpiry))
+                                        || (statusType == StatusType.Expired && ssi.ExpiryDate <= DateTimeOffset.UtcNow)
+                                    ))
                                 .Select(ssi =>
                                     new CompanySsiDetailData(
                                         ssi.Id,
