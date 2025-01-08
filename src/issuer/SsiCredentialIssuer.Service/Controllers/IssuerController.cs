@@ -42,9 +42,10 @@ public static class IssuerController
     {
         var issuer = group.MapGroup("/issuer");
 
-        issuer.MapGet("useCaseParticipation", (IIssuerBusinessLogic logic) => logic.GetUseCaseParticipationAsync())
+        issuer.MapGet("useCaseParticipation", (IIssuerBusinessLogic logic,
+                [FromQuery(Name = "status")] string? status) => logic.GetUseCaseParticipationAsync(status))
             .WithSwaggerDescription("Gets all use case frameworks and the participation status of the acting company",
-                "Example: GET: api/issuer/useCaseParticipation")
+                "Example: GET: api/issuer/useCaseParticipation<br><h3>Available values:</h3> All, Active, Expired")
             .RequireAuthorization(r =>
             {
                 r.RequireRole("view_use_case_participation");
@@ -52,6 +53,7 @@ public static class IssuerController
             })
             .WithDefaultResponses()
             .Produces(StatusCodes.Status200OK, typeof(IEnumerable<UseCaseParticipationData>), Constants.JsonContentType)
+            .Produces(StatusCodes.Status400BadRequest, typeof(ErrorResponse), Constants.JsonContentType)
             .Produces(StatusCodes.Status409Conflict, typeof(ErrorResponse), Constants.JsonContentType);
 
         issuer.MapGet("certificates", (IIssuerBusinessLogic logic) => logic.GetSsiCertificatesAsync())
