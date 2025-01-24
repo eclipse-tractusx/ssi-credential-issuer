@@ -149,7 +149,7 @@ processesworker:
 credentialExpiry:
   name: "expiry"
   image:
-    name: "docker.io/tractusx/ssi-credential-expiry-app"
+    name: "docker.io/tractusx/ssi-credential-data-deletion-app"
     tag: ""
     pullSecrets: []
   imagePullPolicy: "IfNotPresent"

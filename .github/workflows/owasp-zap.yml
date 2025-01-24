@@ -88,13 +88,13 @@ jobs:
           tags: kind-registry:5000/credential-issuer-processes-worker:testing
   
       - name: Build Expiry image
-        id: build-expiry-image
+        id: build-data-deletion-image
         uses: docker/build-push-action@1a162644f9a7e87d8f4b053101d1d9a712edc18c # v6.3.0
         with:
           context: .
-          file: ./docker/Dockerfile-credential-expiry-app
+          file: ./docker/Dockerfile-credential-data-deletion-app
           push: true
-          tags: kind-registry:5000/credential-expiry-app:testing
+          tags: kind-registry:5000/credential-data-deletion-app:testing
   
       - name: Add bitnami repo
         run: |
@@ -107,7 +107,7 @@ jobs:
           helm dependency build
 
       - name: Install the chart on KinD cluster
-        run: helm install testing -n apps --create-namespace --wait --set service.image.name=kind-registry:5000/credential-issuer-service --set service.image.tag=testing --set migrations.image.name=kind-registry:5000/credential-issuer-migrations --set migrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-expiry-app --set credentialExpiry.image.tag=testing --set service.swaggerEnabled=true charts/ssi-credential-issuer
+        run: helm install testing -n apps --create-namespace --wait --set service.image.name=kind-registry:5000/credential-issuer-service --set service.image.tag=testing --set migrations.image.name=kind-registry:5000/credential-issuer-migrations --set migrations.image.tag=testing --set processesworker.image.name=kind-registry:5000/credential-issuer-processes-worker --set processesworker.image.tag=testing --set credentialExpiry.image.name=kind-registry:5000/credential-data-deletion-app --set credentialExpiry.image.tag=testing --set service.swaggerEnabled=true charts/ssi-credential-issuer
 
       - name: Configure port forward to app in KinD
         run: |

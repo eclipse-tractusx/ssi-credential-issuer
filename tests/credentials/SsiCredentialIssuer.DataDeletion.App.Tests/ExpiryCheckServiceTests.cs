@@ -31,12 +31,12 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 using System.Runtime.CompilerServices;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.Tests;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.Tests;
 
 public class ExpiryCheckServiceTests
 {

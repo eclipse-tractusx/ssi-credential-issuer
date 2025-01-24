@@ -19,7 +19,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.DependencyInjection;
 
 /// <summary>
 /// Settings for the ExpiryCheckService

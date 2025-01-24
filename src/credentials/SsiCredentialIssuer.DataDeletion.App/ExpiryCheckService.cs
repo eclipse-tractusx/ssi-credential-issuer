@@ -29,12 +29,12 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 using System.Text.Json;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App;
 
 /// <summary>
 /// Service to delete the pending and inactive documents as well as the depending consents from the database
