@@ -17,13 +17,22 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Validation;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
 
-public enum ProcessStepStatusId
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity;
+
+public static class ServiceCollectionExtensions
 {
-    TODO = 1,
-    DONE = 2,
-    SKIPPED = 3,
-    FAILED = 4,
-    DUPLICATE = 5
+    public static IServiceCollection AddProcessIdentity(this IServiceCollection services, IConfigurationSection section)
+    {
+        services.AddOptions<ProcessExecutionServiceSettings>()
+            .Bind(section)
+            .EnvironmentalValidation(section);
+
+        return services
+            .AddTransient<IIdentityIdService, ProcessIdentityIdService>();
+    }
 }

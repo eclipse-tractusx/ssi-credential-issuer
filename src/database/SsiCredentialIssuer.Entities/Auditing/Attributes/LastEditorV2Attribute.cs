@@ -27,6 +27,4 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Attributes;
 /// When changes are needed create a V3 of it.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Property)]
-public class LastEditorV2Attribute : Attribute
-{
-}
+public class LastEditorV2Attribute : Attribute;

@@ -26,7 +26,7 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Seeding.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.DependencyInjection;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity;
 using Serilog;
 using System.Reflection;
 

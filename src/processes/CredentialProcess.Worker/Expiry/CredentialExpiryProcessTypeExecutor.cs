@@ -18,12 +18,13 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Worker.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Extensions;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
 using System.Collections.Immutable;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Expiry;
@@ -31,7 +32,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Expi
 public class CredentialExpiryProcessTypeExecutor(
     IIssuerRepositories issuerRepositories,
     ICredentialExpiryProcessHandler credentialExpiryProcessHandler)
-    : IProcessTypeExecutor
+    : IProcessTypeExecutor<ProcessTypeId, ProcessStepTypeId>
 {
     private readonly IEnumerable<ProcessStepTypeId> _executableProcessSteps = ImmutableArray.Create(
         ProcessStepTypeId.REVOKE_CREDENTIAL,
@@ -45,7 +46,7 @@ public class CredentialExpiryProcessTypeExecutor(
     public IEnumerable<ProcessStepTypeId> GetExecutableStepTypeIds() => _executableProcessSteps;
     public ValueTask<bool> IsLockRequested(ProcessStepTypeId processStepTypeId) => ValueTask.FromResult(false);
 
-    public async ValueTask<IProcessTypeExecutor.InitializationResult> InitializeProcess(Guid processId, IEnumerable<ProcessStepTypeId> processStepTypeIds)
+    public async ValueTask<IProcessTypeExecutor<ProcessTypeId, ProcessStepTypeId>.InitializationResult> InitializeProcess(Guid processId, IEnumerable<ProcessStepTypeId> processStepTypeIds)
     {
         var (exists, credentialId) = await issuerRepositories.GetInstance<ICredentialRepository>().GetDataForProcessId(processId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (!exists)
@@ -54,10 +55,10 @@ public class CredentialExpiryProcessTypeExecutor(
         }
 
         _credentialId = credentialId;
-        return new IProcessTypeExecutor.InitializationResult(false, null);
+        return new IProcessTypeExecutor<ProcessTypeId, ProcessStepTypeId>.InitializationResult(false, null);
     }
 
-    public async ValueTask<IProcessTypeExecutor.StepExecutionResult> ExecuteProcessStep(ProcessStepTypeId processStepTypeId, IEnumerable<ProcessStepTypeId> processStepTypeIds, CancellationToken cancellationToken)
+    public async ValueTask<IProcessTypeExecutor<ProcessTypeId, ProcessStepTypeId>.StepExecutionResult> ExecuteProcessStep(ProcessStepTypeId processStepTypeId, IEnumerable<ProcessStepTypeId> processStepTypeIds, CancellationToken cancellationToken)
     {
         if (_credentialId == Guid.Empty)
         {
@@ -88,7 +89,7 @@ public class CredentialExpiryProcessTypeExecutor(
             modified = true;
         }
 
-        return new IProcessTypeExecutor.StepExecutionResult(modified, stepStatusId, nextStepTypeIds, null, processMessage);
+        return new IProcessTypeExecutor<ProcessTypeId, ProcessStepTypeId>.StepExecutionResult(modified, stepStatusId, nextStepTypeIds, null, processMessage);
     }
 
     private static (ProcessStepStatusId StatusId, string? ProcessMessage, IEnumerable<ProcessStepTypeId>? nextSteps) ProcessError(Exception ex, ProcessStepTypeId processStepTypeId)

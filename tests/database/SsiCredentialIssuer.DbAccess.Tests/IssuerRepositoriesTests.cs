@@ -21,6 +21,8 @@ using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Concrete.Entities;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -89,16 +91,16 @@ public class IssuerRepositoriesTests : IAssemblyFixture<TestDbFixture>
     }
 
     [Fact]
-    public async Task GetInstance_ProcessStep_CreatesSuccessfully()
+    public async Task GetInstance_ProcessStepRepo_CreatesSuccessfully()
     {
         // Arrange
         var sut = await CreateSut();
 
         // Act
-        var result = sut.GetInstance<IProcessStepRepository>();
+        var result = sut.GetInstance<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>();
 
         // Assert
-        result.Should().BeOfType<ProcessStepRepository>();
+        result.Should().BeOfType<ProcessStepRepository<Process, ProcessType<Process, ProcessTypeId>, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>, ProcessStepType<Process, ProcessTypeId, ProcessStepTypeId>, ProcessTypeId, ProcessStepTypeId>>();
     }
 
     #endregion

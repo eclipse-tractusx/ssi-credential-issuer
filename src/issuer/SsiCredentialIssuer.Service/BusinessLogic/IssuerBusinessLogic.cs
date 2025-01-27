@@ -23,14 +23,19 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Concrete.Entities;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
@@ -180,7 +185,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
     private Guid CreateProcess()
     {
-        var processStepRepository = _repositories.GetInstance<IProcessStepRepository>();
+        var processStepRepository = _repositories.GetInstance<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>();
         var processId = processStepRepository.CreateProcess(ProcessTypeId.CREATE_CREDENTIAL).Id;
         processStepRepository.CreateProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, ProcessStepStatusId.TODO, processId);
         return processId;
@@ -288,8 +293,8 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
         if (processId is not null)
         {
-            _repositories.GetInstance<IProcessStepRepository>().AttachAndModifyProcessSteps(
-                processStepIds.Select(p => new ValueTuple<Guid, Action<ProcessStep>?, Action<ProcessStep>>(
+            _repositories.GetInstance<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>().AttachAndModifyProcessSteps(
+                processStepIds.Select(p => new ValueTuple<Guid, Action<IProcessStep<ProcessStepTypeId>>?, Action<IProcessStep<ProcessStepTypeId>>>(
                     p,
                     ps => ps.ProcessStepStatusId = ProcessStepStatusId.TODO,
                     ps => ps.ProcessStepStatusId = ProcessStepStatusId.SKIPPED
@@ -428,7 +433,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
     }
 
     public Task RetriggerProcessStep(Guid processId, ProcessStepTypeId processStepTypeId, CancellationToken cancellationToken) =>
-        processStepTypeId.TriggerProcessStep(processId, _repositories);
+        processStepTypeId.TriggerProcessStep(processId, _repositories, ProcessStepTypeExtensions.GetProcessStepForRetrigger);
 
     private async Task<string> GetHolderInformation(string didDocumentLocation, CancellationToken cancellationToken)
     {

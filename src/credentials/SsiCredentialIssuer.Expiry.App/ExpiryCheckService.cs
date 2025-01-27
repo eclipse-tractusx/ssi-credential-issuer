@@ -23,6 +23,8 @@ using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -80,7 +82,7 @@ public class ExpiryCheckService
 
                 var now = dateTimeProvider.OffsetNow;
                 var companySsiDetailsRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
-                var processStepRepository = repositories.GetInstance<IProcessStepRepository>();
+                var processStepRepository = repositories.GetInstance<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>();
                 var inactiveVcsToDelete = now.AddDays(-(_settings.InactiveVcsToDeleteInWeeks * 7));
                 var expiredVcsToDelete = now.AddMonths(-_settings.ExpiredVcsToDeleteInMonth);
 
@@ -104,7 +106,7 @@ public class ExpiryCheckService
         ICompanySsiDetailsRepository companySsiDetailsRepository,
         IIssuerRepositories repositories,
         IPortalService portalService,
-        IProcessStepRepository processStepRepository,
+        IProcessStepRepository<ProcessTypeId, ProcessStepTypeId> processStepRepository,
         CancellationToken cancellationToken)
     {
         if (data.ScheduleData.IsVcToDelete)
@@ -127,7 +129,7 @@ public class ExpiryCheckService
     private static void HandleDecline(
         Guid credentialId,
         ICompanySsiDetailsRepository companySsiDetailsRepository,
-        IProcessStepRepository processStepRepository)
+        IProcessStepRepository<ProcessTypeId, ProcessStepTypeId> processStepRepository)
     {
         var processId = processStepRepository.CreateProcess(ProcessTypeId.DECLINE_CREDENTIAL).Id;
         processStepRepository.CreateProcessStep(ProcessStepTypeId.REVOKE_CREDENTIAL, ProcessStepStatusId.TODO, processId);

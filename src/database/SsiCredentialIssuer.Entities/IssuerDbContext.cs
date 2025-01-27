@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Microsoft.EntityFrameworkCore;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Concrete.Context;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.AuditEntities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Extensions;
@@ -28,21 +29,8 @@ using System.Collections.Immutable;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 
-public class IssuerDbContext : DbContext
+public class IssuerDbContext(DbContextOptions<IssuerDbContext> options, IAuditHandler auditHandler) : ProcessDbContext<Process, ProcessTypeId, ProcessStepTypeId>(options)
 {
-    private readonly IAuditHandler _auditHandler;
-
-    protected IssuerDbContext()
-    {
-        throw new InvalidOperationException("IdentityService should never be null");
-    }
-
-    public IssuerDbContext(DbContextOptions<IssuerDbContext> options, IAuditHandler auditHandler)
-        : base(options)
-    {
-        _auditHandler = auditHandler;
-    }
-
     public virtual DbSet<AuditCompanySsiDetail20240228> AuditCompanySsiDetail20240228 { get; set; } = default!;
     public virtual DbSet<AuditDocument20240305> AuditDocument20240305 { get; set; } = default!;
     public virtual DbSet<AuditCompanySsiDetail20240419> AuditCompanySsiDetail20240419 { get; set; } = default!;
@@ -56,11 +44,6 @@ public class IssuerDbContext : DbContext
     public virtual DbSet<DocumentType> DocumentTypes { get; set; } = default!;
     public virtual DbSet<ExpiryCheckType> ExpiryCheckTypes { get; set; } = default!;
     public virtual DbSet<MediaType> MediaTypes { get; set; } = default!;
-    public virtual DbSet<Process> Processes { get; set; } = default!;
-    public virtual DbSet<ProcessStep> ProcessSteps { get; set; } = default!;
-    public virtual DbSet<ProcessStepStatus> ProcessStepStatuses { get; set; } = default!;
-    public virtual DbSet<ProcessStepType> ProcessStepTypes { get; set; } = default!;
-    public virtual DbSet<ProcessType> ProcessTypes { get; set; } = default!;
     public virtual DbSet<UseCase> UseCases { get; set; } = default!;
     public virtual DbSet<VerifiedCredentialExternalType> VerifiedCredentialExternalTypes { get; set; } = default!;
     public virtual DbSet<VerifiedCredentialExternalTypeDetailVersion> VerifiedCredentialExternalTypeDetailVersions { get; set; } = default!;
@@ -79,6 +62,8 @@ public class IssuerDbContext : DbContext
     {
         modelBuilder.HasAnnotation("Relational:Collation", "en_US.utf8");
         modelBuilder.HasDefaultSchema("issuer");
+
+        base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<CompanySsiDetail>(entity =>
         {
@@ -174,39 +159,6 @@ public class IssuerDbContext : DbContext
                 Enum.GetValues(typeof(MediaTypeId))
                     .Cast<MediaTypeId>()
                     .Select(e => new MediaType(e))
-            );
-
-        modelBuilder.Entity<Process>()
-            .HasOne(d => d.ProcessType)
-            .WithMany(p => p!.Processes)
-            .HasForeignKey(d => d.ProcessTypeId)
-            .OnDelete(DeleteBehavior.ClientSetNull);
-
-        modelBuilder.Entity<ProcessStep>()
-            .HasOne(d => d.Process)
-            .WithMany(p => p!.ProcessSteps)
-            .HasForeignKey(d => d.ProcessId)
-            .OnDelete(DeleteBehavior.ClientSetNull);
-
-        modelBuilder.Entity<ProcessType>()
-            .HasData(
-                Enum.GetValues(typeof(ProcessTypeId))
-                    .Cast<ProcessTypeId>()
-                    .Select(e => new ProcessType(e))
-            );
-
-        modelBuilder.Entity<ProcessStepStatus>()
-            .HasData(
-                Enum.GetValues(typeof(ProcessStepStatusId))
-                    .Cast<ProcessStepStatusId>()
-                    .Select(e => new ProcessStepStatus(e))
-            );
-
-        modelBuilder.Entity<ProcessStepType>()
-            .HasData(
-                Enum.GetValues(typeof(ProcessStepTypeId))
-                    .Cast<ProcessStepTypeId>()
-                    .Select(e => new ProcessStepType(e))
             );
 
         modelBuilder.Entity<UseCase>();
@@ -311,7 +263,7 @@ public class IssuerDbContext : DbContext
 
     private void EnhanceChangedEntries()
     {
-        _auditHandler.HandleAuditForChangedEntries(
+        auditHandler.HandleAuditForChangedEntries(
             ChangeTracker.Entries().Where(entry =>
                 entry.State != EntityState.Unchanged && entry.State != EntityState.Detached &&
                 entry.Entity is IAuditableV2).ToImmutableList(),

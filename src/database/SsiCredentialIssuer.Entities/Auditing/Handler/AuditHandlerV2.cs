@@ -29,20 +29,12 @@ using System.Reflection;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Handler;
 
-public class AuditHandlerV2 : IAuditHandler
+public class AuditHandlerV2(IIdentityIdService identityService, IDateTimeProvider dateTimeProvider)
+    : IAuditHandler
 {
-    private readonly IIdentityIdService _identityService;
-    private readonly IDateTimeProvider _dateTimeProvider;
-
-    public AuditHandlerV2(IIdentityIdService identityService, IDateTimeProvider dateTimeProvider)
-    {
-        _identityService = identityService;
-        _dateTimeProvider = dateTimeProvider;
-    }
-
     public void HandleAuditForChangedEntries(IEnumerable<EntityEntry> changedEntries, DbContext context)
     {
-        var now = _dateTimeProvider.OffsetNow;
+        var now = dateTimeProvider.OffsetNow;
         foreach (var groupedEntries in changedEntries
                      .GroupBy(entry => entry.Metadata.ClrType))
         {
@@ -61,7 +53,7 @@ public class AuditHandlerV2 : IAuditHandler
                              lastEditorNames,
                              property => property.Metadata.Name))
                 {
-                    prop.CurrentValue = _identityService.IdentityId;
+                    prop.CurrentValue = identityService.IdentityId;
                 }
 
                 foreach (var prop in properties.IntersectBy(
@@ -101,8 +93,8 @@ public class AuditHandlerV2 : IAuditHandler
 
         newAuditEntity.AuditV2Id = Guid.NewGuid();
         newAuditEntity.AuditV2OperationId = entityEntry.State.ToAuditOperation();
-        newAuditEntity.AuditV2DateLastChanged = _dateTimeProvider.OffsetNow;
-        newAuditEntity.AuditV2LastEditorId = _identityService.IdentityId;
+        newAuditEntity.AuditV2DateLastChanged = dateTimeProvider.OffsetNow;
+        newAuditEntity.AuditV2LastEditorId = identityService.IdentityId;
 
         context.Add(newAuditEntity);
     }

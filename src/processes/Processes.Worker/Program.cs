@@ -20,12 +20,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Worker.Library;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Serilog;
 
@@ -40,7 +41,7 @@ try
             services
                 .AddTransient<ITokenService, TokenService>()
                 .AddIssuerRepositories(hostContext.Configuration)
-                .AddProcessExecutionService(hostContext.Configuration.GetSection("Processes"))
+                .AddProcessExecutionService<ProcessTypeId, ProcessStepTypeId>(hostContext.Configuration.GetSection("Processes"))
                 .AddPortalService(hostContext.Configuration.GetSection("Portal"))
                 .AddCallbackService(hostContext.Configuration.GetSection("Callback"))
                 .AddWalletService(hostContext.Configuration)
@@ -60,7 +61,7 @@ try
     };
 
     Log.Information("Start processing");
-    var workerInstance = host.Services.GetRequiredService<ProcessExecutionService>();
+    var workerInstance = host.Services.GetRequiredService<ProcessExecutionService<ProcessTypeId, ProcessStepTypeId>>();
     await workerInstance.ExecuteAsync(tokenSource.Token).ConfigureAwait(ConfigureAwaitOptions.None);
     Log.Information("Execution finished shutting down");
 }

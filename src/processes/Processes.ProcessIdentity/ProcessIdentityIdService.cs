@@ -17,9 +17,14 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
+using Microsoft.Extensions.Options;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
 
-public record VerifyProcessData(
-    Process? Process,
-    IEnumerable<ProcessStep>? ProcessSteps
-);
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity;
+
+public class ProcessIdentityIdService(IOptions<ProcessExecutionServiceSettings> options) : IIdentityIdService
+{
+    private readonly ProcessExecutionServiceSettings _settings = options.Value;
+
+    public string IdentityId => _settings.IdentityId;
+}

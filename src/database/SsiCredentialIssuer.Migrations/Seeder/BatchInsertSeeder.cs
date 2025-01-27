@@ -19,10 +19,13 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.DBAccess;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Concrete.Entities;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Seeding;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Seeder;
 
@@ -76,7 +79,7 @@ public class BatchInsertSeeder : ICustomSeeder
     {
         await SeedTableForBaseEntity<Document>("documents", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await SeedTableForBaseEntity<UseCase>("use_cases", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        await SeedTableForBaseEntity<ProcessStep>("process_steps", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await SeedTableForBaseEntity<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>("process_steps", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await SeedTableForBaseEntity<Process>("processes", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await SeedTableForBaseEntity<VerifiedCredentialExternalTypeDetailVersion>("verified_credential_external_type_detail_versions", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         await SeedTableForBaseEntity<CompanySsiDetail>("company_ssi_details", cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);

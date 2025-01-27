@@ -1,5 +1,5 @@
 ﻿<!--
-- Copyright (c) 2024 Contributors to the Eclipse Foundation
+- Copyright (c) 2025 Contributors to the Eclipse Foundation
 -
 - See the NOTICE file(s) distributed with this work for additional
 - information regarding copyright ownership.
@@ -18,25 +18,27 @@
 -->
 
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <AssemblyName>Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess</AssemblyName>
-    <RootNamespace>Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess</RootNamespace>
+    <AssemblyName>Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity</AssemblyName>
+    <RootNamespace>Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>6095f568-c370-4ea3-b510-8c992115cc44</UserSecretsId>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.12" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.12" />
-    <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.DBAccess" Version="2.17.0" />
-    <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling" Version="2.17.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
     <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Models" Version="2.17.0" />
-    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\database\SsiCredentialIssuer.Entities\SsiCredentialIssuer.Entities.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SsiCredentialIssuer.Entities\SsiCredentialIssuer.Entities.csproj" />
-  </ItemGroup>
 </Project>

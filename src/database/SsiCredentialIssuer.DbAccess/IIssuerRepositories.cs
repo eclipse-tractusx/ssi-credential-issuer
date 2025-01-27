@@ -17,22 +17,8 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Org.Eclipse.TractusX.Portal.Backend.Framework.DBAccess;
+
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 
-public interface IIssuerRepositories
-{
-    /// <summary>
-    /// Attaches the given Entity to the database
-    /// </summary>
-    /// <param name="entity">the entity that should be attached to the database</param>
-    /// <param name="setOptionalParameters"></param>
-    /// <typeparam name="TEntity">Type of the entity</typeparam>
-    /// <returns>Returns the attached entity</returns>
-    TEntity Attach<TEntity>(TEntity entity, Action<TEntity>? setOptionalParameters = null)
-        where TEntity : class;
-
-    public T GetInstance<T>();
-
-    public Task<int> SaveAsync();
-    void Clear();
-}
+public interface IIssuerRepositories : IRepositories;
