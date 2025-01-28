@@ -72,8 +72,8 @@ spec:
             {{- end }}
             - name: "EXPIRY__EXPIREDVCSTODELETEINMONTH"
               value: "{{ .Values.credentialExpiry.expiry.expiredVcsToDeleteInMonth }}"
-            - name: "EXPIRY__INACTIVEVCSTODELETEINWEEKS"
-              value: "{{ .Values.credentialExpiry.expiry.inactiveVcsToDeleteInWeeks }}"
+            - name: "EXPIRY__INACTIVEVCSTODELETEINDAYS"
+              value: "{{ .Values.credentialExpiry.expiry.inactiveVcsToDeleteInDays }}"
             - name: "PROCESSIDENTITY__IDENTITYID"
               value: "{{ .Values.credentialExpiry.processIdentity.identityId }}"
             - name: "PORTAL__CLIENTID"

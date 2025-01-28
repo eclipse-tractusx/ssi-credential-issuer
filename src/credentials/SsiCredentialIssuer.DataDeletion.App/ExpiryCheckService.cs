@@ -83,7 +83,7 @@ public class ExpiryCheckService
                 var now = dateTimeProvider.OffsetNow;
                 var companySsiDetailsRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
                 var processStepRepository = repositories.GetInstance<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>();
-                var inactiveVcsToDelete = now.AddDays(-(_settings.InactiveVcsToDeleteInWeeks * 7));
+                var inactiveVcsToDelete = now.AddDays(-_settings.InactiveVcsToDeleteInDays);
                 var expiredVcsToDelete = now.AddMonths(-_settings.ExpiredVcsToDeleteInMonth);
 
                 var credentials = outerLoopRepositories.GetInstance<ICompanySsiDetailsRepository>()

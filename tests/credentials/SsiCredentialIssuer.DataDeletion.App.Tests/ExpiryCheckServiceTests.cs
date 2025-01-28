@@ -84,7 +84,7 @@ public class ExpiryCheckServiceTests
         _settings = new ExpiryCheckServiceSettings
         {
             ExpiredVcsToDeleteInMonth = 12,
-            InactiveVcsToDeleteInWeeks = 8
+            InactiveVcsToDeleteInDays = 56
         };
         _sut = new ExpiryCheckService(serviceScopeFactory, _fixture.Create<ILogger<ExpiryCheckService>>(), Options.Create(_settings));
     }
@@ -94,7 +94,7 @@ public class ExpiryCheckServiceTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var inactiveVcsToDelete = now.AddDays(-(_settings.InactiveVcsToDeleteInWeeks * 7));
+        var inactiveVcsToDelete = now.AddDays(-_settings.InactiveVcsToDeleteInDays);
         var credentialId = Guid.NewGuid();
         var credentialScheduleData = _fixture.Build<CredentialScheduleData>()
             .With(x => x.IsVcToDelete, true)

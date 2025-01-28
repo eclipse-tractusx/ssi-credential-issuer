@@ -36,5 +36,5 @@ public class ExpiryCheckServiceSettings
     /// Vcs which are older than the given value will be deleted when declined
     /// </summary>
     [Required]
-    public int InactiveVcsToDeleteInWeeks { get; init; }
+    public int InactiveVcsToDeleteInDays { get; init; }
 }
