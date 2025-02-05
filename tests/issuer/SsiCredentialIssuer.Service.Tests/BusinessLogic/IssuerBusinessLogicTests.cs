@@ -1052,9 +1052,11 @@ public class IssuerBusinessLogicTests
     [InlineData(1, 15, 20, 2, 1, 5)]
     public async Task GetCredentials_ReturnsExpected(int page, int size, int numberOfElements, int numberOfPages, int resultPage, int resultPageSize)
     {
-        var data = new AsyncEnumerableStub<CompanySsiDetail>(_fixture.CreateMany<CompanySsiDetail>(numberOfElements));
-        A.CallTo(() => _companySsiDetailsRepository.GetAllCredentialDetails(A<CompanySsiDetailStatusId?>._, A<VerifiedCredentialTypeId?>._, A<CompanySsiDetailApprovalType?>._))
-            .Returns(data.AsQueryable());
+        var data = _fixture.CreateMany<CredentialDetailData>(numberOfElements);
+        Task<Pagination.Source<CredentialDetailData>?> PaginationResult(int skip, int take) => Task.FromResult(new Pagination.Source<CredentialDetailData>(data.Count(), data.Skip(skip).Take(take)));
+
+        A.CallTo(() => _companySsiDetailsRepository.GetAllCredentialDetails(A<CompanySsiDetailSorting?>._, A<CompanySsiDetailStatusId?>._, A<VerifiedCredentialTypeId?>._, A<CompanySsiDetailApprovalType?>._))
+            .Returns(PaginationResult);
 
         // Act
         var result = await _sut.GetCredentials(page, size, null, null, null, null);

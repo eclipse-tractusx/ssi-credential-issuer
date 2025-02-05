@@ -29,5 +29,12 @@ public record CredentialDetailData(
     CompanySsiDetailStatusId ParticipantStatus,
     DateTimeOffset? ExpiryDate,
     IEnumerable<DocumentData> Documents,
-    ExternalTypeDetailData? ExternalTypeDetail
+    ExternalTypeDetailData? ExternalTypeDetail,
+    Guid? ProcessId,
+    IEnumerable<ProcessStepDetailData>? ProcessSteps
+);
+
+public record ProcessStepDetailData(
+    ProcessStepStatusId ProcessStepStatusId,
+    ProcessStepTypeId ProcessStepTypeId
 );

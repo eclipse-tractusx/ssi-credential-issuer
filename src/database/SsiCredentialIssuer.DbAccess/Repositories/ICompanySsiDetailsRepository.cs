@@ -17,6 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
@@ -83,11 +84,12 @@ public interface ICompanySsiDetailsRepository
     /// <summary>
     /// Gets all credential details
     /// </summary>
+    /// <param name="sorting">The sorting of the result</param>
     /// <param name="companySsiDetailStatusId">The status of the details</param>
     /// <param name="credentialTypeId">OPTIONAL: The type of the credential that should be returned</param>
     /// <param name="approvalType">OPTIONAL: The approval type of the credential</param>
     /// <returns>Returns data to create the pagination</returns>
-    IQueryable<CompanySsiDetail> GetAllCredentialDetails(CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType);
+    Func<int, int, Task<Pagination.Source<CredentialDetailData>?>> GetAllCredentialDetails(CompanySsiDetailSorting? sorting, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType);
 
     /// <summary>
     /// Gets all credentials for a specific bpn

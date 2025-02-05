@@ -17,7 +17,6 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
@@ -29,7 +28,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Extensions;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Library;
@@ -96,45 +94,16 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             .GetSsiCertificates(_identity.Bpnl, _dateTimeProvider.OffsetNow);
 
     /// <inheritdoc />
-    public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType, CompanySsiDetailSorting? sorting)
-    {
-        var query = _repositories
-            .GetInstance<ICompanySsiDetailsRepository>()
-            .GetAllCredentialDetails(companySsiDetailStatusId, credentialTypeId, approvalType);
-        var sortedQuery = sorting switch
-        {
-            CompanySsiDetailSorting.BpnlAsc or null => query.OrderBy(c => c.Bpnl),
-            CompanySsiDetailSorting.BpnlDesc => query.OrderByDescending(c => c.Bpnl),
-            _ => query
-        };
-
-        return Pagination.CreateResponseAsync(page, size, _settings.MaxPageSize, (skip, take) =>
-            new Pagination.AsyncSource<CredentialDetailData>
-            (
-                query.CountAsync(),
-                sortedQuery
-                    .Skip(skip)
-                    .Take(take)
-                    .Select(c => new CredentialDetailData(
-                        c.Id,
-                        c.Bpnl,
-                        c.VerifiedCredentialTypeId,
-                        c.VerifiedCredentialType!.VerifiedCredentialTypeAssignedUseCase!.UseCase!.Name,
-                        c.CompanySsiDetailStatusId,
-                        c.ExpiryDate,
-                        c.Documents.Select(d => new DocumentData(d.Id, d.DocumentName, d.DocumentTypeId)),
-                        c.VerifiedCredentialExternalTypeDetailVersion == null
-                            ? null
-                            : new ExternalTypeDetailData(
-                                c.VerifiedCredentialExternalTypeDetailVersion.Id,
-                                c.VerifiedCredentialExternalTypeDetailVersion.VerifiedCredentialExternalTypeId,
-                                c.VerifiedCredentialExternalTypeDetailVersion.Version,
-                                c.VerifiedCredentialExternalTypeDetailVersion.Template,
-                                c.VerifiedCredentialExternalTypeDetailVersion.ValidFrom,
-                                c.VerifiedCredentialExternalTypeDetailVersion.Expiry))
-                    ).AsAsyncEnumerable()
-            ));
-    }
+    public Task<Pagination.Response<CredentialDetailData>> GetCredentials(int page, int size, CompanySsiDetailStatusId? companySsiDetailStatusId, VerifiedCredentialTypeId? credentialTypeId, CompanySsiDetailApprovalType? approvalType, CompanySsiDetailSorting? sorting) =>
+        Pagination.CreateResponseAsync(
+        page,
+        size,
+        _settings.MaxPageSize,
+        _repositories.GetInstance<ICompanySsiDetailsRepository>().GetAllCredentialDetails(
+            sorting,
+            companySsiDetailStatusId,
+            credentialTypeId,
+            approvalType));
 
     public IAsyncEnumerable<OwnedVerifiedCredentialData> GetCredentialsForBpn() =>
         _repositories
@@ -151,7 +120,13 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
 
         var companySsiRepository = _repositories.GetInstance<ICompanySsiDetailsRepository>();
         var (exists, data) = await companySsiRepository.GetSsiApprovalData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
-        ValidateApprovalData(credentialId, exists, data);
+
+        if (!exists)
+        {
+            throw NotFoundException.Create(IssuerErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
+        }
+
+        ValidateApprovalData(credentialId, data);
 
         var processId = CreateProcess();
 
@@ -211,13 +186,8 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         return processId;
     }
 
-    private static void ValidateApprovalData(Guid credentialId, bool exists, SsiApprovalData data)
+    private static void ValidateApprovalData(Guid credentialId, SsiApprovalData data)
     {
-        if (!exists)
-        {
-            throw NotFoundException.Create(IssuerErrors.SSI_DETAILS_NOT_FOUND, new ErrorParameter[] { new("credentialId", credentialId.ToString()) });
-        }
-
         if (data.Status != CompanySsiDetailStatusId.PENDING)
         {
             throw ConflictException.Create(IssuerErrors.CREDENTIAL_NOT_PENDING, new ErrorParameter[] { new("credentialId", credentialId.ToString()), new("status", CompanySsiDetailStatusId.PENDING.ToString()) });
