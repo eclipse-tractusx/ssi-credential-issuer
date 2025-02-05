@@ -299,6 +299,10 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -344,6 +348,10 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -395,6 +403,10 @@ paths:
           schema:
             $ref: '#/components/schemas/ProcessStepTypeId'
       responses:
+        '200':
+          description: OK
+          content:
+            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -440,6 +452,13 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
         '401':
           description: Unauthorized
           content:
@@ -452,13 +471,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
   '/api/revocation/credentials/{credentialId}':
     post:
       tags:
@@ -474,6 +486,13 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
         '401':
           description: Unauthorized
           content:
@@ -486,13 +505,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
   '/api/revocation/{processId}/retrigger-step/{processStepTypeId}':
     post:
       tags:
@@ -514,6 +526,10 @@ paths:
           schema:
             $ref: '#/components/schemas/ProcessStepTypeId'
       responses:
+        '200':
+          description: OK
+          content:
+            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -595,6 +611,13 @@ paths:
             type: string
             format: uuid
       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
         '401':
           description: Unauthorized
           content:
@@ -607,13 +630,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: binary
         '409':
           description: Conflict
           content:
