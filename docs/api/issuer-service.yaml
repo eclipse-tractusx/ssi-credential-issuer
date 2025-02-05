@@ -747,6 +747,15 @@ components:
             $ref: '#/components/schemas/DocumentData'
         externalTypeDetail:
           $ref: '#/components/schemas/ExternalTypeDetailData'
+        processId:
+          type: string
+          format: uuid
+          nullable: true
+        processSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessStepDetailData'
+          nullable: true
       additionalProperties: false
     DocumentData:
       type: object
@@ -854,6 +863,22 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    ProcessStepDetailData:
+      type: object
+      properties:
+        processStepStatusId:
+          $ref: '#/components/schemas/ProcessStepStatusId'
+        processStepTypeId:
+          $ref: '#/components/schemas/ProcessStepTypeId'
+      additionalProperties: false
+    ProcessStepStatusId:
+      enum:
+        - TODO
+        - DONE
+        - SKIPPED
+        - FAILED
+        - DUPLICATE
+      type: string
     ProcessStepTypeId:
       enum:
         - CREATE_SIGNED_CREDENTIAL
