@@ -46,6 +46,9 @@ public class IssuerSettings
     public string StatusListUrl { get; set; } = null!;
 
     [Required(AllowEmptyStrings = false)]
+    public string StatusListType { get; set; } = null!;
+
+    [Required(AllowEmptyStrings = false)]
     public string IssuerBpn { get; set; } = null!;
 }
 
