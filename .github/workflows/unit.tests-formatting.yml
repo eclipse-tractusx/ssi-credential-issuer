@@ -36,10 +36,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['8.0']
+        dotnet-version: ['9.0']
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
         with:
@@ -50,6 +51,15 @@ jobs:
         run: dotnet restore src
       - name: Build
         run: dotnet build src --configuration Release --no-restore
+      - name: Check for uncommitted files in working directory # refers to updated api specifications, please refer to /docs/api/README.md
+        run: |
+          git_status=$(git status --porcelain)
+          if [ -n "$git_status" ]; then
+            echo "Please commit the file(s) in your working directory after executing the build command"
+            exit 1
+          else
+            echo "No modified files found in the working directory."
+          fi
       - name: Check Format
         run: dotnet format src --verify-no-changes --no-restore
       - name: Test

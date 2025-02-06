@@ -19,9 +19,11 @@
 
 using Laraue.EfCoreTriggers.PostgreSql.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.DBAccess;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Seeding.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
@@ -43,7 +45,8 @@ try
                 .AddDbContext<IssuerDbContext>(o =>
                     o.UseNpgsql(hostContext.Configuration.GetConnectionString("IssuerDb"),
                         x => x.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name)
-                            .MigrationsHistoryTable("__efmigrations_history_issuer"))
+                            .MigrationsHistoryTable("__efmigrations_history_issuer", "public"))
+                        .ReplaceService<IHistoryRepository, CustomNpgsqlHistoryRepository>()
                         .UsePostgreSqlTriggers())
                 .AddDatabaseInitializer<IssuerDbContext>(hostContext.Configuration.GetSection("Seeding"));
         })
