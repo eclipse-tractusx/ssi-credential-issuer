@@ -20,15 +20,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
-using Org.Eclipse.TractusX.Portal.Backend.Tests.Shared;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 using System.Security.Claims;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.Identity;
 
 public class MandatoryIdentityClaimHandlerTests
 {
-    private readonly IFixture _fixture;
     private readonly IClaimsIdentityDataBuilder _claimsIdentityDataBuilder;
     private readonly IMockLogger<MandatoryIdentityClaimHandler> _mockLogger;
     private readonly ILogger<MandatoryIdentityClaimHandler> _logger;
@@ -36,10 +35,10 @@ public class MandatoryIdentityClaimHandlerTests
 
     public MandatoryIdentityClaimHandlerTests()
     {
-        _fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
-        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-            .ForEach(b => _fixture.Behaviors.Remove(b));
-        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        var fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
+        fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+            .ForEach(b => fixture.Behaviors.Remove(b));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
         _claimsIdentityDataBuilder = new ClaimsIdentityDataBuilder();
 

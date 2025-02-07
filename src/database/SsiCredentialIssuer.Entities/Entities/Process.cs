@@ -17,39 +17,12 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.Portal.Backend.Framework.DBAccess;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Concrete.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 
-public class Process : IBaseEntity, ILockableEntity
+public class Process(Guid id, ProcessTypeId processTypeId, Guid version) : AbstractProcess<Process, ProcessTypeId, ProcessStepTypeId>(id, processTypeId, version)
 {
-    private Process()
-    {
-        ProcessSteps = new HashSet<ProcessStep>();
-        CompanySsiDetails = new HashSet<CompanySsiDetail>();
-    }
-
-    public Process(Guid id, ProcessTypeId processTypeId, Guid version) : this()
-    {
-        Id = id;
-        ProcessTypeId = processTypeId;
-        Version = version;
-    }
-
-    public Guid Id { get; private set; }
-
-    public ProcessTypeId ProcessTypeId { get; set; }
-
-    public DateTimeOffset? LockExpiryDate { get; set; }
-
-    [ConcurrencyCheck]
-    public Guid Version { get; set; }
-
-    // Navigation properties
-    public virtual ProcessType? ProcessType { get; set; }
-    public virtual ICollection<ProcessStep> ProcessSteps { get; private set; }
     public virtual ICollection<CompanySsiDetail> CompanySsiDetails { get; private set; }
 }

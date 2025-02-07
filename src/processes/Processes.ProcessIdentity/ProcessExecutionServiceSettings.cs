@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,12 +17,15 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing;
+using System.ComponentModel.DataAnnotations;
 
-/// <summary>
-/// Marker interface
-/// </summary>
-public interface IBaseEntity
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity;
+
+public class ProcessExecutionServiceSettings
 {
-    Guid Id { get; }
+    [Required]
+    public int LockExpirySeconds { get; set; }
+
+    [Required]
+    public string IdentityId { get; set; } = null!;
 }

@@ -18,9 +18,11 @@
  ********************************************************************************/
 
 using Microsoft.Extensions.DependencyInjection;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Worker.Library;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Creation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Expiry;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.Worker.Library;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.DependencyInjection;
 
@@ -28,11 +30,11 @@ public static class CredentialProcessCollectionExtensions
 {
     public static IServiceCollection AddCredentialCreationProcessExecutor(this IServiceCollection services) =>
         services
-            .AddTransient<IProcessTypeExecutor, Creation.CredentialCreationProcessTypeExecutor>()
+            .AddTransient<IProcessTypeExecutor<ProcessTypeId, ProcessStepTypeId>, CredentialCreationProcessTypeExecutor>()
             .AddCredentialCreationProcessHandler();
 
     public static IServiceCollection AddCredentialExpiryProcessExecutor(this IServiceCollection services) =>
         services
-            .AddTransient<IProcessTypeExecutor, CredentialExpiryProcessTypeExecutor>()
+            .AddTransient<IProcessTypeExecutor<ProcessTypeId, ProcessStepTypeId>, CredentialExpiryProcessTypeExecutor>()
             .AddCredentialExpiryProcessHandler();
 }

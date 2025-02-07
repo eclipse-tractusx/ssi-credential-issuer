@@ -21,8 +21,12 @@ using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Concrete.Entities;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DbAccess.Tests.Setup;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
@@ -78,7 +82,6 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     #region CreateProcessStepRange
 
     [Fact]
-
     public async Task CreateProcessStepRange_CreateSuccessfully()
     {
         // Arrange
@@ -97,39 +100,13 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
             .And.AllSatisfy(x =>
             {
                 x.State.Should().Be(EntityState.Added);
-                x.Entity.Should().BeOfType<ProcessStep>();
+                x.Entity.Should().BeOfType<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>();
             });
-        changeTracker.Entries().Select(x => x.Entity).Cast<ProcessStep>()
+        changeTracker.Entries().Select(x => x.Entity).Cast<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>()
             .Should().Satisfy(
                 x => x.Id == result.ElementAt(0).Id && x.ProcessId == processId && x.ProcessStepTypeId == processStepTypeIds[0] && x.ProcessStepStatusId == ProcessStepStatusId.TODO,
                 x => x.Id == result.ElementAt(1).Id && x.ProcessId == processId && x.ProcessStepTypeId == processStepTypeIds[1] && x.ProcessStepStatusId == ProcessStepStatusId.TODO,
                 x => x.Id == result.ElementAt(2).Id && x.ProcessId == processId && x.ProcessStepTypeId == processStepTypeIds[2] && x.ProcessStepStatusId == ProcessStepStatusId.TODO
-            );
-    }
-
-    #endregion
-
-    #region CreateProcessStep
-
-    [Fact]
-    public async Task CreateProcessStep_CreateSuccessfully()
-    {
-        // Arrange
-        var processId = Guid.NewGuid();
-        var (sut, dbContext) = await CreateSutWithContext();
-        var changeTracker = dbContext.ChangeTracker;
-
-        // Act
-        sut.CreateProcessStep(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, ProcessStepStatusId.TODO, processId);
-
-        // Assert
-        changeTracker.HasChanges().Should().BeTrue();
-        changeTracker.Entries().Should()
-            .ContainSingle()
-            .Which.State.Should().Be(EntityState.Added);
-        changeTracker.Entries().Select(x => x.Entity).Cast<ProcessStep>()
-            .Should().Satisfy(
-                x => x.ProcessId == processId && x.ProcessStepTypeId == ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL && x.ProcessStepStatusId == ProcessStepStatusId.TODO
             );
     }
 
@@ -163,7 +140,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         changedEntries.Should().HaveCount(1);
         var changedEntity = changedEntries.Single();
         changedEntity.State.Should().Be(EntityState.Modified);
-        changedEntity.Entity.Should().BeOfType<ProcessStep>().Which.ProcessStepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        changedEntity.Entity.Should().BeOfType<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>().Which.ProcessStepStatusId.Should().Be(ProcessStepStatusId.DONE);
     }
 
     #endregion
@@ -174,12 +151,12 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task AttachAndModifyProcessSteps_UpdatesStatus()
     {
         // Arrange
-        var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep InitialStep, ProcessStep ModifiedStep)>(5).ToImmutableArray();
+        var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId> InitialStep, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId> ModifiedStep)>(5).ToImmutableArray();
 
         var (sut, dbContext) = await CreateSutWithContext();
 
         // Act
-        sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<ProcessStep>?, Action<ProcessStep>>(
+        sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<IProcessStep<ProcessStepTypeId>>?, Action<IProcessStep<ProcessStepTypeId>>>(
             data.ProcessStepId,
             step =>
                 {
@@ -199,7 +176,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         var changedEntries = changeTracker.Entries().ToList();
         changeTracker.HasChanges().Should().BeTrue();
         changedEntries.Should().HaveCount(5).And.AllSatisfy(entry => entry.State.Should().Be(EntityState.Modified));
-        changedEntries.Select(entry => entry.Entity).Should().AllBeOfType<ProcessStep>().Which.Should().Satisfy(
+        changedEntries.Select(entry => entry.Entity).Should().AllBeOfType<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>().Which.Should().Satisfy(
             step => step.Id == stepData[0].ProcessStepId && step.ProcessStepStatusId == stepData[0].ModifiedStep.ProcessStepStatusId && step.DateLastChanged == stepData[0].ModifiedStep.DateLastChanged && step.Message == stepData[0].ModifiedStep.Message,
             step => step.Id == stepData[1].ProcessStepId && step.ProcessStepStatusId == stepData[1].ModifiedStep.ProcessStepStatusId && step.DateLastChanged == stepData[1].ModifiedStep.DateLastChanged && step.Message == stepData[1].ModifiedStep.Message,
             step => step.Id == stepData[2].ProcessStepId && step.ProcessStepStatusId == stepData[2].ModifiedStep.ProcessStepStatusId && step.DateLastChanged == stepData[2].ModifiedStep.DateLastChanged && step.Message == stepData[2].ModifiedStep.Message,
@@ -212,12 +189,12 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task AttachAndModifyProcessSteps_WithUnmodifiedData_SkipsUpdateStatus()
     {
         // Arrange
-        var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep InitialStep)>(5).ToImmutableArray();
+        var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId> InitialStep)>(5).ToImmutableArray();
 
         var (sut, dbContext) = await CreateSutWithContext();
 
         // Act
-        sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<ProcessStep>?, Action<ProcessStep>>(
+        sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<IProcessStep<ProcessStepTypeId>>?, Action<IProcessStep<ProcessStepTypeId>>>(
             data.ProcessStepId,
             step =>
                 {
@@ -235,7 +212,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         var changedEntries = changeTracker.Entries().ToList();
         changeTracker.HasChanges().Should().BeFalse();
         changedEntries.Should().HaveCount(5).And.AllSatisfy(entry => entry.State.Should().Be(EntityState.Unchanged));
-        changedEntries.Select(entry => entry.Entity).Should().AllBeOfType<ProcessStep>().Which.Should().Satisfy(
+        changedEntries.Select(entry => entry.Entity).Should().AllBeOfType<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>().Which.Should().Satisfy(
             step => step.Id == stepData[0].ProcessStepId && step.ProcessStepStatusId == stepData[0].InitialStep.ProcessStepStatusId && step.DateLastChanged == stepData[0].InitialStep.DateLastChanged && step.Message == stepData[0].InitialStep.Message,
             step => step.Id == stepData[1].ProcessStepId && step.ProcessStepStatusId == stepData[1].InitialStep.ProcessStepStatusId && step.DateLastChanged == stepData[1].InitialStep.DateLastChanged && step.Message == stepData[1].InitialStep.Message,
             step => step.Id == stepData[2].ProcessStepId && step.ProcessStepStatusId == stepData[2].InitialStep.ProcessStepStatusId && step.DateLastChanged == stepData[2].InitialStep.DateLastChanged && step.Message == stepData[2].InitialStep.Message,
@@ -248,12 +225,12 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     public async Task AttachAndModifyProcessSteps_WithUnmodifiedData_UpdatesLastChanged()
     {
         // Arrange
-        var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep InitialStep)>(5).ToImmutableArray();
+        var stepData = _fixture.CreateMany<(Guid ProcessStepId, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId> InitialStep)>(5).ToImmutableArray();
 
         var (sut, dbContext) = await CreateSutWithContext();
 
         // Act
-        sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<ProcessStep>?, Action<ProcessStep>>(
+        sut.AttachAndModifyProcessSteps(stepData.Select(data => new ValueTuple<Guid, Action<IProcessStep<ProcessStepTypeId>>?, Action<IProcessStep<ProcessStepTypeId>>>(
             data.ProcessStepId,
             step =>
                 {
@@ -268,7 +245,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         var changedEntries = changeTracker.Entries().ToList();
         changeTracker.HasChanges().Should().BeTrue();
         changedEntries.Should().HaveCount(5).And.AllSatisfy(entry => entry.State.Should().Be(EntityState.Modified));
-        changedEntries.Select(entry => entry.Entity).Should().AllBeOfType<ProcessStep>().Which.Should().Satisfy(
+        changedEntries.Select(entry => entry.Entity).Should().AllBeOfType<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>().Which.Should().Satisfy(
             step => step.Id == stepData[0].ProcessStepId && step.ProcessStepStatusId == stepData[0].InitialStep.ProcessStepStatusId && step.DateLastChanged != stepData[0].InitialStep.DateLastChanged && step.Message == stepData[0].InitialStep.Message,
             step => step.Id == stepData[1].ProcessStepId && step.ProcessStepStatusId == stepData[1].InitialStep.ProcessStepStatusId && step.DateLastChanged != stepData[1].InitialStep.DateLastChanged && step.Message == stepData[1].InitialStep.Message,
             step => step.Id == stepData[2].ProcessStepId && step.ProcessStepStatusId == stepData[2].InitialStep.ProcessStepStatusId && step.DateLastChanged != stepData[2].InitialStep.DateLastChanged && step.Message == stepData[2].InitialStep.Message,
@@ -290,6 +267,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
             ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
+            ProcessStepTypeId.TRIGGER_CALLBACK
         };
 
         var sut = await CreateSut();
@@ -311,6 +289,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
             ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
+            ProcessStepTypeId.TRIGGER_CALLBACK
         };
 
         var sut = await CreateSut();
@@ -344,7 +323,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
     #region IsValidProcess
 
     [Fact]
-    public async Task IsValidProcess_ReturnsExpected()
+    public async Task IsValidProcess_WithTodoProcessStep_ReturnsExpected()
     {
         // Arrange
         var processId = new Guid("dd371565-9489-4907-a2e4-b8cbfe7a8cd2");
@@ -352,41 +331,51 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
 
         // Act
         var result = await sut.IsValidProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1));
-
-        // Assert
         result.ProcessExists.Should().BeTrue();
         result.ProcessData.ProcessSteps.Should().ContainSingle()
-            .And.Satisfy(x => x.ProcessStepStatusId == ProcessStepStatusId.TODO);
+            .And.Satisfy(
+                x => x.ProcessStepTypeId == ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT && x.ProcessStepStatusId == ProcessStepStatusId.TODO
+            );
     }
 
     [Fact]
-    public async Task IsValidProcess_WithNonExisting_ReturnsExpected()
+    public async Task IsValidProcess_WithDoneProcessStep_ReturnsExpected()
+    {
+        // Arrange
+        var processId = new Guid("dd371565-9489-4907-a2e4-b8cbfe7a8cd2");
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.IsValidProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, Enumerable.Repeat(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, 1));
+        result.ProcessExists.Should().BeTrue();
+        result.ProcessData.ProcessSteps.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task IsValidProcess_WithNotExistingProcess_ReturnsExpected()
     {
         // Arrange
         var processId = Guid.NewGuid();
         var sut = await CreateSut();
 
         // Act
-        var result = await sut.IsValidProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, Enumerable.Repeat(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, 1));
-
-        // Assert
+        var result = await sut.IsValidProcess(processId, ProcessTypeId.CREATE_CREDENTIAL, Enumerable.Repeat(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, 1));
         result.ProcessExists.Should().BeFalse();
-        result.ProcessData.Should().BeNull();
     }
 
     #endregion
 
-    private async Task<(ProcessStepRepository sut, IssuerDbContext dbContext)> CreateSutWithContext()
+    private async Task<(ProcessStepRepository<Process, ProcessType<Process, ProcessTypeId>, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>, ProcessStepType<Process, ProcessTypeId, ProcessStepTypeId>, ProcessTypeId, ProcessStepTypeId> sut, IssuerDbContext dbContext)> CreateSutWithContext()
     {
         var context = await _dbTestDbFixture.GetDbContext();
-        var sut = new ProcessStepRepository(context);
+        var sut = new ProcessStepRepository<Process, ProcessType<Process, ProcessTypeId>, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>, ProcessStepType<Process, ProcessTypeId, ProcessStepTypeId>, ProcessTypeId, ProcessStepTypeId>(new IssuerProcessDbContextAccess(context));
         return (sut, context);
     }
 
-    private async Task<ProcessStepRepository> CreateSut()
+    private async Task<ProcessStepRepository<Process, ProcessType<Process, ProcessTypeId>, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>, ProcessStepType<Process, ProcessTypeId, ProcessStepTypeId>, ProcessTypeId, ProcessStepTypeId>> CreateSut()
     {
         var context = await _dbTestDbFixture.GetDbContext();
-        var sut = new ProcessStepRepository(context);
+        var sut = new ProcessStepRepository<Process, ProcessType<Process, ProcessTypeId>, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>, ProcessStepType<Process, ProcessTypeId, ProcessStepTypeId>, ProcessTypeId, ProcessStepTypeId>(new IssuerProcessDbContextAccess(context));
         return sut;
     }
 }

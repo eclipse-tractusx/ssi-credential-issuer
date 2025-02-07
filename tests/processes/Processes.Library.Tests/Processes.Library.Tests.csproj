@@ -35,7 +35,6 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\..\src\processes\Processes.Library\Processes.Library.csproj" />
         <ProjectReference Include="..\..\Tests.Shared\Tests.Shared.csproj" />
     </ItemGroup>
 </Project>

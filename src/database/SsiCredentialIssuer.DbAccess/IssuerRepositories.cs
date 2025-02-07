@@ -17,62 +17,28 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.EntityFrameworkCore;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.DBAccess;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Concrete.Entities;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.Collections.Immutable;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 
-public class IssuerRepositories : IIssuerRepositories
+public class IssuerRepositories(IssuerDbContext dbContext) :
+    AbstractRepositories<IssuerDbContext>(dbContext),
+    IIssuerRepositories
 {
-    private readonly IssuerDbContext _dbContext;
+    protected override IReadOnlyDictionary<Type, Func<IssuerDbContext, object>> RepositoryTypes => Types;
 
-    private static readonly IReadOnlyDictionary<Type, Func<IssuerDbContext, object>> Types = new Dictionary<Type, Func<IssuerDbContext, object>> {
-        { typeof(ICompanySsiDetailsRepository), context => new CompanySsiDetailsRepository(context) },
-        { typeof(ICredentialRepository), context => new CredentialRepository(context) },
-        { typeof(IDocumentRepository), context => new DocumentRepository(context) },
-        { typeof(IProcessStepRepository), context => new ProcessStepRepository(context) },
-    }.ToImmutableDictionary();
-
-    public IssuerRepositories(IssuerDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
-    public RepositoryType GetInstance<RepositoryType>()
-    {
-        object? repository = default;
-
-        if (Types.TryGetValue(typeof(RepositoryType), out var createFunc))
-        {
-            repository = createFunc(_dbContext);
-        }
-
-        return (RepositoryType)(repository ?? throw new ArgumentException($"unexpected type {typeof(RepositoryType).Name}", nameof(RepositoryType)));
-    }
-
-    /// <inheritdoc />
-    public TEntity Attach<TEntity>(TEntity entity, Action<TEntity>? setOptionalParameters = null) where TEntity : class
-    {
-        var attachedEntity = _dbContext.Attach(entity).Entity;
-        setOptionalParameters?.Invoke(attachedEntity);
-
-        return attachedEntity;
-    }
-
-    public Task<int> SaveAsync()
-    {
-        try
-        {
-            return _dbContext.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException e)
-        {
-            throw new ConflictException("while processing a concurrent update was saved to the database (reason could also be data to be deleted is no longer existing)", e);
-        }
-    }
-
-    public void Clear() => _dbContext.ChangeTracker.Clear();
+    private static readonly IReadOnlyDictionary<Type, Func<IssuerDbContext, object>> Types = ImmutableDictionary.CreateRange(
+    [
+        CreateTypeEntry<ICompanySsiDetailsRepository>(context => new CompanySsiDetailsRepository(context)),
+        CreateTypeEntry<ICredentialRepository>(context => new CredentialRepository(context)),
+        CreateTypeEntry<IDocumentRepository>(context => new DocumentRepository(context)),
+        CreateTypeEntry<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>(context => new ProcessStepRepository<Process, ProcessType<Process, ProcessTypeId>, ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>, ProcessStepType<Process, ProcessTypeId, ProcessStepTypeId>, ProcessTypeId, ProcessStepTypeId>(new IssuerProcessDbContextAccess(context))),
+    ]);
 }

@@ -17,12 +17,16 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Concrete.Entities;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -34,8 +38,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Models;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.Setup;
-using System.Collections.Immutable;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
@@ -54,7 +56,7 @@ public class IssuerBusinessLogicTests
     private readonly IFixture _fixture;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
     private readonly IDocumentRepository _documentRepository;
-    private readonly IProcessStepRepository _processStepRepository;
+    private readonly IProcessStepRepository<ProcessTypeId, ProcessStepTypeId> _processStepRepository;
 
     private readonly IIssuerBusinessLogic _sut;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -74,7 +76,7 @@ public class IssuerBusinessLogicTests
         _issuerRepositories = A.Fake<IIssuerRepositories>();
         _companySsiDetailsRepository = A.Fake<ICompanySsiDetailsRepository>();
         _documentRepository = A.Fake<IDocumentRepository>();
-        _processStepRepository = A.Fake<IProcessStepRepository>();
+        _processStepRepository = A.Fake<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>();
         _identity = A.Fake<IIdentityData>();
 
         var identityService = A.Fake<IIdentityService>();
@@ -84,7 +86,7 @@ public class IssuerBusinessLogicTests
 
         A.CallTo(() => _issuerRepositories.GetInstance<ICompanySsiDetailsRepository>()).Returns(_companySsiDetailsRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
-        A.CallTo(() => _issuerRepositories.GetInstance<IProcessStepRepository>()).Returns(_processStepRepository);
+        A.CallTo(() => _issuerRepositories.GetInstance<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>()).Returns(_processStepRepository);
 
         var identityId = Guid.NewGuid();
 
@@ -693,7 +695,7 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _portalService.TriggerMail("CredentialRejected", A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, NotificationTypeId.CREDENTIAL_REJECTED, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(A<IEnumerable<(Guid ProcessStepId, Action<IProcessStep<ProcessStepTypeId>>? Initialize, Action<IProcessStep<ProcessStepTypeId>> Modify)>>._)).MustHaveHappenedOnceExactly();
 
         detail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.INACTIVE);
         detail.DateLastChanged.Should().Be(now);
@@ -728,7 +730,7 @@ public class IssuerBusinessLogicTests
         A.CallTo(() => _portalService.TriggerMail(A<string>._, A<Guid>._, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _portalService.AddNotification(A<string>._, A<Guid>._, A<NotificationTypeId>._, A<CancellationToken>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(A<IEnumerable<(Guid ProcessStepId, Action<IProcessStep<ProcessStepTypeId>>? Initialize, Action<IProcessStep<ProcessStepTypeId>> Modify)>>._)).MustHaveHappenedOnceExactly();
 
         detail.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.INACTIVE);
         detail.DateLastChanged.Should().Be(now);
@@ -1046,22 +1048,22 @@ public class IssuerBusinessLogicTests
     {
         // Arrange
         var process = new Process(Guid.NewGuid(), processId, Guid.NewGuid());
-        var processStep = new ProcessStep(Guid.NewGuid(), retriggerStep, ProcessStepStatusId.TODO, process.Id, DateTimeOffset.UtcNow);
-        var processSteps = new List<ProcessStep>();
+        var processStep = new ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>(Guid.NewGuid(), retriggerStep, ProcessStepStatusId.TODO, process.Id, DateTimeOffset.UtcNow);
+        var processSteps = new List<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>();
         A.CallTo(() => _processStepRepository.IsValidProcess(A<Guid>._, A<ProcessTypeId>._, A<IEnumerable<ProcessStepTypeId>>._))
-            .Returns(new ValueTuple<bool, VerifyProcessData>(
+            .Returns(new ValueTuple<bool, VerifyProcessData<ProcessTypeId, ProcessStepTypeId>>(
                 false,
-                new VerifyProcessData(
+                new VerifyProcessData<ProcessTypeId, ProcessStepTypeId>(
                     process,
                     Enumerable.Repeat(processStep, 1))));
         A.CallTo(() => _processStepRepository.CreateProcessStepRange(A<IEnumerable<(ProcessStepTypeId ProcessStepTypeId, ProcessStepStatusId ProcessStepStatusId, Guid ProcessId)>>._))
             .Invokes((IEnumerable<(ProcessStepTypeId ProcessStepTypeId, ProcessStepStatusId ProcessStepStatusId, Guid ProcessId)> processStepTypeStatus) =>
                 {
-                    processSteps.AddRange(processStepTypeStatus.Select(x => new ProcessStep(Guid.NewGuid(), x.ProcessStepTypeId, x.ProcessStepStatusId, x.ProcessId, DateTimeOffset.UtcNow)).ToList());
+                    processSteps.AddRange(processStepTypeStatus.Select(x => new ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>(Guid.NewGuid(), x.ProcessStepTypeId, x.ProcessStepStatusId, x.ProcessId, DateTimeOffset.UtcNow)).ToList());
                 });
         A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(
-                A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._))
-            .Invokes((IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)> processStepStatus) =>
+                A<IEnumerable<(Guid ProcessStepId, Action<IProcessStep<ProcessStepTypeId>>? Initialize, Action<IProcessStep<ProcessStepTypeId>> Modify)>>._))
+            .Invokes((IEnumerable<(Guid ProcessStepId, Action<IProcessStep<ProcessStepTypeId>>? Initialize, Action<IProcessStep<ProcessStepTypeId>> Modify)> processStepStatus) =>
                 {
                     foreach (var ps in processStepStatus.Where(p => p.ProcessStepId == processStep.Id))
                     {
@@ -1093,22 +1095,22 @@ public class IssuerBusinessLogicTests
     {
         // Arrange
         var process = new Process(Guid.NewGuid(), processTypeId, Guid.NewGuid());
-        var processStep = new ProcessStep(Guid.NewGuid(), retriggerStep, ProcessStepStatusId.TODO, process.Id, DateTimeOffset.UtcNow);
-        var processSteps = new List<ProcessStep>();
+        var processStep = new ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>(Guid.NewGuid(), retriggerStep, ProcessStepStatusId.TODO, process.Id, DateTimeOffset.UtcNow);
+        var processSteps = new List<ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>>();
         A.CallTo(() => _processStepRepository.IsValidProcess(A<Guid>._, A<ProcessTypeId>._, A<IEnumerable<ProcessStepTypeId>>._))
-            .Returns(new ValueTuple<bool, VerifyProcessData>(
+            .Returns(new ValueTuple<bool, VerifyProcessData<ProcessTypeId, ProcessStepTypeId>>(
                 true,
-                new VerifyProcessData(
+                new VerifyProcessData<ProcessTypeId, ProcessStepTypeId>(
                     process,
                     Enumerable.Repeat(processStep, 1))));
         A.CallTo(() => _processStepRepository.CreateProcessStepRange(A<IEnumerable<(ProcessStepTypeId ProcessStepTypeId, ProcessStepStatusId ProcessStepStatusId, Guid ProcessId)>>._))
             .Invokes((IEnumerable<(ProcessStepTypeId ProcessStepTypeId, ProcessStepStatusId ProcessStepStatusId, Guid ProcessId)> processStepTypeStatus) =>
                 {
-                    processSteps.AddRange(processStepTypeStatus.Select(x => new ProcessStep(Guid.NewGuid(), x.ProcessStepTypeId, x.ProcessStepStatusId, x.ProcessId, DateTimeOffset.UtcNow)).ToList());
+                    processSteps.AddRange(processStepTypeStatus.Select(x => new ProcessStep<Process, ProcessTypeId, ProcessStepTypeId>(Guid.NewGuid(), x.ProcessStepTypeId, x.ProcessStepStatusId, x.ProcessId, DateTimeOffset.UtcNow)).ToList());
                 });
         A.CallTo(() => _processStepRepository.AttachAndModifyProcessSteps(
-                A<IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)>>._))
-            .Invokes((IEnumerable<(Guid ProcessStepId, Action<ProcessStep>? Initialize, Action<ProcessStep> Modify)> processStepStatus) =>
+                A<IEnumerable<(Guid ProcessStepId, Action<IProcessStep<ProcessStepTypeId>>? Initialize, Action<IProcessStep<ProcessStepTypeId>> Modify)>>._))
+            .Invokes((IEnumerable<(Guid ProcessStepId, Action<IProcessStep<ProcessStepTypeId>>? Initialize, Action<IProcessStep<ProcessStepTypeId>> Modify)> processStepStatus) =>
                 {
                     foreach (var ps in processStepStatus.Where(p => p.ProcessStepId == processStep.Id))
                     {

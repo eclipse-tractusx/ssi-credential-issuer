@@ -22,6 +22,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -40,7 +42,7 @@ public class ExpiryCheckServiceTests
 
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IIssuerRepositories _issuerRepositories;
-    private readonly IProcessStepRepository _processStepRepository;
+    private readonly IProcessStepRepository<ProcessTypeId, ProcessStepTypeId> _processStepRepository;
     private readonly IPortalService _portalService;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
     private readonly ExpiryCheckServiceSettings _settings;
@@ -57,11 +59,11 @@ public class ExpiryCheckServiceTests
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
         _issuerRepositories = A.Fake<IIssuerRepositories>();
         _companySsiDetailsRepository = A.Fake<ICompanySsiDetailsRepository>();
-        _processStepRepository = A.Fake<IProcessStepRepository>();
+        _processStepRepository = A.Fake<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>();
 
         A.CallTo(() => _issuerRepositories.GetInstance<ICompanySsiDetailsRepository>())
             .Returns(_companySsiDetailsRepository);
-        A.CallTo(() => _issuerRepositories.GetInstance<IProcessStepRepository>())
+        A.CallTo(() => _issuerRepositories.GetInstance<IProcessStepRepository<ProcessTypeId, ProcessStepTypeId>>())
             .Returns(_processStepRepository);
 
         _dateTimeProvider = A.Fake<IDateTimeProvider>();

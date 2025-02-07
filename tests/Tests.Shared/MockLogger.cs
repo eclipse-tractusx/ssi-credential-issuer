@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,37 +17,29 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Tests.Shared;
 
-public class HttpMessageHandlerMock(
-    HttpStatusCode statusCode,
-    HttpContent? httpContent = null,
-    Exception? ex = null,
-    bool isRequestUri = false)
-    : HttpMessageHandler
+public interface IMockLogger<T>
 {
-    protected override Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken)
+    void Log(LogLevel logLevel, Exception? exception, string logMessage);
+}
+
+public class MockLogger<T>(IMockLogger<T> logger) : ILogger<T>
+{
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => new TestDisposable();
+
+    public bool IsEnabled(LogLevel logLevel) => true;
+
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+        logger.Log(logLevel, exception, formatter(state, exception));
+
+    public class TestDisposable : IDisposable
     {
-        RequestMessage = request;
-
-        if (ex != null)
+        public void Dispose()
         {
-            throw ex;
+            GC.SuppressFinalize(this);
         }
-
-        var httpResponseMessage = new HttpResponseMessage(statusCode);
-        httpResponseMessage.RequestMessage = isRequestUri ? request : null;
-        if (httpContent != null)
-        {
-            httpResponseMessage.Content = httpContent;
-        }
-
-        return Task.FromResult(httpResponseMessage);
     }
-
-    public HttpRequestMessage? RequestMessage { get; private set; } = null;
 }
