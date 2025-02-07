@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.2.0-rc.1...v1.3.0-rc.1) (2025-02-07)
+
+
+### Features
+
+* enhance use case participant get credential endpoint by supporting filters ([#331](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/331)) ([2996a7c](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/2996a7c7333a563a474a4a1417c6ee22c336202d))
+* **issuer:** add process and process step status to GET: /api/issuer ([#315](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/315)) ([9d3ac69](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/9d3ac69689efba92912d09505be895efaac77555)), closes [#300](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/300)
+* make statuslist type configureable ([#298](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/298)) ([b2445f5](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/b2445f5346c1d42320c315e8f6df1840a134b9a2)), closes [#299](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/299)
+* **processes:** use process package ([#323](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/323)) ([e434c5b](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/e434c5bf8969457524bb6d5ef268ad61f8fbabbb)), closes [#60](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/60)
+* upgrade .NET to v9 ([f2a2b92](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/f2a2b92d4b8d824149fcce912045b360081086dd))
+
+
+### Miscellaneous Chores
+
+* release 1.3.0-rc.1 ([d6033c6](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/d6033c6778f25f7d116d7d2a7c4c47e454b15ff4))
+
 ## [1.2.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2024-10-24)
 
 ### Bug Fixes
