@@ -27,6 +27,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.Dependen
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Serilog;
 
@@ -41,6 +42,7 @@ try
             services
                 .AddTransient<ITokenService, TokenService>()
                 .AddIssuerRepositories(hostContext.Configuration)
+                .AddProcessIdentity(hostContext.Configuration.GetSection("Processes"))
                 .AddProcessExecutionService<ProcessTypeId, ProcessStepTypeId>(hostContext.Configuration.GetSection("Processes"))
                 .AddPortalService(hostContext.Configuration.GetSection("Portal"))
                 .AddCallbackService(hostContext.Configuration.GetSection("Callback"))

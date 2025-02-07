@@ -22,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;

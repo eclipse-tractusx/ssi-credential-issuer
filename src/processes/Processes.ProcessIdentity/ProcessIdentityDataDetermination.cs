@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,24 +17,11 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Validation;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.ProcessIdentity;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.Identity;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity;
 
-public static class ServiceCollectionExtensions
+public class ProcessIdentityDataDetermination : IProcessIdentityDataDetermination
 {
-    public static IServiceCollection AddProcessIdentity(this IServiceCollection services, IConfigurationSection section)
-    {
-        services.AddOptions<ProcessExecutionServiceSettings>()
-            .Bind(section)
-            .EnvironmentalValidation(section);
-
-        return services
-            .AddScoped<IProcessIdentityDataDetermination, ProcessIdentityDataDetermination>()
-            .AddScoped<IIdentityIdService, ProcessIdentityIdService>();
-    }
+    public Task GetIdentityData() => Task.CompletedTask;
 }
