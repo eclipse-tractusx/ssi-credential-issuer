@@ -8,7 +8,12 @@ paths:
       tags:
         - 'Org.Eclipse.TractusX.SsiCredentialIssuer.Service, Version=1.2.0.0, Culture=neutral, PublicKeyToken=null'
       summary: Gets all use case frameworks and the participation status of the acting company
-      description: 'Example: GET: api/issuer/useCaseParticipation'
+      description: 'Example: GET: api/issuer/useCaseParticipation<br><h3>Available values:</h3> All, Active, Expired'
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -26,6 +31,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -288,10 +299,6 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
-          description: OK
-          content:
-            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -337,10 +344,6 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
-          description: OK
-          content:
-            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -392,10 +395,6 @@ paths:
           schema:
             $ref: '#/components/schemas/ProcessStepTypeId'
       responses:
-        '200':
-          description: OK
-          content:
-            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -441,13 +440,6 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
         '401':
           description: Unauthorized
           content:
@@ -460,6 +452,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
   '/api/revocation/credentials/{credentialId}':
     post:
       tags:
@@ -475,13 +474,6 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: uuid
         '401':
           description: Unauthorized
           content:
@@ -494,6 +486,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
   '/api/revocation/{processId}/retrigger-step/{processStepTypeId}':
     post:
       tags:
@@ -515,10 +514,6 @@ paths:
           schema:
             $ref: '#/components/schemas/ProcessStepTypeId'
       responses:
-        '200':
-          description: OK
-          content:
-            application/json: { }
         '401':
           description: Unauthorized
           content:
@@ -600,13 +595,6 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: string
-                format: binary
         '401':
           description: Unauthorized
           content:
@@ -619,6 +607,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
         '409':
           description: Conflict
           content:
