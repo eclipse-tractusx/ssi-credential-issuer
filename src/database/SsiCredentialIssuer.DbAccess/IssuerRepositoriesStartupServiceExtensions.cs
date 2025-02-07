@@ -20,6 +20,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Auditing.DependencyInjection;
 
@@ -30,6 +31,7 @@ public static class IssuerRepositoriesStartupServiceExtensions
     public static IServiceCollection AddIssuerRepositories(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IIssuerRepositories, IssuerRepositories>()
+            .AddScoped<IRepositories, IssuerRepositories>()
             .AddDbAuditing()
             .AddDbContext<IssuerDbContext>(o => o
                     .UseNpgsql(configuration.GetConnectionString("IssuerDb")))
