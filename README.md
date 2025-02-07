@@ -10,7 +10,7 @@ To see the latest open API specs you can have a look at the [API Hub](https://ec
 
 ## How to build and run
 
-Install the [.NET 8.0 SDK](https://www.microsoft.com/net/download).
+Install the [.NET 9.0 SDK](https://www.microsoft.com/net/download).
 
 Run the following command from the CLI:
 
