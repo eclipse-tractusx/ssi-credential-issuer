@@ -29,7 +29,7 @@ To use the helm chart as a dependency:
 dependencies:
   - name: ssi-credential-issuer
     repository: https://eclipse-tractusx.github.io/charts/dev
-    version: 1.2.0
+    version: 1.3.0-rc.1
 ```
 
 ## Requirements
@@ -65,6 +65,7 @@ dependencies:
 | service.credential.issuerDid | string | `"did:web:example"` |  |
 | service.credential.issuerBpn | string | `"BPNL00000001TEST"` |  |
 | service.credential.statusListUrl | string | `"https://example.org/statuslist"` |  |
+| service.credential.statusListType | string | `"StatusList2021"` | valid types are:  StatusList2021, BitstringStatusList |
 | service.credential.encryptionConfigIndex | int | `0` |  |
 | service.credential.encryptionConfigs.index0.index | int | `0` |  |
 | service.credential.encryptionConfigs.index0.cipherMode | string | `"CBC"` |  |
