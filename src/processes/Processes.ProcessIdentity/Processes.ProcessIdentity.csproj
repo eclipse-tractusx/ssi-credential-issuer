@@ -35,6 +35,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.1" />
     <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Models" Version="3.0.0" />
+    <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.ProcessIdentity" Version="2.17.0" />
   </ItemGroup>
   
   <ItemGroup>
