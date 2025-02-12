@@ -40,9 +40,9 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
-      <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Logging" Version="3.3.0" />
-      <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library" Version="3.3.0" />
-      <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Token" Version="3.3.0" />
+      <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Logging" Version="3.7.0" />
+      <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library" Version="3.7.0" />
+      <PackageReference Include="Org.Eclipse.TractusX.Portal.Backend.Framework.Token" Version="3.7.0" />
     </ItemGroup>
 
     <ItemGroup>

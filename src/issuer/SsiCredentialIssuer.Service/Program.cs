@@ -20,6 +20,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Service;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Web;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Extensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Web;
@@ -39,6 +40,7 @@ await WebApplicationBuildRunner
     .BuildAndRunWebApplicationAsync<Program>(args, "issuer", version, ".Issuer", builder =>
         {
             builder.Services
+                .AddTransient<GeneralHttpExceptionMiddleware>()
                 .AddTransient<IClaimsTransformation, KeycloakClaimsTransformation>()
                 .AddTransient<IAuthorizationHandler, MandatoryIdentityClaimHandler>()
                 .AddTransient<ITokenService, TokenService>()
@@ -63,6 +65,7 @@ await WebApplicationBuildRunner
         },
     (app, _) =>
     {
+        app.UseMiddleware<GeneralHttpExceptionMiddleware>();
         app.MapGroup("/api")
             .WithOpenApi()
             .MapIssuerApi()
