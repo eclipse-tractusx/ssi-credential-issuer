@@ -6,7 +6,6 @@
 ### Bug Fixes
 
 * added missing ids to verified credential external types table ([#345](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/345)) ([8159b4e](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/8159b4e7515fb4925e443b30441a6b4e0699ee4b))
-* adjust statusList url ([#344](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/344)) ([f200921](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/f200921433a63b244856e28df9329deac25fe7bf)), closes [#343](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/343)
 * **errorHandling:** adjust general error handler ([#341](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/341)) ([37883fe](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/37883fe7f82494c2b8853f789b13b5da4f9e5882))
 * **processWorker:** add missing registrations ([#338](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/338)) ([df5c415](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/df5c415eb2f419ddbe9bdbbc26e2ddda4bae96fb))
 
