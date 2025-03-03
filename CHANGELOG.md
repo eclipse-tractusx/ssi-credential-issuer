@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.3.0-rc.1...v1.3.0-rc.2) (2025-03-03)
+
+
+### Bug Fixes
+
+* added missing ids to verified credential external types table ([#345](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/345)) ([7e56c5c](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/7e56c5cb56903c1e83030a6548967943003f99e2))
+* adjust statusList url ([#344](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/344)) ([015fa59](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/015fa590e3f1399ff7dd96638c0e94b9281b96b7)), closes [#343](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/343)
+* **processWorker:** add missing registrations ([#338](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/338)) ([3b1d88e](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/3b1d88e989843b30d8b49fd12fde357fe837808c))
+
+
+### Miscellaneous Chores
+
+* release 1.3.0-rc.2 ([d5ca095](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/d5ca09506f577f751ee1f87d855ca6ef7c8ee978))
+
 ## [1.3.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.2.0-rc.1...v1.3.0-rc.1) (2025-02-07)
 
 
