@@ -19,7 +19,7 @@
 
 portalBackendAddress: "https://portal-backend.int.catena-x.net"
 walletAddress: "https://dis-integration-service-prod.eu10.dim.cloud.sap"
-walletTokenAddress: "https://issuer.authentication.eu10.hana.ondemand.com/oauth/token"
+walletTokenAddress: "https://5c9a4f56-0609-49a5-ab86-dd8f93dfd3fa-mak75wiz.authentication.eu10.hana.ondemand.com/oauth/token"
 
 ingress:
   enabled: true
@@ -47,7 +47,7 @@ service:
   credential:
     issuerDid: "did:web:portal-backend.int.catena-x.net:api:administration:staticdata:did:BPNL00000003CRHK"
     issuerBpn: "BPNL00000003CRHK"
-    statusListUrl: "https://dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com/credentials/status/ba0cd4ef-63e0-4c13-829a-915c496dc836/3c7b17d8-fe44-4f08-9bf9-f786f8be73bf"
+    statusListUrl: "https://dim-static-prod.dis-cloud-prod.cfapps.eu10-004.hana.ondemand.com/credentials/status/7ffe8174-7a0b-4d50-87e4-b8301cd1a8ad/9e0a8b94-2899-473e-b50a-cff620b73776"
     encryptionConfigs:
       index0:
         encryptionKey: "<path:portal/data/ssi-credential-issuer/int/credential#encryptionKey0>"
