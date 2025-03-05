@@ -29,7 +29,7 @@ ingress:
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "8m"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.int.catena-x.net"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:3000, https://*.int.catena-x.net"
   tls:
     - secretName: "ssi-credential-issuer.int.catena-x.net-tls"
       hosts:
