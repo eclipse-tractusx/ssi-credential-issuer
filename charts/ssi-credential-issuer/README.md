@@ -4,7 +4,9 @@ This helm chart installs the Catena-X SSI Credential Issuer application.
 
 For further information please refer to [Technical Documentation](/docs/technical-documentation).
 
-For information about the initial credential creation for the Operator, please refer to [initial credential setup](/docs/technical-documentation/operator-credential-creation/initial-credential-setup.md)
+For information about the initial credential creation for the Operator, please refer to [initial credential setup](/docs/technical-documentation/operator-credential-creation/initial-credential-setup.md).
+
+Information about the connection to the Decentralized Identity Verification (DIV, formerly known as DIM) Wallet: this version was last tested with the 2.2.1 version of the [SSI DIM Middle Layer](https://github.com/SAP/ssi-dim-middle-layer).
 
 The referenced container images are for demonstration purposes only.
 
@@ -29,7 +31,7 @@ To use the helm chart as a dependency:
 dependencies:
   - name: ssi-credential-issuer
     repository: https://eclipse-tractusx.github.io/charts/dev
-    version: 1.3.0-rc.2
+    version: 1.3.0
 ```
 
 ## Requirements

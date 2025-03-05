@@ -4,8 +4,6 @@
 
 - The DIM Status List is presently included in both the configuration file and the outbound wallet post body, which is against our recommendation as we believe this function should be autonomously managed by the wallet. The status list is defined within the component configuration, suggesting an interim solution with an intention to phase out this approach, reinforcing that the status list should not be integral to the interface in the long term.
 
-- Type of the status list is not yet configurable and currently still set to StatusList2021, see [299](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/299).
-
 ## NOTICE
 
 This work is licensed under the [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0).
