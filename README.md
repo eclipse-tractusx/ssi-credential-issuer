@@ -8,6 +8,8 @@ For **installation** details, please refer to the [README.md](./charts/ssi-crede
 
 To see the latest open API specs you can have a look at the [API Hub](https://eclipse-tractusx.github.io/api-hub/ssi-credential-issuer/).
 
+Information about the connection to the Decentralized Identity Verification (DIV, formerly known as DIM) Wallet: this version was last tested with the 2.2.1 version of the [SSI DIM Middle Layer](https://github.com/SAP/ssi-dim-middle-layer).
+
 ## How to build and run
 
 Install the [.NET 9.0 SDK](https://www.microsoft.com/net/download).
