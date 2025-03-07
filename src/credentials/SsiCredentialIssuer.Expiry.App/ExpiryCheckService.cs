@@ -170,18 +170,19 @@ public class ExpiryCheckService
 
         var content = JsonSerializer.Serialize(new
         {
-            Type = data.VerifiedCredentialExternalTypeId,
+            AssignedExternalCredentialType = data.VerifiedCredentialExternalTypeId?.GetEnumValue(),
             ExpiryDate = data.ExpiryDate?.ToString("O") ?? throw new ConflictException("Expiry Date must be set here"),
             Version = data.DetailVersion,
             CredentialId = data.Id,
-            ExpiryCheckTypeId = newExpiryCheckTypeId
+            CredentialType = data.verifiedCredentialTypeId.ToString(),
+            ExpiryCheckTypeId = newExpiryCheckTypeId.ToString()
         }, Options);
 
         if (Guid.TryParse(data.RequesterId, out var requesterId))
         {
             await portalService.AddNotification(content, requesterId, NotificationTypeId.CREDENTIAL_EXPIRY,
                 cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-            var typeValue = data.VerifiedCredentialExternalTypeId.GetEnumValue() ??
+            var typeValue = data.VerifiedCredentialExternalTypeId?.GetEnumValue() ??
                             throw new UnexpectedConditionException(
                                 $"VerifiedCredentialType {data.VerifiedCredentialExternalTypeId} does not exists");
             var mailParameters = new MailParameter[]
