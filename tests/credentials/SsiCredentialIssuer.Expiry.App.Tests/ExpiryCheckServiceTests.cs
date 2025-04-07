@@ -21,7 +21,9 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Extensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
@@ -202,7 +204,7 @@ public class ExpiryCheckServiceTests
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portalService.TriggerMail("CredentialExpiry", creatorUserId, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
-        credentialNotification.GetLastValue().Should().ContainAll("MembershipCredential", "MEMBERSHIP");
+        credentialNotification.GetLastValue().Should().ContainAll(VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL.GetEnumValue(), VerifiedCredentialTypeId.MEMBERSHIP.GetEnumValue());
         ssiDetail.ExpiryCheckTypeId.Should().Be(expiryCheckTypeId);
     }
 }
