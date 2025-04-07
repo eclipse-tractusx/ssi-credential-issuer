@@ -22,8 +22,22 @@ name: Check Dependencies
 on:
   push:
     branches: [main]
+    paths:
+      # all csproj files which include the external packages
+      - '**.csproj'
+      # dependencies file
+      - 'DEPENDENCIES'
+      # workflow file
+      - '.github/workflows/dependencies.yaml'
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      # all csproj files which include the external packages
+      - '**.csproj'
+      # dependencies file
+      - 'DEPENDENCIES'
+      # workflow file
+      - '.github/workflows/dependencies.yaml'
   workflow_dispatch:
 
 jobs:
@@ -32,7 +46,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ['9.0']
+        # dotnet list command doesn't work with 9.0.202, switch to 9.0.104 as a workaround
+        dotnet-version: ['9.0.104']
 
     steps:
   
@@ -62,6 +77,14 @@ jobs:
       - name: Generate Dependencies file
         run: java -jar ./org.eclipse.dash.licenses.jar PACKAGES -project automotive.tractusx -summary DEPENDENCIES || true
 
+      - name: Check for restricted dependencies
+        run: |
+          restricted=$(grep ' restricted,' DEPENDENCIES || true)
+          if [[ -n "$restricted" ]]; then
+            echo "The following dependencies are restricted: $restricted"
+            exit 1
+          fi
+
       - name: Check if dependencies were changed
         id: dependencies-changed
         run: |
@@ -73,15 +96,6 @@ jobs:
             echo "dependencies not changed"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Check for restricted dependencies
-        run: |
-          restricted=$(grep ' restricted,' DEPENDENCIES || true)
-          if [[ -n "$restricted" ]]; then
-            echo "The following dependencies are restricted: $restricted"
-            exit 1
-          fi
-        if: steps.dependencies-changed.outputs.changed == 'true'
 
       - name: Upload DEPENDENCIES file
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
