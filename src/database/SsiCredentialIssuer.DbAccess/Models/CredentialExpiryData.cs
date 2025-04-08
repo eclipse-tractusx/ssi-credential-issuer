@@ -29,7 +29,8 @@ public record CredentialExpiryData(
     string? DetailVersion,
     string Bpnl,
     CompanySsiDetailStatusId CompanySsiDetailStatusId,
-    VerifiedCredentialExternalTypeId VerifiedCredentialExternalTypeId,
+    VerifiedCredentialTypeId verifiedCredentialTypeId,
+    VerifiedCredentialExternalTypeId? VerifiedCredentialExternalTypeId,
     CredentialScheduleData ScheduleData);
 
 public record CredentialScheduleData(
