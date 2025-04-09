@@ -36,7 +36,7 @@ spec:
           restartPolicy: OnFailure
           {{- with .Values.processesworker.image.pullSecrets }}
           imagePullSecrets:
-            {{- toYaml . | nindent 8 }}
+            {{- toYaml . | nindent 10 }}
           {{- end }}
           containers:
           - name: {{ include "issuer.fullname" . }}-{{ .Values.processesworker.name }}
