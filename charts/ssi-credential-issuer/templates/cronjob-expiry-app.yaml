@@ -36,7 +36,7 @@ spec:
           restartPolicy: OnFailure
           {{- with .Values.credentialExpiry.image.pullSecrets }}
           imagePullSecrets:
-            {{- toYaml . | nindent 10 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           containers:
           - name: {{ include "issuer.fullname" . }}-{{ .Values.credentialExpiry.name }}
