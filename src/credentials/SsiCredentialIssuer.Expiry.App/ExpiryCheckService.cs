@@ -88,10 +88,12 @@ public class ExpiryCheckService
 
                 var credentials = outerLoopRepositories.GetInstance<ICompanySsiDetailsRepository>()
                     .GetExpiryData(now, inactiveVcsToDelete, expiredVcsToDelete);
+                _logger.LogInformation("Total number of credentials to be processed for details are {Count}", await credentials.CountAsync(stoppingToken).ConfigureAwait(false));
                 await foreach (var credential in credentials.WithCancellation(stoppingToken).ConfigureAwait(false))
                 {
                     await ProcessCredentials(credential, companySsiDetailsRepository, repositories, portalService, processStepRepository, stoppingToken).ConfigureAwait(ConfigureAwaitOptions.None);
                 }
+                _logger.LogInformation("Credential details process completed successfully");
             }
             catch (Exception ex)
             {
@@ -109,21 +111,30 @@ public class ExpiryCheckService
         IProcessStepRepository<ProcessTypeId, ProcessStepTypeId> processStepRepository,
         CancellationToken cancellationToken)
     {
-        if (data.ScheduleData.IsVcToDelete)
+        try
         {
-            companySsiDetailsRepository.RemoveSsiDetail(data.Id, data.Bpnl, data.RequesterId);
-        }
-        else if (data.ScheduleData.IsVcToDecline)
-        {
-            HandleDecline(data.Id, companySsiDetailsRepository, processStepRepository);
-        }
-        else
-        {
-            await HandleNotification(data, companySsiDetailsRepository, portalService, cancellationToken).ConfigureAwait(false);
-        }
+            if (data.ScheduleData.IsVcToDelete)
+            {
+                companySsiDetailsRepository.RemoveSsiDetail(data.Id, data.Bpnl, data.RequesterId);
+            }
+            else if (data.ScheduleData.IsVcToDecline)
+            {
+                HandleDecline(data.Id, companySsiDetailsRepository, processStepRepository);
+            }
+            else
+            {
+                await HandleNotification(data, companySsiDetailsRepository, portalService, cancellationToken).ConfigureAwait(false);
+            }
 
-        // Saving here to make sure the each credential is handled by there own 
-        await repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
+            // Saving here to make sure the each credential is handled by there own 
+            await repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
+
+        }
+        catch (Exception ex)
+        {
+            var message = $"An error occurred while processing credential details '{ex.Message}' for ID '{data.Id}'";
+            throw new InvalidOperationException(message, ex);
+        }
     }
 
     private static void HandleDecline(
