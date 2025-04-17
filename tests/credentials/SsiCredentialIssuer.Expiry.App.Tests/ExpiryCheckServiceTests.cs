@@ -21,7 +21,9 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Extensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
@@ -32,6 +34,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
+using System.Runtime.CompilerServices;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.Tests;
 
@@ -98,7 +101,7 @@ public class ExpiryCheckServiceTests
             .Create();
         var data = new CredentialExpiryData[]
         {
-            new(credentialId, Guid.NewGuid().ToString(), inactiveVcsToDelete.AddDays(-1), null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
+            new(credentialId, Guid.NewGuid().ToString(), inactiveVcsToDelete.AddDays(-1), null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialTypeId.MEMBERSHIP, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
         };
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
@@ -130,7 +133,7 @@ public class ExpiryCheckServiceTests
             .Create();
         var data = new CredentialExpiryData[]
         {
-            new(ssiDetail.Id, ssiDetail.CreatorUserId, ssiDetail.ExpiryDate!.Value, ssiDetail.ExpiryCheckTypeId, null, Bpnl, ssiDetail.CompanySsiDetailStatusId, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
+            new(ssiDetail.Id, ssiDetail.CreatorUserId, ssiDetail.ExpiryDate!.Value, ssiDetail.ExpiryCheckTypeId, null, Bpnl, ssiDetail.CompanySsiDetailStatusId, VerifiedCredentialTypeId.MEMBERSHIP, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
         };
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
@@ -178,7 +181,7 @@ public class ExpiryCheckServiceTests
             .Create();
         var data = new CredentialExpiryData[]
         {
-            new(ssiDetail.Id, ssiDetail.CreatorUserId, ssiDetail.ExpiryDate!.Value, ssiDetail.ExpiryCheckTypeId, null, Bpnl, ssiDetail.CompanySsiDetailStatusId, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
+            new(ssiDetail.Id, ssiDetail.CreatorUserId, ssiDetail.ExpiryDate!.Value, ssiDetail.ExpiryCheckTypeId, null, Bpnl, ssiDetail.CompanySsiDetailStatusId, VerifiedCredentialTypeId.MEMBERSHIP, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
         };
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
@@ -190,6 +193,8 @@ public class ExpiryCheckServiceTests
                 initialize?.Invoke(ssiDetail);
                 updateFields.Invoke(ssiDetail);
             });
+        var credentialNotification = A.Captured<string>();
+        A.CallTo(() => _portalService.AddNotification(credentialNotification._, creatorUserId, NotificationTypeId.CREDENTIAL_EXPIRY, A<CancellationToken>._)).DoesNothing();
 
         // Act
         await _sut.ExecuteAsync(CancellationToken.None);
@@ -197,9 +202,9 @@ public class ExpiryCheckServiceTests
         // Assert
         A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(ssiDetail.Id, A<string>._, A<string>._)).MustNotHaveHappened();
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();
-        A.CallTo(() => _portalService.AddNotification(A<string>._, creatorUserId, NotificationTypeId.CREDENTIAL_EXPIRY, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => _portalService.TriggerMail("CredentialExpiry", creatorUserId, A<IEnumerable<MailParameter>>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
 
+        credentialNotification.GetLastValue().Should().ContainAll(VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL.GetEnumValue(), VerifiedCredentialTypeId.MEMBERSHIP.GetEnumValue());
         ssiDetail.ExpiryCheckTypeId.Should().Be(expiryCheckTypeId);
     }
 }

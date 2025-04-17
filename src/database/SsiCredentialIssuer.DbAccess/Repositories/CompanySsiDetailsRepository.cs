@@ -305,6 +305,7 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 x.Details.VerifiedCredentialExternalTypeDetailVersion!.Version,
                 x.Details.Bpnl,
                 x.Details.CompanySsiDetailStatusId,
+                x.Details.VerifiedCredentialTypeId,
                 x.Details.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalTypeId,
                 new CredentialScheduleData(
                     x.IsVcToDelete,
