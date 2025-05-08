@@ -39,23 +39,23 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App;
 /// <summary>
 /// Service to delete the pending and inactive documents as well as the depending consents from the database
 /// </summary>
-public class ExpiryCheckService
+public class DataDeletionCheckService
 {
     private static readonly JsonSerializerOptions Options = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<ExpiryCheckService> _logger;
-    private readonly ExpiryCheckServiceSettings _settings;
+    private readonly ILogger<DataDeletionCheckService> _logger;
+    private readonly DataDeletionCheckServiceSettings _settings;
 
     /// <summary>
-    /// Creates a new instance of <see cref="ExpiryCheckService"/>
+    /// Creates a new instance of <see cref="DataDeletionCheckService"/>
     /// </summary>
     /// <param name="serviceScopeFactory">access to the services</param>
     /// <param name="logger">the logger</param>
     /// <param name="options">The options</param>
-    public ExpiryCheckService(
+    public DataDeletionCheckService(
         IServiceScopeFactory serviceScopeFactory,
-        ILogger<ExpiryCheckService> logger,
-        IOptions<ExpiryCheckServiceSettings> options)
+        ILogger<DataDeletionCheckService> logger,
+        IOptions<DataDeletionCheckServiceSettings> options)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;

@@ -56,7 +56,7 @@ try
     };
 
     Log.Information("Start processing");
-    var workerInstance = host.Services.GetRequiredService<ExpiryCheckService>();
+    var workerInstance = host.Services.GetRequiredService<DataDeletionCheckService>();
     await workerInstance.ExecuteAsync(tokenSource.Token).ConfigureAwait(ConfigureAwaitOptions.None);
     Log.Information("Execution finished shutting down");
 }

@@ -24,7 +24,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.DependencyIn
 /// <summary>
 /// Settings for the ExpiryCheckService
 /// </summary>
-public class ExpiryCheckServiceSettings
+public class DataDeletionCheckServiceSettings
 {
     /// <summary>
     /// Vcs which are older than the given value will be deleted when expired
