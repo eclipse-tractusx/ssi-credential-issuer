@@ -51,3 +51,4 @@ Chart.lock
 
 # local dev configuration
 appsettings.Development.json
+PACKAGES
