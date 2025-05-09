@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.3.0...v1.4.0-rc.1) (2025-05-09)
+
+### Features
+
+* Enhanced the notification message when the credential is expired ([#354](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/354)) ([c30396a](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/c30396a4088f9b0108cd0a6b8a9c27a158f74417)), closes [#353](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/353)
+
 ## [1.3.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.3.0-rc.1...v1.3.0-rc.2) (2025-03-03)
 
 
