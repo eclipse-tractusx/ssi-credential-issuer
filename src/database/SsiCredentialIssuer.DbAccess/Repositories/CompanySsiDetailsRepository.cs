@@ -317,8 +317,18 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
             .ToAsyncEnumerable();
     }
 
-    public void RemoveSsiDetail(Guid companySsiDetailId, string bpnl, string userId) =>
+    public void RemoveSsiDetail(Guid companySsiDetailId, string bpnl, string userId)
+    {
+        var assignments = context.CompanySsiDetailAssignedDocuments
+            .Where(x => x.CompanySsiDetailId == companySsiDetailId).ToList();
+
+        var documents = context.Documents.Where(document => assignments.Select(assign => assign.DocumentId).Contains(document.Id)).ToList();
+
+        context.CompanySsiDetailAssignedDocuments.RemoveRange(assignments);
+        context.Documents.RemoveRange(documents);
+
         context.CompanySsiDetails.Remove(new CompanySsiDetail(companySsiDetailId, bpnl, default, default, bpnl, userId, DateTimeOffset.MinValue));
+    }
 
     public void CreateProcessData(Guid companySsiDetailId, JsonDocument schema, VerifiedCredentialTypeKindId credentialTypeKindId, Action<CompanySsiProcessData>? setOptionalFields)
     {

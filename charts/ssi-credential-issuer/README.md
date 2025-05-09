@@ -106,7 +106,7 @@ dependencies:
 | processesworker.wallet.getCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to get a specific credential; {0} will be replaced by the credential id |
 | processesworker.wallet.revokeCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to revoke a specific credential; {0} will be replaced by the credential id |
 | credentialExpiry.name | string | `"expiry"` |  |
-| credentialExpiry.image.name | string | `"docker.io/tractusx/ssi-credential-expiry-app"` |  |
+| credentialExpiry.image.name | string | `"docker.io/tractusx/ssi-credential-data-deletion-app"` |  |
 | credentialExpiry.image.tag | string | `""` |  |
 | credentialExpiry.image.pullSecrets | list | `[]` |  |
 | credentialExpiry.imagePullPolicy | string | `"IfNotPresent"` |  |
@@ -114,7 +114,7 @@ dependencies:
 | credentialExpiry.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
 | credentialExpiry.logging.default | string | `"Information"` |  |
 | credentialExpiry.expiry.expiredVcsToDeleteInMonth | int | `12` |  |
-| credentialExpiry.expiry.inactiveVcsToDeleteInWeeks | int | `12` |  |
+| credentialExpiry.expiry.inactiveVcsToDeleteInDays | int | `84` |  |
 | existingSecret | string | `""` | Secret containing the client-secrets for the connection to portal and wallet as well as encryptionKeys for issuer.credential and processesworker.wallet |
 | dotnetEnvironment | string | `"Production"` |  |
 | dbConnection.schema | string | `"issuer"` |  |

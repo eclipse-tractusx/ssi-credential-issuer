@@ -19,12 +19,12 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.DependencyInjection;
 
 /// <summary>
 /// Settings for the ExpiryCheckService
 /// </summary>
-public class ExpiryCheckServiceSettings
+public class DataDeletionCheckServiceSettings
 {
     /// <summary>
     /// Vcs which are older than the given value will be deleted when expired
@@ -36,5 +36,5 @@ public class ExpiryCheckServiceSettings
     /// Vcs which are older than the given value will be deleted when declined
     /// </summary>
     [Required]
-    public int InactiveVcsToDeleteInWeeks { get; init; }
+    public int InactiveVcsToDeleteInDays { get; init; }
 }

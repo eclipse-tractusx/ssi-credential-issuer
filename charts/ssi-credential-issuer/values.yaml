@@ -149,7 +149,7 @@ processesworker:
 credentialExpiry:
   name: "expiry"
   image:
-    name: "docker.io/tractusx/ssi-credential-expiry-app"
+    name: "docker.io/tractusx/ssi-credential-data-deletion-app"
     tag: ""
     pullSecrets: []
   imagePullPolicy: "IfNotPresent"
@@ -167,7 +167,7 @@ credentialExpiry:
     default: "Information"
   expiry:
     expiredVcsToDeleteInMonth: 12
-    inactiveVcsToDeleteInWeeks: 12
+    inactiveVcsToDeleteInDays: 84
 
 # -- Secret containing the client-secrets for the connection to portal and wallet
 # as well as encryptionKeys for issuer.credential and processesworker.wallet

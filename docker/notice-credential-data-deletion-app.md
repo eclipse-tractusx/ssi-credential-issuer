@@ -1,6 +1,6 @@
 ## Notice for Docker image
 
-DockerHub: [https://hub.docker.com/r/tractusx/ssi-credential-expiry-app](https://hub.docker.com/r/tractusx/ssi-credential-expiry-app)
+DockerHub: [https://hub.docker.com/r/tractusx/ssi-credential-data-deletion-app](https://hub.docker.com/r/tractusx/ssi-credential-data-deletion-app)
 
 Eclipse Tractus-X product(s) installed within the image:
 
@@ -8,7 +8,7 @@ __Credential Expiry App__
 
 - GitHub: https://github.com/eclipse-tractusx/ssi-credential-issuer
 - Project home: https://projects.eclipse.org/projects/automotive.tractusx
-- Dockerfile: https://github.com/eclipse-tractusx/ssi-credential-issuer/blob/main/docker/Dockerfile-credential-expiry-app
+- Dockerfile: https://github.com/eclipse-tractusx/ssi-credential-issuer/blob/main/docker/Dockerfile-credential-data-deletion-app
 - Project license: [Apache License, Version 2.0](https://github.com/eclipse-tractusx/ssi-credential-issuer/blob/main/LICENSE)
 
 __Used base images__

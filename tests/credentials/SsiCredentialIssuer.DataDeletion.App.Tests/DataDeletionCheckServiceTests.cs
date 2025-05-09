@@ -31,29 +31,29 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
 using System.Runtime.CompilerServices;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.Tests;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.Tests;
 
-public class ExpiryCheckServiceTests
+public class DataDeletionCheckServiceTests
 {
     private readonly IFixture _fixture;
-    private readonly ExpiryCheckService _sut;
+    private readonly DataDeletionCheckService _sut;
 
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly IProcessStepRepository<ProcessTypeId, ProcessStepTypeId> _processStepRepository;
     private readonly IPortalService _portalService;
     private readonly ICompanySsiDetailsRepository _companySsiDetailsRepository;
-    private readonly ExpiryCheckServiceSettings _settings;
+    private readonly DataDeletionCheckServiceSettings _settings;
 
     private readonly string Bpnl = "BPNL00000001TEST";
     private static readonly string IssuerBpnl = "BPNL000001ISSUER";
 
-    public ExpiryCheckServiceTests()
+    public DataDeletionCheckServiceTests()
     {
         _fixture = new Fixture().Customize(new AutoFakeItEasyCustomization { ConfigureMembers = true });
         _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -81,12 +81,12 @@ public class ExpiryCheckServiceTests
         var serviceScopeFactory = _fixture.Create<IServiceScopeFactory>();
         A.CallTo(() => serviceScopeFactory.CreateScope()).Returns(serviceScope);
 
-        _settings = new ExpiryCheckServiceSettings
+        _settings = new DataDeletionCheckServiceSettings
         {
             ExpiredVcsToDeleteInMonth = 12,
-            InactiveVcsToDeleteInWeeks = 8
+            InactiveVcsToDeleteInDays = 56
         };
-        _sut = new ExpiryCheckService(serviceScopeFactory, _fixture.Create<ILogger<ExpiryCheckService>>(), Options.Create(_settings));
+        _sut = new DataDeletionCheckService(serviceScopeFactory, _fixture.Create<ILogger<DataDeletionCheckService>>(), Options.Create(_settings));
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class ExpiryCheckServiceTests
     {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var inactiveVcsToDelete = now.AddDays(-(_settings.InactiveVcsToDeleteInWeeks * 7));
+        var inactiveVcsToDelete = now.AddDays(-_settings.InactiveVcsToDeleteInDays);
         var credentialId = Guid.NewGuid();
         var credentialScheduleData = _fixture.Build<CredentialScheduleData>()
             .With(x => x.IsVcToDelete, true)

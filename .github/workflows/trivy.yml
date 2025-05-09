@@ -144,7 +144,7 @@ jobs:
         with:
           sarif_file: "trivy-results3.sarif"
 
-  analyze-ssi-credential-expiry-app:
+  analyze-ssi-credential-data-deletion-app:
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -165,7 +165,7 @@ jobs:
         uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5 # v0.30.0
         with:
           # Path to Docker image
-          image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-expiry-app:latest"
+          image-ref: "${{ env.IMAGE_NAMESPACE }}/ssi-credential-data-deletion-app:latest"
           format: "sarif"
           output: "trivy-results4.sarif"
           vuln-type: "os,library"

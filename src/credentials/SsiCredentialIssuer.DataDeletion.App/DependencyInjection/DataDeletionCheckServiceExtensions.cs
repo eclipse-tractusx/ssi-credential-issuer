@@ -22,12 +22,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Validation;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DataDeletion.App.DependencyInjection;
 
 /// <summary>
 /// Extension method to register the expiry check service and dependent services
 /// </summary>
-public static class ExpiryCheckServiceExtensions
+public static class DataDeletionCheckServiceExtensions
 {
     /// <summary>
     /// Adds the expiry check service
@@ -38,11 +38,11 @@ public static class ExpiryCheckServiceExtensions
     public static IServiceCollection AddExpiryCheckService(this IServiceCollection services, IConfigurationSection section)
     {
         services
-            .AddOptions<ExpiryCheckServiceSettings>()
+            .AddOptions<DataDeletionCheckServiceSettings>()
             .Bind(section)
             .EnvironmentalValidation(section);
         services
-            .AddTransient<ExpiryCheckService>()
+            .AddTransient<DataDeletionCheckService>()
             .AddTransient<IDateTimeProvider, UtcDateTimeProvider>();
         return services;
     }

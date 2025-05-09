@@ -100,9 +100,9 @@ jobs:
           - image: tractusx/ssi-credential-issuer-processes-worker
             dockerfile: ./docker/Dockerfile-credential-issuer-processes-worker
             dockernotice: ./docker/notice-credential-issuer-processes-worker.md
-          - image: tractusx/ssi-credential-expiry-app
-            dockerfile: ./docker/Dockerfile-credential-expiry-app
-            dockernotice: ./docker/notice-credential-expiry-app.md
+          - image: tractusx/ssi-credential-data-deletion-app
+            dockerfile: ./docker/Dockerfile-credential-data-deletion-app
+            dockernotice: ./docker/notice-credential-data-deletion-app.md
     outputs:
       app-version: ${{ steps.app-version.outputs.current }}
       version-check: ${{ steps.version-check.outputs.exists }}
