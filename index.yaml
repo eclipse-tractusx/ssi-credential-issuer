@@ -2,21 +2,21 @@ apiVersion: v1
 entries:
   ssi-credential-issuer:
   - apiVersion: v2
-    appVersion: 1.4.0-rc.1
-    created: "2025-05-09T12:58:57.619690858Z"
+    appVersion: 1.4.0-rc.2
+    created: "2025-05-26T09:51:06.508169633Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
       repository: https://charts.bitnami.com/bitnami
       version: 12.12.x
     description: Helm chart for SSI Credential Issuer
-    digest: 02d4c48396c09c7fc44788b8d563fa5ca93fb473e4383bf14dca076283ed2970
+    digest: 7dece2ba6800b620b706f291daaa8d487b2a427d2d706fc5c5b0a1ae2a77f5ed
     home: https://github.com/eclipse-tractusx/ssi-credential-issuer
     name: ssi-credential-issuer
     type: application
     urls:
-    - https://github.com/eclipse-tractusx/ssi-credential-issuer/releases/download/ssi-credential-issuer-1.4.0-rc.1/ssi-credential-issuer-1.4.0-rc.1.tgz
-    version: 1.4.0-rc.1
+    - https://github.com/eclipse-tractusx/ssi-credential-issuer/releases/download/ssi-credential-issuer-1.4.0-rc.2/ssi-credential-issuer-1.4.0-rc.2.tgz
+    version: 1.4.0-rc.2
   - apiVersion: v2
     appVersion: 1.4.0-rc.1
     created: "2025-05-09T12:18:11.633629885Z"
@@ -43,6 +43,22 @@ entries:
       version: 12.12.x
     description: Helm chart for SSI Credential Issuer
     digest: b0e977b69472e83c434170cdfddbd681916cbd43e6eda0fc57176d445fed8db5
+    home: https://github.com/eclipse-tractusx/ssi-credential-issuer
+    name: ssi-credential-issuer
+    type: application
+    urls:
+    - https://github.com/eclipse-tractusx/ssi-credential-issuer/releases/download/ssi-credential-issuer-1.4.0-rc.1/ssi-credential-issuer-1.4.0-rc.1.tgz
+    version: 1.4.0-rc.1
+  - apiVersion: v2
+    appVersion: 1.4.0-rc.1
+    created: "2025-05-09T12:58:57.619690858Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.12.x
+    description: Helm chart for SSI Credential Issuer
+    digest: 02d4c48396c09c7fc44788b8d563fa5ca93fb473e4383bf14dca076283ed2970
     home: https://github.com/eclipse-tractusx/ssi-credential-issuer
     name: ssi-credential-issuer
     type: application
@@ -227,6 +243,22 @@ entries:
     version: 1.2.0-alpha.2
   - apiVersion: v2
     appVersion: 1.2.0-alpha.1
+    created: "2024-09-23T15:32:30.74772196Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.12.x
+    description: Helm chart for SSI Credential Issuer
+    digest: 38982bdd25e1f65ccac738200dbed267e31a894a5098795dd8548d6b2ef5a2e2
+    home: https://github.com/eclipse-tractusx/ssi-credential-issuer
+    name: ssi-credential-issuer
+    type: application
+    urls:
+    - https://github.com/eclipse-tractusx/ssi-credential-issuer/releases/download/ssi-credential-issuer-1.2.0-alpha.1/ssi-credential-issuer-1.2.0-alpha.1.tgz
+    version: 1.2.0-alpha.1
+  - apiVersion: v2
+    appVersion: 1.2.0-alpha.1
     created: "2024-09-27T15:31:59.797532534Z"
     dependencies:
     - condition: postgresql.enabled
@@ -251,22 +283,6 @@ entries:
       version: 12.12.x
     description: Helm chart for SSI Credential Issuer
     digest: 2a28a3098f2ac7adc2a54c65c18e766cfd10e3cae173d013e2ea2256635afec3
-    home: https://github.com/eclipse-tractusx/ssi-credential-issuer
-    name: ssi-credential-issuer
-    type: application
-    urls:
-    - https://github.com/eclipse-tractusx/ssi-credential-issuer/releases/download/ssi-credential-issuer-1.2.0-alpha.1/ssi-credential-issuer-1.2.0-alpha.1.tgz
-    version: 1.2.0-alpha.1
-  - apiVersion: v2
-    appVersion: 1.2.0-alpha.1
-    created: "2024-09-23T15:32:30.74772196Z"
-    dependencies:
-    - condition: postgresql.enabled
-      name: postgresql
-      repository: https://charts.bitnami.com/bitnami
-      version: 12.12.x
-    description: Helm chart for SSI Credential Issuer
-    digest: 38982bdd25e1f65ccac738200dbed267e31a894a5098795dd8548d6b2ef5a2e2
     home: https://github.com/eclipse-tractusx/ssi-credential-issuer
     name: ssi-credential-issuer
     type: application
@@ -513,4 +529,4 @@ entries:
     urls:
     - https://github.com/eclipse-tractusx/ssi-credential-issuer/releases/download/ssi-credential-issuer-1.0.0-rc.1/ssi-credential-issuer-1.0.0-rc.1.tgz
     version: 1.0.0-rc.1
-generated: "2025-05-09T13:06:47.456764386Z"
+generated: "2025-05-26T09:51:06.508701847Z"
