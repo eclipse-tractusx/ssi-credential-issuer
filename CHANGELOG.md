@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.3.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.3.0-rc.1...v1.3.0-rc.2) (2025-05-26)
+
+
+### Date
+
+* Mon Mar 3 15:04:33 2025 +0100 ([c858377](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/c85837712fcba0844ab3eee6fcb79a876b684932))
+
+
+### Features
+
+* Enhanced the notification message when the credential is expired ([#354](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/354)) ([c30396a](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/c30396a4088f9b0108cd0a6b8a9c27a158f74417)), closes [#353](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/353)
+
+
+### Bug Fixes
+
+* added missing ids to verified credential external types table ([#345](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/345)) ([8159b4e](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/8159b4e7515fb4925e443b30441a6b4e0699ee4b))
+* adjust statusList url ([#344](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/344)) ([f200921](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/f200921433a63b244856e28df9329deac25fe7bf)), closes [#343](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/343)
+* change image pull secret indentation for jobs ([#361](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/361)) ([345a557](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/345a5578587fbeca76680dcffc1158fe0300a05d))
+* **errorHandling:** adjust general error handler ([#341](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/341)) ([37883fe](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/37883fe7f82494c2b8853f789b13b5da4f9e5882))
+* **processWorker:** add missing registrations ([#338](https://github.com/eclipse-tractusx/ssi-credential-issuer/issues/338)) ([df5c415](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/df5c415eb2f419ddbe9bdbbc26e2ddda4bae96fb))
+
 ## [1.4.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.3.0...v1.4.0-rc.1) (2025-05-09)
 
 ### Features
