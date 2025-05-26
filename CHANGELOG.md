@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0-rc.2](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.4.0-rc.1...v1.4.0-rc.2) (2025-05-09)
+
+### Miscellaneous Chores
+
+* update dependencies ([3c47215b](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/3c47215bc787649537b5fce9fd690ff5c88f488a)), ([dc95a25](https://github.com/eclipse-tractusx/ssi-credential-issuer/commit/dc95a25750f37dafd3d2c603ca68a3b7d2898549))
+
 ## [1.4.0-rc.1](https://github.com/eclipse-tractusx/ssi-credential-issuer/compare/v1.3.0...v1.4.0-rc.1) (2025-05-09)
 
 ### Features
