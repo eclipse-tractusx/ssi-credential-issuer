@@ -1,7 +1,7 @@
 openapi: 3.0.4
 info:
   title: Org.Eclipse.TractusX.SsiCredentialIssuer.Service
-  version: v1.4.0-rc.2
+  version: v1.4.0
 paths:
   /api/issuer/useCaseParticipation:
     get:
