@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -125,20 +125,20 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_FOR_HOLDER);
     }
 
     #endregion
 
-    #region CreateCredentialForHolder
+    #region RequestCredentialForHolder
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithCredentialNotSet_SkipsStep()
+    public async Task RequestCredentialForHolder_WithCredentialNotSet_SkipsStep()
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns(default((bool, HolderWalletData, string?, EncryptionTransformationData, string?)));
-        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+            .Returns(default((bool, HolderWalletData, string?, JsonDocument?, EncryptionTransformationData, string?)));
+        Task Act() => _sut.RequestCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
@@ -148,37 +148,41 @@ public class CredentialCreationProcessHandlerTests
     }
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithClientIdNull_SkipsStep()
+    public async Task RequestCredentialForHolder_WithClientIdNull_SkipsStep()
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((false, new HolderWalletData(null, null), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
-        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+            .Returns((false, new HolderWalletData(null, null), "test", JsonDocument.Parse(@"{""name"":""John"",""age"":30}"), _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
 
         // Act
-        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+        var result = await _sut.RequestCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
-        ex.Message.Should().Be("Wallet information must be set");
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().Be("ProcessStep was skipped because the holder is the BYOW");
+        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
     }
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithWalletUrlNull_SkipsStep()
+    public async Task RequestCredentialForHolder_WithWalletUrlNull_SkipsStep()
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((false, new HolderWalletData(null, "c1"), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
-        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+            .Returns((false, new HolderWalletData(null, "c1"), "test", JsonDocument.Parse(@"{""name"":""John"",""age"":30}"), _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
 
         // Act
-        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+        var result = await _sut.RequestCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
-        ex.Message.Should().Be("Wallet information must be set");
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().Be("ProcessStep was skipped because the holder is the BYOW");
+        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
     }
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithEncryptionNotSet_SkipsStep()
+    public async Task RequestCredentialForHolder_WithEncryptionNotSet_SkipsStep()
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
@@ -186,46 +190,49 @@ public class CredentialCreationProcessHandlerTests
                 false,
                 new HolderWalletData("https://example.org", "c1"),
                 "test",
+                JsonDocument.Parse(@"{""name"":""John"",""age"":30}"),
                 new EncryptionTransformationData("test"u8.ToArray(), "test"u8.ToArray(), 0),
                 "https://example.org"));
 
         // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+        var result = await _sut.RequestCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK);
     }
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithValidData_ReturnsExpected()
+    public async Task RequestCredentialForHolder_WithValidData_ReturnsExpected()
     {
         // Arrange
+        var credJson = JsonDocument.Parse(@"{""name"":""John"",""age"":30}");
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
             .Returns((
                 false,
                 new HolderWalletData("https://example.org", "c1"),
                 "test",
+                credJson,
                 _fixture.Create<EncryptionTransformationData>(),
                 "https://example.org"));
 
         // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+        var result = await _sut.RequestCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletBusinessLogic.CreateCredentialForHolder(_credentialId, "https://example.org", "c1", A<EncryptionInformation>._, "test", A<CancellationToken>._))
+        A.CallTo(() => _walletBusinessLogic.RequestCredentialForHolder(_credentialId, "https://example.org", "c1", A<EncryptionInformation>._, credJson.RootElement.GetRawText(), A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
 
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK);
     }
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithIssuerAsHolder_ReturnsExpected()
+    public async Task RequestCredentialForHolder_WithIssuerAsHolder_ReturnsExpected()
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
@@ -233,14 +240,15 @@ public class CredentialCreationProcessHandlerTests
                 true,
                 new HolderWalletData("https://example.org", "c1"),
                 "test",
+                JsonDocument.Parse(@"{""name"":""John"",""age"":30}"),
                 _fixture.Create<EncryptionTransformationData>(),
                 "https://example.org"));
 
         // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+        var result = await _sut.RequestCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletBusinessLogic.CreateCredentialForHolder(A<Guid>._, A<string>._, A<string>._, A<EncryptionInformation>._, A<string>._, A<CancellationToken>._))
+        A.CallTo(() => _walletBusinessLogic.RequestCredentialForHolder(A<Guid>._, A<string>._, A<string>._, A<EncryptionInformation>._, A<string>._, A<CancellationToken>._))
             .MustNotHaveHappened();
 
         result.modified.Should().BeFalse();
