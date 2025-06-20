@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -58,7 +58,8 @@ public class CredentialCreationProcessHandler(
         var nextProcessStep = callbackUrl == null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1);
         return (
             hasEncryptionInformation
-                ? Enumerable.Repeat(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, 1)
+                // ? Enumerable.Repeat(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, 1)
+                ? Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_FOR_HOLDER, 1)
                 : nextProcessStep,
             ProcessStepStatusId.DONE,
             false,
@@ -67,7 +68,7 @@ public class CredentialCreationProcessHandler(
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CreateCredentialForHolder(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (isIssuerCompany, holderWalletData, credential, encryptionInformation, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (isIssuerCompany, holderWalletData, credential, _, encryptionInformation, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (isIssuerCompany)
         {
             return (
@@ -95,6 +96,70 @@ public class CredentialCreationProcessHandler(
         await walletBusinessLogic.CreateCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credential, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         return (
             callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
+            ProcessStepStatusId.DONE,
+            false,
+            null);
+    }
+
+    public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RequestCredentialForHolder(Guid credentialId, CancellationToken cancellationToken)
+    {
+        var (isIssuerCompany, holderWalletData, _, credentialJson, encryptionInformation, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (isIssuerCompany)
+        {
+            return (
+                callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
+                ProcessStepStatusId.SKIPPED,
+                false,
+                "ProcessStep was skipped because the holder is the issuer");
+        }
+
+        if (credentialJson is null)
+        {
+            throw new ConflictException("Credential must be set here");
+        }
+
+        if (holderWalletData.ClientId == null || holderWalletData.WalletUrl == null)
+        {
+            // throw new ConflictException("Wallet information must be set");
+            return (
+                callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
+                ProcessStepStatusId.SKIPPED,
+                false,
+                "ProcessStep was skipped because the holder is the BYOW");
+        }
+
+        if (encryptionInformation.Secret == null || encryptionInformation.InitializationVector == null || encryptionInformation.EncryptionMode == null)
+        {
+            throw new ConflictException("Wallet secret must be set");
+        }
+
+        await walletBusinessLogic.RequestCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        return (
+            Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK, 1),
+            ProcessStepStatusId.DONE,
+            false,
+            null);
+    }
+
+    public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CheckCredentialStatus(Guid credentialId, CancellationToken cancellationToken)
+    {
+        var (credentialRequestId, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialRequestIdById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (credentialRequestId == null)
+        {
+            throw new ConflictException("Credential Request Id must be set here");
+        }
+
+        var credentialRequestStatus = await walletBusinessLogic.CheckCredentialRequestStatus(credentialId, credentialRequestId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (credentialRequestStatus == "RECEIVED")
+        {
+            return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+                null,
+                ProcessStepStatusId.TODO,
+                false,
+                null);
+        }
+        return (
+            callbackUrl == null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
             ProcessStepStatusId.DONE,
             false,
             null);

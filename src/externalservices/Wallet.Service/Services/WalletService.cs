@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -102,5 +102,60 @@ public class WalletService(
             .CatchingIntoServiceExceptionFor("revoke-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
+    }
+
+    public async Task<Guid> RequestCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, string credential, CancellationToken cancellationToken)
+    {
+        var authSettings = new BasicAuthSettings
+        {
+            ClientId = clientId,
+            ClientSecret = clientSecret,
+            TokenAddress = $"{holderWalletUrl}/oauth/token"
+        };
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(authSettings, cancellationToken);
+        Console.WriteLine(credential);
+        ICredential credentialBase = JsonSerializer.Deserialize<Credential>(credential)!;
+        if (credentialBase == null)
+        {
+            throw new UnexpectedConditionException("Credential must not be null");
+        }
+
+        var type = credentialBase.Type.ElementAt(1);
+        var issuerDid = credentialBase.Issuer;
+        var holderDid = credentialBase.CredentialSubject.Id;
+        var expirationDate = credentialBase.ExpirationDate;
+
+        var data = new RequestCredential(
+            Enumerable.Repeat(
+                new RequestedCredentials(type, "vcdm11_jwt"), 1),
+                 issuerDid, holderDid, expirationDate);
+        var result = await client.PostAsJsonAsync(string.Format(_settings.RequestCredentialPath, _settings.WalletApplication), data, Options, cancellationToken)
+            .CatchingIntoServiceExceptionFor("request-holder-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<RequestCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (response is null)
+        {
+            throw new ServiceException(NoIdErrorMessage, true);
+        }
+
+        return response.Id;
+    }
+
+    public async Task<CredentialRequestReceived> GetCredentialRequestsReceived(Guid credentialRequestId, CancellationToken cancellationToken)
+    {
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        // TODO CredentialRequestsReceivedPath needs to be updated with the correct path
+        var result = await client.GetAsync(string.Format(_settings.CredentialRequestsReceivedPath, credentialRequestId), cancellationToken)
+            .CatchingIntoServiceExceptionFor("get-credential-requests-received", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<GetCredentialRequestReceivedResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (response is null)
+        {
+            throw new ServiceException(NoIdErrorMessage, true);
+        }
+
+        return response.Data.FirstOrDefault() ?? throw new NotFoundException($"Credential request with id {credentialRequestId} not found");
     }
 }
