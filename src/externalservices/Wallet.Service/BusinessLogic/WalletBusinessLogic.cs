@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -116,5 +116,54 @@ public class WalletBusinessLogic(
                 c.InitializationVector = null;
                 c.EncryptionMode = null;
             });
+    }
+
+    public async Task RequestCredentialForHolder(Guid companySsiDetailId, string holderWalletUrl, string clientId, EncryptionInformation encryptionInformation, string credential, CancellationToken cancellationToken)
+    {
+        var cryptoHelper = _settings.EncryptionConfigs.GetCryptoHelper(_settings.EncryptionConfigIndex);
+        var secret = cryptoHelper.Decrypt(encryptionInformation.Secret, encryptionInformation.InitializationVector);
+
+        var requestId = await walletService
+            .RequestCredentialForHolder(holderWalletUrl, clientId, secret, credential, cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.None);
+
+        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c =>
+        {
+            c.CredentialRequestId = null;
+        }, c =>
+        {
+            c.CredentialRequestId = requestId;
+        });
+
+        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyProcessData(companySsiDetailId,
+            c =>
+            {
+                c.ClientId = clientId;
+                c.ClientSecret = encryptionInformation.Secret;
+                c.InitializationVector = encryptionInformation.InitializationVector;
+                c.EncryptionMode = encryptionInformation.EncryptionMode;
+            },
+            c =>
+            {
+                c.ClientId = null;
+                c.ClientSecret = null;
+                c.InitializationVector = null;
+                c.EncryptionMode = null;
+            });
+    }
+
+    public async Task<string> CheckCredentialRequestStatus(Guid companySsiDetailId, Guid credentialRequestId, CancellationToken cancellationToken)
+    {
+        var credentialRequest = await walletService.GetCredentialRequestsReceived(credentialRequestId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+
+        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c =>
+        {
+            c.CredentialRequestStatus = null;
+        }, c =>
+        {
+            c.CredentialRequestStatus = credentialRequest.Status;
+        });
+
+        return credentialRequest.Status;
     }
 }

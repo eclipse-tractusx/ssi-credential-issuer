@@ -1,4 +1,5 @@
 /********************************************************************************
+ * Copyright (c) 2025 Cofinity-X GmbH
  * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,29 +18,22 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using System.Text.Json.Serialization;
 
-public enum ProcessStepTypeId
-{
-    // CREATE CREDENTIAL PROCESS
-    CREATE_SIGNED_CREDENTIAL = 1,
-    SAVE_CREDENTIAL_DOCUMENT = 3,
-    CREATE_CREDENTIAL_FOR_HOLDER = 4,
-    REQUEST_CREDENTIAL_FOR_HOLDER = 10,
-    REQUEST_CREDENTIAL_STATUS_CHECK = 12,
-    TRIGGER_CALLBACK = 5,
-    RETRIGGER_CREATE_SIGNED_CREDENTIAL = 6,
-    RETRIGGER_SAVE_CREDENTIAL_DOCUMENT = 7,
-    RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER = 8,
-    RETRIGGER_REQUEST_CREDENTIAL_FOR_HOLDER = 11,
-    RETRIGGER_REQUEST_CREDENTIAL_STATUS_CHECK = 13,
-    RETRIGGER_TRIGGER_CALLBACK = 9,
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 
-    // DECLINE PROCESS
-    REVOKE_CREDENTIAL = 100,
-    TRIGGER_NOTIFICATION = 101,
-    TRIGGER_MAIL = 102,
-    RETRIGGER_REVOKE_CREDENTIAL = 103,
-    RETRIGGER_TRIGGER_NOTIFICATION = 104,
-    RETRIGGER_TRIGGER_MAIL = 105
-}
+public record RequestCredential(
+    [property: JsonPropertyName("requestedCredentials")] IEnumerable<RequestedCredentials> Data,
+    [property: JsonPropertyName("issuerDid")] string IssuerDid,
+    [property: JsonPropertyName("holderDid")] string HolderDid,
+    [property: JsonPropertyName("expirationDate")] string ExpirationDate
+);
+
+public record RequestedCredentials(
+    [property: JsonPropertyName("credentialType")] string CredentialType,
+    [property: JsonPropertyName("format")] string Format
+);
+
+public record RequestCredentialResponse(
+    [property: JsonPropertyName("holderRequestId")] Guid Id
+);

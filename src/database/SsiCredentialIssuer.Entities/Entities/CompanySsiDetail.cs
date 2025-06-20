@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,7 +25,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 
-[AuditEntityV2(typeof(AuditCompanySsiDetail20240419))]
+[AuditEntityV2(typeof(AuditCompanySsiDetail20240618))]
 public class CompanySsiDetail : IAuditableV2, IBaseEntity
 {
     private CompanySsiDetail()
@@ -62,6 +62,8 @@ public class CompanySsiDetail : IAuditableV2, IBaseEntity
     public Guid? ProcessId { get; set; }
     public Guid? ExternalCredentialId { get; set; }
     public string? Credential { get; set; }
+    public Guid? CredentialRequestId { get; set; }
+    public string? CredentialRequestStatus { get; set; }
 
     [LastChangedV2]
     public DateTimeOffset? DateLastChanged { get; set; }
