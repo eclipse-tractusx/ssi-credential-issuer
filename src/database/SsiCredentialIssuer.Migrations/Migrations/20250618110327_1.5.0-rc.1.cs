@@ -92,7 +92,9 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                     { 10, "REQUEST_CREDENTIAL_FOR_HOLDER" },
                     { 11, "RETRIGGER_REQUEST_CREDENTIAL_FOR_HOLDER" },
                     { 12, "REQUEST_CREDENTIAL_STATUS_CHECK" },
-                    { 13, "RETRIGGER_REQUEST_CREDENTIAL_STATUS_CHECK" }
+                    { 13, "RETRIGGER_REQUEST_CREDENTIAL_STATUS_CHECK" },
+                    { 14, "REQUEST_CREDENTIAL_AUTO_APPROVE" },
+                    { 15, "RETRIGGER_REQUEST_CREDENTIAL_AUTO_APPROVE" }
                 });
 
             migrationBuilder.Sql("CREATE FUNCTION \"issuer\".\"LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL$\r\nBEGIN\r\n  INSERT INTO \"issuer\".\"audit_company_ssi_detail20240618\" (\"id\", \"bpnl\", \"issuer_bpn\", \"verified_credential_type_id\", \"company_ssi_detail_status_id\", \"date_created\", \"creator_user_id\", \"expiry_date\", \"verified_credential_external_type_detail_version_id\", \"expiry_check_type_id\", \"process_id\", \"external_credential_id\", \"credential\", \"credential_request_id\", \"credential_request_status\", \"date_last_changed\", \"last_editor_id\", \"audit_v2id\", \"audit_v2operation_id\", \"audit_v2date_last_changed\", \"audit_v2last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"bpnl\", \r\n  NEW.\"issuer_bpn\", \r\n  NEW.\"verified_credential_type_id\", \r\n  NEW.\"company_ssi_detail_status_id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"creator_user_id\", \r\n  NEW.\"expiry_date\", \r\n  NEW.\"verified_credential_external_type_detail_version_id\", \r\n  NEW.\"expiry_check_type_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"external_credential_id\", \r\n  NEW.\"credential\", \r\n  NEW.\"credential_request_id\", \r\n  NEW.\"credential_request_status\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL AFTER INSERT\r\nON \"issuer\".\"company_ssi_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"issuer\".\"LC_TRIGGER_AFTER_INSERT_COMPANYSSIDETAIL\"();");
@@ -134,6 +136,18 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                 table: "process_step_types",
                 keyColumn: "id",
                 keyValue: 13);
+
+            migrationBuilder.DeleteData(
+                schema: "issuer",
+                table: "process_step_types",
+                keyColumn: "id",
+                keyValue: 14);
+
+            migrationBuilder.DeleteData(
+                schema: "issuer",
+                table: "process_step_types",
+                keyColumn: "id",
+                keyValue: 15);
 
             migrationBuilder.DropColumn(
                 name: "credential_request_id",

@@ -18,6 +18,7 @@
  ********************************************************************************/
 
 using Microsoft.EntityFrameworkCore;
+using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -115,9 +116,9 @@ public class CredentialRepository(IssuerDbContext dbContext) : ICredentialReposi
                 x.MediaTypeId))
             .SingleOrDefaultAsync();
 
-    public Task<(Guid? credentialRequestId, string? CallbackUrl)> GetCredentialRequestIdById(Guid credentialId) =>
+    public Task<(Guid? ExternalCredentialId, JsonDocument? CredentialJson, string? CallbackUrl)> GetCredentialDetailById(Guid credentialId) =>
         dbContext.CompanySsiProcessData
             .Where(x => x.CompanySsiDetailId == credentialId)
-            .Select(x => new ValueTuple<Guid?, string?>(x.CompanySsiDetail!.CredentialRequestId, x.CallbackUrl))
+            .Select(x => new ValueTuple<Guid?, JsonDocument?, string?>(x.CompanySsiDetail!.ExternalCredentialId, x.Schema, x.CallbackUrl))
             .SingleOrDefaultAsync();
 }

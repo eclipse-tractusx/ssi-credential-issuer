@@ -29,5 +29,7 @@ public interface IWalletService
     Task<Guid> RequestCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, string credential, CancellationToken cancellationToken);
     Task<JsonDocument> GetCredential(Guid externalCredentialId, CancellationToken cancellationToken);
     Task RevokeCredentialForIssuer(Guid externalCredentialId, CancellationToken cancellationToken);
-    Task<CredentialRequestReceived> GetCredentialRequestsReceived(Guid credentialRequestId, CancellationToken cancellationToken);
+    Task<IEnumerable<CredentialRequestReceived>> GetCredentialRequestsReceived(string holderDid, CancellationToken cancellationToken);
+    Task<CredentialRequestReceived> GetCredentialRequestsReceivedDetail(string credentialRequestId, CancellationToken cancellationToken);
+    Task<string> CredentialRequestsReceivedAutoApprove(string credentialRequestId, CancellationToken cancellationToken);
 }

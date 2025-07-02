@@ -219,6 +219,16 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Migrations.Migrations
                         },
                         new
                         {
+                            Id = 14,
+                            Label = "REQUEST_CREDENTIAL_AUTO_APPROVE"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Label = "RETRIGGER_REQUEST_CREDENTIAL_AUTO_APPROVE"
+                        },
+                        new
+                        {
                             Id = 100,
                             Label = "REVOKE_CREDENTIAL"
                         },

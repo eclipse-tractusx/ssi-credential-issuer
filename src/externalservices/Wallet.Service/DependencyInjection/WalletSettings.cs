@@ -54,4 +54,10 @@ public class WalletSettings : BasicAuthSettings
 
     [Required]
     public string CredentialRequestsReceivedPath { get; set; } = null!;
+
+    [Required]
+    public string CredentialRequestsReceivedDetailPath { get; set; } = null!;
+
+    [Required]
+    public string CredentialRequestsReceivedAutoApprovePath { get; set; } = null!;
 }

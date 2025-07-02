@@ -37,8 +37,8 @@ public class CredentialCreationProcessTypeExecutor(
     private readonly IEnumerable<ProcessStepTypeId> _executableProcessSteps = ImmutableArray.Create(
         ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
         ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
-        // ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
         ProcessStepTypeId.REQUEST_CREDENTIAL_FOR_HOLDER,
+        ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE,
         ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK,
         ProcessStepTypeId.TRIGGER_CALLBACK);
 
@@ -81,9 +81,9 @@ public class CredentialCreationProcessTypeExecutor(
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => await credentialCreationProcessHandler.SaveCredentialDocument(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
-                // ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await credentialCreationProcessHandler.CreateCredentialForHolder(_credentialId, cancellationToken)
-                //     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.REQUEST_CREDENTIAL_FOR_HOLDER => await credentialCreationProcessHandler.RequestCredentialForHolder(_credentialId, cancellationToken)
+                    .ConfigureAwait(ConfigureAwaitOptions.None),
+                ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE => await credentialCreationProcessHandler.RequestCredentialAutoApprove(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK => await credentialCreationProcessHandler.CheckCredentialStatus(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
