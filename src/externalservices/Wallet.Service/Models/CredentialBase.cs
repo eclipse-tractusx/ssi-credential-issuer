@@ -25,6 +25,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 public interface ICredential
 {
     IEnumerable<string> Type { get; }
+    string Id { get; }
     string Issuer { get; }
     string ExpirationDate { get; }
     CredentialSubjectType CredentialSubject { get; }
@@ -38,6 +39,9 @@ public class Credential : ICredential
 {
     [JsonPropertyName("type")]
     public IEnumerable<string> Type { get; set; } = default!;
+
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
 
     [JsonPropertyName("issuer")]
     public string Issuer { get; set; } = default!;

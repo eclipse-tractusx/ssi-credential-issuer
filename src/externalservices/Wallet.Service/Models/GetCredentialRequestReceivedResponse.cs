@@ -29,9 +29,24 @@ public record GetCredentialRequestReceivedResponse(
 
 public record CredentialRequestReceived(
     [property: JsonPropertyName("id")] string Id,
-    [property: JsonPropertyName("expirationDate")] string expirationDate,
+    [property: JsonPropertyName("expirationDate")] string ExpirationDate,
+    [property: JsonPropertyName("requestedCredentials")] IEnumerable<RequestedCredentialsType> RequestedCredentials,
+    [property: JsonPropertyName("matchingCredentials")] IEnumerable<Credential> MatchingCredentials,
     [property: JsonPropertyName("issuerDid")] string IssuerDid,
     [property: JsonPropertyName("holderDid")] string HolderDid,
-    [property: JsonPropertyName("credentialTypes")] string[] CredentialTypes,
-    [property: JsonPropertyName("status")] string Status
+    [property: JsonPropertyName("status")] string Status,
+    [property: JsonPropertyName("deliveryStatus")] string DeliveryStatus,
+    [property: JsonPropertyName("approvedCredentials")] string[]? ApprovedCredentials
+);
+
+public record RequestedCredentialsType(
+    [property: JsonPropertyName("format")] string Format,
+    [property: JsonPropertyName("credentialType")] string CredentialType
+);
+
+public record RequestedCredentialAutoApproveResponse(
+    [property: JsonPropertyName("issuerPid")] string IssuerPid,
+    [property: JsonPropertyName("holderPid")] string HolderPid,
+    [property: JsonPropertyName("status")] string Status,
+    [property: JsonPropertyName("reason")] string? Reason
 );

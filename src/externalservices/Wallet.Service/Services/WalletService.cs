@@ -25,6 +25,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjectio
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Web;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
@@ -142,12 +143,12 @@ public class WalletService(
         return response.Id;
     }
 
-    public async Task<CredentialRequestReceived> GetCredentialRequestsReceived(Guid credentialRequestId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<CredentialRequestReceived>> GetCredentialRequestsReceived(string holderDid, CancellationToken cancellationToken)
     {
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
-        // TODO CredentialRequestsReceivedPath needs to be updated with the correct path
-        var result = await client.GetAsync(string.Format(_settings.CredentialRequestsReceivedPath, credentialRequestId), cancellationToken)
-            .CatchingIntoServiceExceptionFor("get-credential-requests-received", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+        var filterString = $"holderDid eq {holderDid}";
+        var result = await client.GetAsync(_settings.CredentialRequestsReceivedPath + $"?filter={HttpUtility.UrlEncode(filterString)}", cancellationToken)
+            .CatchingIntoServiceExceptionFor("get-credential-requests-received-list", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
         var response = await result.Content.ReadFromJsonAsync<GetCredentialRequestReceivedResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
@@ -156,6 +157,43 @@ public class WalletService(
             throw new ServiceException(NoIdErrorMessage, true);
         }
 
-        return response.Data.FirstOrDefault() ?? throw new NotFoundException($"Credential request with id {credentialRequestId} not found");
+        return response.Data;
+    }
+
+    public async Task<CredentialRequestReceived> GetCredentialRequestsReceivedDetail(string credentialRequestId, CancellationToken cancellationToken)
+    {
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+
+        var result = await client.GetAsync(string.Format(_settings.CredentialRequestsReceivedDetailPath, credentialRequestId), cancellationToken)
+            .CatchingIntoServiceExceptionFor("get-credential-requests-received-detail", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<CredentialRequestReceived>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (response is null)
+        {
+            throw new ServiceException(NoIdErrorMessage, true);
+        }
+
+        return response;
+    }
+
+    public async Task<string> CredentialRequestsReceivedAutoApprove(string credentialRequestId, CancellationToken cancellationToken)
+    {
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+
+        var result = await client.PostAsync(string.Format(_settings.CredentialRequestsReceivedAutoApprovePath, credentialRequestId), null, cancellationToken)
+            .CatchingIntoServiceExceptionFor("credential-requests-received-auto-approve", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<RequestedCredentialAutoApproveResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (response is null)
+        {
+            throw new ServiceException(NoIdErrorMessage, true);
+        }
+        if (response.Reason != null)
+        {
+            throw new ServiceException(response.Reason, false);
+        }
+        return response.Status;
     }
 }

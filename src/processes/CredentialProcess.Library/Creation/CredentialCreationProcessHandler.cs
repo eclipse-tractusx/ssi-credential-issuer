@@ -122,7 +122,7 @@ public class CredentialCreationProcessHandler(
         {
             // throw new ConflictException("Wallet information must be set");
             return (
-                callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
+                Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK, 1),
                 ProcessStepStatusId.SKIPPED,
                 false,
                 "ProcessStep was skipped because the holder is the BYOW");
@@ -135,6 +135,43 @@ public class CredentialCreationProcessHandler(
 
         await walletBusinessLogic.RequestCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         return (
+            Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE, 1),
+            ProcessStepStatusId.DONE,
+            false,
+            null);
+    }
+
+    public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RequestCredentialAutoApprove(Guid credentialId, CancellationToken cancellationToken)
+    {
+        var (externalCredentialId, credentialJson, _) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialDetailById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (externalCredentialId == null)
+        {
+            throw new ConflictException("External Credential Request Id must be set here");
+        }
+        if (credentialJson is null)
+        {
+            throw new ConflictException("Credential must be set here");
+        }
+
+        var credentialRequestStatus = await walletBusinessLogic.CredentialRequestAutoApprove(externalCredentialId.Value, credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        //for given credential id request didn't found
+        if (credentialRequestStatus == null)
+        {
+            return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+                null,
+                ProcessStepStatusId.TODO,
+                false,
+                null);
+        }
+        if (credentialRequestStatus == "Expired")
+        {
+            return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+                null,
+                ProcessStepStatusId.FAILED,
+                false,
+                null);
+        }
+        return (
             Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK, 1),
             ProcessStepStatusId.DONE,
             false,
@@ -143,26 +180,38 @@ public class CredentialCreationProcessHandler(
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CheckCredentialStatus(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (credentialRequestId, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialRequestIdById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
-        if (credentialRequestId == null)
+        var (externalCredentialId, credentialJson, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialDetailById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (externalCredentialId == null)
         {
-            throw new ConflictException("Credential Request Id must be set here");
+            throw new ConflictException("External Credential Request Id must be set here");
+        }
+        if (credentialJson is null)
+        {
+            throw new ConflictException("Credential must be set here");
         }
 
-        var credentialRequestStatus = await walletBusinessLogic.CheckCredentialRequestStatus(credentialId, credentialRequestId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        if (credentialRequestStatus == "RECEIVED")
+        var (credentialRequestStatus, deliveryStatus) = await walletBusinessLogic.CheckCredentialRequestStatus(credentialId, externalCredentialId.Value, credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (credentialRequestStatus == "ISSUED" && deliveryStatus == "COMPLETED")
         {
-            return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
-                null,
-                ProcessStepStatusId.TODO,
-                false,
-                null);
-        }
-        return (
+            return (
             callbackUrl == null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
             ProcessStepStatusId.DONE,
             false,
             null);
+        }
+        if (credentialRequestStatus == "ISSUED" && deliveryStatus == "FAILED")
+        {
+            return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+                Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE, 1),
+                ProcessStepStatusId.SKIPPED,
+                false,
+                null);
+        }
+        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+                null,
+                ProcessStepStatusId.TODO,
+                false,
+                null);
     }
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> TriggerCallback(Guid credentialId, CancellationToken cancellationToken)

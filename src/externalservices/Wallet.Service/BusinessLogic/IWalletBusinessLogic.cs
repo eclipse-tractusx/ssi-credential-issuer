@@ -33,5 +33,7 @@ public interface IWalletBusinessLogic
 
     Task RequestCredentialForHolder(Guid companySsiDetailId, string holderWalletUrl, string clientId, EncryptionInformation encryptionInformation, string credential, CancellationToken cancellationToken);
 
-    Task<string> CheckCredentialRequestStatus(Guid companySsiDetailId, Guid credentialRequestId, CancellationToken cancellationToken);
+    Task<(string? status, string? deliveryStatus)> CheckCredentialRequestStatus(Guid companySsiDetailId, Guid externalCredentialId, string credential, CancellationToken cancellationToken);
+
+    Task<string?> CredentialRequestAutoApprove(Guid externalCredentialId, string credential, CancellationToken cancellationToken);
 }
