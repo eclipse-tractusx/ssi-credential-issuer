@@ -161,7 +161,7 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().Be("ProcessStep was skipped because the holder is the BYOW");
         result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().Be("ProcessStep was skipped because the holder is the BYOW");
         result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK);
     }
 
     [Fact]
@@ -201,7 +201,7 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE);
     }
 
     [Fact]
@@ -228,7 +228,7 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE);
     }
 
     [Fact]
@@ -298,74 +298,204 @@ public class CredentialCreationProcessHandlerTests
 
     #endregion
 
-    // #region CheckCredentialStatus
+    #region CheckCredentialStatus
 
-    // [Fact]
-    // public async Task CheckCredentialStatus_WithNullCredentialRequestId_ThrowsConflictException()
-    // {
-    //     // Arrange
-    //     A.CallTo(() => _credentialRepository.GetCredentialRequestIdById(_credentialId))
-    //         .Returns(((Guid?)null, "https://callback.example.com"));
-    //     Task Act() => _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
+    [Fact]
+    public async Task CheckCredentialStatus_WithNullCredentialRequestId_ThrowsConflictException()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns(((Guid?)null, JsonDocument.Parse("{}"), "https://callback.example.com"));
+        Task Act() => _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
 
-    //     // Act & Assert
-    //     var ex = await Assert.ThrowsAsync<ConflictException>(Act);
-    //     ex.Message.Should().Be("Credential Request Id must be set here");
-    // }
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+        ex.Message.Should().Be("Credential Id must be set here");
+    }
 
-    // [Fact]
-    // public async Task CheckCredentialStatus_WithReceivedStatus_ReturnsTodo()
-    // {
-    //     // Arrange
-    //     var requestId = Guid.NewGuid();
-    //     A.CallTo(() => _credentialRepository.GetCredentialRequestIdById(_credentialId))
-    //         .Returns((requestId, "https://callback.example.com"));
-    //     A.CallTo(() => _walletBusinessLogic.CheckCredentialRequestStatus(_credentialId, requestId, A<CancellationToken>._))
-    //         .Returns("RECEIVED");
+    [Fact]
+    public async Task CheckCredentialStatus_WithNullCredential_ThrowsConflictException()
+    {
+        // Arrange
+        var requestId = Guid.NewGuid();
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((requestId, null, "https://callback.example.com"));
+        Task Act() => _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
 
-    //     // Act
-    //     var result = await _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+        ex.Message.Should().Be("Credential must be set here");
+    }
 
-    //     // Assert
-    //     result.stepStatusId.Should().Be(ProcessStepStatusId.TODO);
-    //     result.nextStepTypeIds.Should().BeNull();
-    // }
+    [Fact]
+    public async Task CheckCredentialStatus_WithReceivedStatus_ReturnsTodo()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credJson = JsonDocument.Parse(@"{""name"":""John"",""age"":30}");
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((externalCredentialId, credJson, "https://callback.example.com"));
+        A.CallTo(() => _walletBusinessLogic.CheckCredentialRequestStatus(_credentialId, externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
+            .Returns(("RECEIVED", "PENDING"));
 
-    // [Fact]
-    // public async Task CheckCredentialStatus_WithNonReceivedStatusAndCallback_ReturnsDoneWithNextStep()
-    // {
-    //     // Arrange
-    //     var requestId = Guid.NewGuid();
-    //     A.CallTo(() => _credentialRepository.GetCredentialRequestIdById(_credentialId))
-    //         .Returns((requestId, "https://callback.example.com"));
-    //     A.CallTo(() => _walletBusinessLogic.CheckCredentialRequestStatus(_credentialId, requestId, A<CancellationToken>._))
-    //         .Returns("ISSUED");
+        // Act
+        var result = await _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
 
-    //     // Act
-    //     var result = await _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
+        // Assert
+        result.stepStatusId.Should().Be(ProcessStepStatusId.TODO);
+        result.nextStepTypeIds.Should().BeNull();
+    }
 
-    //     // Assert
-    //     result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-    //     result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
-    // }
+    [Fact]
+    public async Task CheckCredentialStatus_WithIssuedStatusAndCallback_ReturnsDoneWithNextStep()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credJson = JsonDocument.Parse(@"{""name"":""John"",""age"":30}");
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((externalCredentialId, credJson, "https://callback.example.com"));
+        A.CallTo(() => _walletBusinessLogic.CheckCredentialRequestStatus(_credentialId, externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
+            .Returns(("ISSUED", "COMPLETED"));
 
-    // [Fact]
-    // public async Task CheckCredentialStatus_WithNonReceivedStatusNoCallback_ReturnsDoneWithoutNextStep()
-    // {
-    //     // Arrange
-    //     var requestId = Guid.NewGuid();
-    //     A.CallTo(() => _credentialRepository.GetCredentialRequestIdById(_credentialId))
-    //         .Returns((requestId, null));
-    //     A.CallTo(() => _walletBusinessLogic.CheckCredentialRequestStatus(_credentialId, requestId, A<CancellationToken>._))
-    //         .Returns("ISSUED");
+        // Act
+        var result = await _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
 
-    //     // Act
-    //     var result = await _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
+        // Assert
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+    }
 
-    //     // Assert
-    //     result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-    //     result.nextStepTypeIds.Should().BeNull();
-    // }
+    [Fact]
+    public async Task CheckCredentialStatus_WithIssuedStatusAndFailedDelivery_ReturnsDoneWithNextStep()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credJson = JsonDocument.Parse(@"{""name"":""John"",""age"":30}");
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((externalCredentialId, credJson, "https://callback.example.com"));
+        A.CallTo(() => _walletBusinessLogic.CheckCredentialRequestStatus(_credentialId, externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
+            .Returns(("ISSUED", "FAILED"));
 
-    // #endregion
+        // Act
+        var result = await _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
+
+        // Assert
+        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE);
+    }
+
+    [Fact]
+    public async Task CheckCredentialStatus_WithIssuedStatusNoCallback_ReturnsDoneWithoutNextStep()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credJson = JsonDocument.Parse(@"{""name"":""John"",""age"":30}");
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((externalCredentialId, credJson, null));
+        A.CallTo(() => _walletBusinessLogic.CheckCredentialRequestStatus(_credentialId, externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
+            .Returns(("ISSUED", "COMPLETED"));
+
+        // Act
+        var result = await _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
+
+        // Assert
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().BeNull();
+    }
+
+    #endregion
+
+    #region RequestCredentialAutoApprove
+
+    [Fact]
+    public async Task RequestCredentialAutoApprove_WithNullExternalCredentialId_ThrowsConflictException()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns(((Guid?)null, JsonDocument.Parse("{}"), "https://callback.example.com"));
+        Task Act() => _sut.RequestCredentialAutoApprove(_credentialId, CancellationToken.None);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+        ex.Message.Should().Be("External Credential Request Id must be set here");
+    }
+
+    [Fact]
+    public async Task RequestCredentialAutoApprove_WithNullCredentialJson_ThrowsConflictException()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((externalCredentialId, null, "https://callback.example.com"));
+        Task Act() => _sut.RequestCredentialAutoApprove(_credentialId, CancellationToken.None);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+        ex.Message.Should().Be("Credential must be set here");
+    }
+
+    [Fact]
+    public async Task RequestCredentialAutoApprove_WithCredentialRequestStatusNull_ReturnsTodo()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credJson = JsonDocument.Parse(@"{ ""name"": ""John"", ""age"": 30 }");
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((externalCredentialId, credJson, "https://callback.example.com"));
+        A.CallTo(() => _walletBusinessLogic.CredentialRequestAutoApprove(externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
+            .Returns(null as string);
+
+        // Act
+        var result = await _sut.RequestCredentialAutoApprove(_credentialId, CancellationToken.None);
+
+        // Assert
+        result.stepStatusId.Should().Be(ProcessStepStatusId.TODO);
+        result.nextStepTypeIds.Should().BeNull();
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task RequestCredentialAutoApprove_WithCredentialRequestStatusExpired_ReturnsFailed()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credJson = JsonDocument.Parse(@"{ ""name"": ""John"", ""age"": 30 }");
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((externalCredentialId, credJson, "https://callback.example.com"));
+        A.CallTo(() => _walletBusinessLogic.CredentialRequestAutoApprove(externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
+            .Returns("Expired");
+
+        // Act
+        var result = await _sut.RequestCredentialAutoApprove(_credentialId, CancellationToken.None);
+
+        // Assert
+        result.stepStatusId.Should().Be(ProcessStepStatusId.FAILED);
+        result.nextStepTypeIds.Should().BeNull();
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task RequestCredentialAutoApprove_WithCredentialRequestStatusOther_ReturnsDone()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credJson = JsonDocument.Parse(@"{ ""name"": ""John"", ""age"": 30 }");
+        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
+            .Returns((externalCredentialId, credJson, "https://callback.example.com"));
+        A.CallTo(() => _walletBusinessLogic.CredentialRequestAutoApprove(externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
+            .Returns("Successful");
+
+        // Act
+        var result = await _sut.RequestCredentialAutoApprove(_credentialId, CancellationToken.None);
+
+        // Assert
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK);
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+    }
+
+    #endregion
 }
