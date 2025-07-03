@@ -114,7 +114,6 @@ public class WalletService(
             TokenAddress = $"{holderWalletUrl}/oauth/token"
         };
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(authSettings, cancellationToken);
-        Console.WriteLine(credential);
         ICredential credentialBase = JsonSerializer.Deserialize<Credential>(credential)!;
         if (credentialBase == null)
         {

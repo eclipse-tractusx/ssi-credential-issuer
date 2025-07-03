@@ -213,4 +213,281 @@ public class WalletBusinessLogicTests
     }
 
     #endregion
+
+    #region CheckCredentialRequestStatus
+
+    [Fact]
+    public async Task CheckCredentialRequestStatus_WhenApprovedCredentialExists_UpdatesAndReturnsStatus()
+    {
+        // Arrange
+        var companySsiDetailId = Guid.NewGuid();
+        var externalCredentialId = Guid.NewGuid();
+        var credential = """
+                            {
+                                "id": "2e70ee49-5fae-438a-9435-0cce3854650d",
+                                "@context": [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://w3id.org/catenax/credentials/v1.0.0"
+                                ],
+                                "type": [
+                                    "VerifiableCredential",
+                                    "BpnCredential"
+                                ],
+                                "issuer": "did:web:example.org:issuer",
+                                "expirationDate": "2022-06-16T18:56:59Z",
+                                "credentialSubject": {
+                                    "id": "did:web:example.org:holder",
+                                    "holderIdentifier": "2e70ee49-5fae-438a-9435-0cce3854650d",
+                                    "bpn": "2e70ee49-5fae-438a-9435-0cce3854650d"
+                                }
+                            }
+                            """;
+        var request = new CredentialRequestReceived(
+            Id: Guid.NewGuid().ToString(),
+            Status: "APPROVED",
+            IssuerDid: "did:web:example.org:issuer",
+            HolderDid: "did:web:example.org:holder",
+            DeliveryStatus: "DELIVERED",
+            ExpirationDate: DateTime.UtcNow.AddDays(1).ToString("o"),
+            ApprovedCredentials: [externalCredentialId.ToString()],
+            MatchingCredentials: new List<Credential>(),
+            RequestedCredentials: new List<RequestedCredentialsType>{
+                new RequestedCredentialsType("vcdm11_jwt", "BpnCredential")
+            });
+
+        A.CallTo(() => _walletService.GetCredentialRequestsReceived(A<string>._, A<CancellationToken>._))
+            .Returns(new List<CredentialRequestReceived> { request });
+
+        // Act
+        var result = await _sut.CheckCredentialRequestStatus(companySsiDetailId, externalCredentialId, credential, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _companySsiDetailRepository.AttachAndModifyCompanySsiDetails(companySsiDetailId, A<Action<CompanySsiDetail>>._, A<Action<CompanySsiDetail>>._))
+            .MustHaveHappenedOnceExactly();
+        result.status.Should().Be("APPROVED");
+        result.deliveryStatus.Should().Be("DELIVERED");
+    }
+
+    [Fact]
+    public async Task CheckCredentialRequestStatus_WhenNoMatchingCredential_ReturnsNulls()
+    {
+        // Arrange
+        var companySsiDetailId = Guid.NewGuid();
+        var externalCredentialId = Guid.NewGuid();
+        var credential = """
+                            {
+                                "id": "2e70ee49-5fae-438a-9435-0cce3854650d",
+                                "@context": [
+                                    "https://www.w3.org/2018/credentials/v1",
+                                    "https://w3id.org/catenax/credentials/v1.0.0"
+                                ],
+                                "type": [
+                                    "VerifiableCredential",
+                                    "BpnCredential"
+                                ],
+                                "issuer": "did:web:example.org:issuer",
+                                "expirationDate": "2022-06-16T18:56:59Z",
+                                "credentialSubject": {
+                                    "id": "did:web:example.org:holder",
+                                    "holderIdentifier": "2e70ee49-5fae-438a-9435-0cce3854650d",
+                                    "bpn": "2e70ee49-5fae-438a-9435-0cce3854650d"
+                                }
+                            }
+                            """;
+        A.CallTo(() => _walletService.GetCredentialRequestsReceived(A<string>._, A<CancellationToken>._))
+            .Returns(Enumerable.Empty<CredentialRequestReceived>());
+
+        // Act
+        var result = await _sut.CheckCredentialRequestStatus(companySsiDetailId, externalCredentialId, credential, CancellationToken.None);
+
+        // Assert
+        result.status.Should().BeNull();
+        result.deliveryStatus.Should().BeNull();
+    }
+
+    #endregion
+
+    #region RequestCredentialForHolder
+
+    [Fact]
+    public async Task RequestCredentialForHolder_ClearsClientCredentialsAfterRequest()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var processData = new CompanySsiProcessData(id, null!, VerifiedCredentialTypeKindId.BPN) { ClientId = "123" };
+        var (secret, vector) = CryptoHelper.Encrypt("test", Convert.FromHexString(_encryptionModeConfig.EncryptionKey), _encryptionModeConfig.CipherMode, _encryptionModeConfig.PaddingMode);
+        A.CallTo(() => _companySsiDetailRepository.AttachAndModifyProcessData(A<Guid>._, A<Action<CompanySsiProcessData>>._, A<Action<CompanySsiProcessData>>._))
+            .Invokes((Guid _, Action<CompanySsiProcessData>? initialize, Action<CompanySsiProcessData> setupOptionalFields) =>
+            {
+                initialize?.Invoke(processData);
+                setupOptionalFields(processData);
+            });
+
+        // Act
+        await _sut.RequestCredentialForHolder(id, "https://example.org/wallet", "test1", new EncryptionInformation(secret, vector, 0), "thisisatestsecret", CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _companySsiDetailRepository.AttachAndModifyProcessData(id, A<Action<CompanySsiProcessData>>._, A<Action<CompanySsiProcessData>>._))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _walletService.RequestCredentialForHolder(A<string>._, A<string>._, A<string>._, A<string>._, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+        processData.ClientId.Should().BeNull();
+        processData.ClientSecret.Should().BeNull();
+    }
+
+    #endregion
+
+    #region CredentialRequestAutoApprove
+
+    [Fact]
+    public async Task CredentialRequestAutoApprove_WhenAlreadyApproved_ReturnsSuccessful()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credential = $@"
+                            {{
+                                ""id"": ""{externalCredentialId}"",
+                                ""@context"": [
+                                    ""https://www.w3.org/2018/credentials/v1"",
+                                    ""https://w3id.org/catenax/credentials/v1.0.0""
+                                ],
+                                ""type"": [
+                                    ""VerifiableCredential"",
+                                    ""BpnCredential""
+                                ],
+                                ""issuer"": ""did:web:example.org:issuer"",
+                                ""expirationDate"": ""2022-06-16T18:56:59Z"",
+                                ""credentialSubject"": {{
+                                    ""id"": ""did:web:example.org:holder"",
+                                    ""holderIdentifier"": ""2e70ee49-5fae-438a-9435-0cce3854650d"",
+                                    ""bpn"": ""2e70ee49-5fae-438a-9435-0cce3854650d""
+                                }}
+                            }}
+                            ";
+        var request = new CredentialRequestReceived(
+            Id: Guid.NewGuid().ToString(),
+            Status: "APPROVED",
+            IssuerDid: "did:web:example.org:issuer",
+            HolderDid: "did:web:example.org:holder",
+            DeliveryStatus: "DELIVERED",
+            ExpirationDate: DateTime.UtcNow.AddDays(1).ToString("o"),
+            ApprovedCredentials: [externalCredentialId.ToString()],
+            MatchingCredentials: new List<Credential>(),
+            RequestedCredentials: new List<RequestedCredentialsType>{
+                new RequestedCredentialsType("vcdm11_jwt", "BpnCredential")
+            });
+
+        A.CallTo(() => _walletService.GetCredentialRequestsReceived(A<string>._, A<CancellationToken>._))
+            .Returns(new List<CredentialRequestReceived> { request });
+
+        // Act
+        var result = await _sut.CredentialRequestAutoApprove(externalCredentialId, credential, CancellationToken.None);
+
+        // Assert
+        result.Should().Be("successful");
+    }
+
+    [Fact]
+    public async Task CredentialRequestAutoApprove_WhenExpired_ReturnsExpired()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credential = $@"
+                            {{
+                                ""id"": ""{externalCredentialId}"",
+                                ""@context"": [
+                                    ""https://www.w3.org/2018/credentials/v1"",
+                                    ""https://w3id.org/catenax/credentials/v1.0.0""
+                                ],
+                                ""type"": [
+                                    ""VerifiableCredential"",
+                                    ""BpnCredential""
+                                ],
+                                ""issuer"": ""did:web:example.org:issuer"",
+                                ""expirationDate"": ""2022-06-16T18:56:59Z"",
+                                ""credentialSubject"": {{
+                                    ""id"": ""did:web:example.org:holder"",
+                                    ""holderIdentifier"": ""2e70ee49-5fae-438a-9435-0cce3854650d"",
+                                    ""bpn"": ""2e70ee49-5fae-438a-9435-0cce3854650d""
+                                }}
+                            }}
+                            ";
+        var request = new CredentialRequestReceived(
+            Id: Guid.NewGuid().ToString(),
+            Status: "RECEIVED",
+            IssuerDid: "did:web:example.org:issuer",
+            HolderDid: "did:web:example.org:holder",
+            DeliveryStatus: "PENDING",
+            ExpirationDate: DateTime.UtcNow.AddDays(-25).ToString("o"),
+            ApprovedCredentials: null,
+            MatchingCredentials: new List<Credential> { JsonSerializer.Deserialize<Credential>(credential)! },
+            RequestedCredentials: new List<RequestedCredentialsType>{
+                new RequestedCredentialsType("vcdm11_jwt", "BpnCredential")
+            });
+
+        A.CallTo(() => _walletService.GetCredentialRequestsReceived(A<string>._, A<CancellationToken>._))
+            .Returns(new List<CredentialRequestReceived> { request });
+        A.CallTo(() => _walletService.GetCredentialRequestsReceivedDetail(A<string>._, A<CancellationToken>._))
+            .Returns(request);
+
+        // Act
+        var result = await _sut.CredentialRequestAutoApprove(externalCredentialId, credential, CancellationToken.None);
+
+        // Assert
+        result.Should().Be("Expired");
+    }
+
+    [Fact]
+    public async Task CredentialRequestAutoApprove_WhenApproved_ReturnsSuccessful()
+    {
+        // Arrange
+        var externalCredentialId = Guid.NewGuid();
+        var credential = $@"
+                            {{
+                                ""id"": ""{externalCredentialId}"",
+                                ""@context"": [
+                                    ""https://www.w3.org/2018/credentials/v1"",
+                                    ""https://w3id.org/catenax/credentials/v1.0.0""
+                                ],
+                                ""type"": [
+                                    ""VerifiableCredential"",
+                                    ""BpnCredential""
+                                ],
+                                ""issuer"": ""did:web:example.org:issuer"",
+                                ""expirationDate"": ""2022-06-16T18:56:59Z"",
+                                ""credentialSubject"": {{
+                                    ""id"": ""did:web:example.org:holder"",
+                                    ""holderIdentifier"": ""2e70ee49-5fae-438a-9435-0cce3854650d"",
+                                    ""bpn"": ""2e70ee49-5fae-438a-9435-0cce3854650d""
+                                }}
+                            }}
+                            ";
+        var request = new CredentialRequestReceived(
+            Id: Guid.NewGuid().ToString(),
+            Status: "RECEIVED",
+            IssuerDid: "did:web:example.org:issuer",
+            HolderDid: "did:web:example.org:holder",
+            DeliveryStatus: "PENDING",
+            ExpirationDate: DateTime.UtcNow.AddDays(+1).ToString("o"),
+            ApprovedCredentials: null,
+            MatchingCredentials: new List<Credential> { JsonSerializer.Deserialize<Credential>(credential)! },
+            RequestedCredentials: new List<RequestedCredentialsType>{
+                new RequestedCredentialsType("vcdm11_jwt", "BpnCredential")
+            });
+
+        A.CallTo(() => _walletService.GetCredentialRequestsReceived(A<string>._, A<CancellationToken>._))
+            .Returns(new List<CredentialRequestReceived> { request });
+        A.CallTo(() => _walletService.GetCredentialRequestsReceivedDetail(A<string>._, A<CancellationToken>._))
+            .Returns(request);
+        A.CallTo(() => _walletService.CredentialRequestsReceivedAutoApprove(A<string>._, A<CancellationToken>._))
+            .Returns("successful");
+
+        // Act
+        var result = await _sut.CredentialRequestAutoApprove(externalCredentialId, credential, CancellationToken.None);
+
+        // Assert
+        result.Should().Be("successful");
+    }
+
+    #endregion
 }
