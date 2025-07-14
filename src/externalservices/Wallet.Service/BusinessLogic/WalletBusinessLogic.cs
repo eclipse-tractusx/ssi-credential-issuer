@@ -205,7 +205,7 @@ public class WalletBusinessLogic(
                     var expirationDate = DateTime.Parse(credentialRequestDetail.ExpirationDate, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
                     if (expirationDate <= DateTime.UtcNow)
                     {
-                        return "Expired";
+                        throw new ServiceException($"The credential ID that matched the following request ID {credentialRequest.Id} has expired.");
                     }
                     return await walletService.CredentialRequestsReceivedAutoApprove(credentialRequest.Id, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
                 }
