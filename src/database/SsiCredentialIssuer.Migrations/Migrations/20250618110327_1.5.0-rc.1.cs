@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
  * Copyright (c) 2025 Cofinity-X GmbH
  * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
@@ -18,8 +18,8 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 

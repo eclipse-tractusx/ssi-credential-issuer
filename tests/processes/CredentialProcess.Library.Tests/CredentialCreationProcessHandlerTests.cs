@@ -456,27 +456,6 @@ public class CredentialCreationProcessHandlerTests
     }
 
     [Fact]
-    public async Task RequestCredentialAutoApprove_WithCredentialRequestStatusExpired_ReturnsFailed()
-    {
-        // Arrange
-        var externalCredentialId = Guid.NewGuid();
-        var credJson = JsonDocument.Parse(@"{ ""name"": ""John"", ""age"": 30 }");
-        A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
-            .Returns((externalCredentialId, credJson, "https://callback.example.com"));
-        A.CallTo(() => _walletBusinessLogic.CredentialRequestAutoApprove(externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
-            .Returns("Expired");
-
-        // Act
-        var result = await _sut.RequestCredentialAutoApprove(_credentialId, CancellationToken.None);
-
-        // Assert
-        result.stepStatusId.Should().Be(ProcessStepStatusId.FAILED);
-        result.nextStepTypeIds.Should().BeNull();
-        result.modified.Should().BeFalse();
-        result.processMessage.Should().BeNull();
-    }
-
-    [Fact]
     public async Task RequestCredentialAutoApprove_WithCredentialRequestStatusOther_ReturnsDone()
     {
         // Arrange
@@ -485,7 +464,7 @@ public class CredentialCreationProcessHandlerTests
         A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
             .Returns((externalCredentialId, credJson, "https://callback.example.com"));
         A.CallTo(() => _walletBusinessLogic.CredentialRequestAutoApprove(externalCredentialId, credJson.RootElement.GetRawText(), A<CancellationToken>._))
-            .Returns("Successful");
+            .Returns("successful");
 
         // Act
         var result = await _sut.RequestCredentialAutoApprove(_credentialId, CancellationToken.None);

@@ -412,8 +412,9 @@ public class WalletBusinessLogicTests
                                 }}
                             }}
                             ";
+        var credentialRequestId = Guid.NewGuid().ToString();
         var request = new CredentialRequestReceived(
-            Id: Guid.NewGuid().ToString(),
+            Id: credentialRequestId,
             Status: "RECEIVED",
             IssuerDid: "did:web:example.org:issuer",
             HolderDid: "did:web:example.org:holder",
@@ -431,10 +432,11 @@ public class WalletBusinessLogicTests
             .Returns(request);
 
         // Act
-        var result = await _sut.CredentialRequestAutoApprove(externalCredentialId, credential, CancellationToken.None);
+        async Task Act() => await _sut.CredentialRequestAutoApprove(externalCredentialId, credential, CancellationToken.None);
+        var ex = await Assert.ThrowsAsync<ServiceException>(Act);
 
         // Assert
-        result.Should().Be("Expired");
+        ex.Message.Should().Be($"The credential ID that matched the following request ID {credentialRequestId} has expired.");
     }
 
     [Fact]

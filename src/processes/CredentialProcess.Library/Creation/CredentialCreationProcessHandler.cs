@@ -154,28 +154,19 @@ public class CredentialCreationProcessHandler(
         }
 
         var credentialRequestStatus = await walletBusinessLogic.CredentialRequestAutoApprove(externalCredentialId.Value, credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        //for given credential id request didn't found
-        if (credentialRequestStatus == null)
+        if (credentialRequestStatus == "successful")
         {
-            return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
+            return (
+                Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK, 1),
+                ProcessStepStatusId.DONE,
+                false,
+                null);
+        }
+        return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
                 null,
                 ProcessStepStatusId.TODO,
                 false,
                 null);
-        }
-        if (credentialRequestStatus == "Expired")
-        {
-            return new ValueTuple<IEnumerable<ProcessStepTypeId>?, ProcessStepStatusId, bool, string?>(
-                null,
-                ProcessStepStatusId.FAILED,
-                false,
-                null);
-        }
-        return (
-            Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK, 1),
-            ProcessStepStatusId.DONE,
-            false,
-            null);
     }
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CheckCredentialStatus(Guid credentialId, CancellationToken cancellationToken)
@@ -183,7 +174,7 @@ public class CredentialCreationProcessHandler(
         var (externalCredentialId, credentialJson, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialDetailById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId == null)
         {
-            throw new ConflictException("External Credential Request Id must be set here");
+            throw new ConflictException("Credential Id must be set here");
         }
         if (credentialJson is null)
         {
