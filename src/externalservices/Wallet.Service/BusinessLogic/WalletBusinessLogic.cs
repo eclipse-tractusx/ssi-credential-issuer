@@ -202,9 +202,8 @@ public class WalletBusinessLogic(
             {
                 if (matchingCredential.Id == externalCredentialId.ToString())
                 {
-                    //credentialRequestDetail.Status  == "expired" check with status in future
                     var expirationDate = DateTime.Parse(credentialRequestDetail.ExpirationDate, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-                    if ((DateTime.UtcNow - expirationDate) > TimeSpan.FromHours(24))
+                    if (expirationDate <= DateTime.UtcNow)
                     {
                         return "Expired";
                     }
