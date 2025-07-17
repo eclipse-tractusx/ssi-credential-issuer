@@ -48,19 +48,17 @@ public class CredentialCreationProcessHandler(
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> SaveCredentialDocument(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (externalCredentialId, kindId, hasEncryptionInformation, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (externalCredentialId, kindId, hasEncryptionInformation, _) = await issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId == null)
         {
             throw new ConflictException("ExternalCredentialId must be set here");
         }
 
         await walletBusinessLogic.GetCredential(credentialId, externalCredentialId.Value, kindId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        var nextProcessStep = callbackUrl == null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1);
         return (
             hasEncryptionInformation
-                // ? Enumerable.Repeat(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, 1)
                 ? Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_FOR_HOLDER, 1)
-                : nextProcessStep,
+                : Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE, 1),
             ProcessStepStatusId.DONE,
             false,
             null);
