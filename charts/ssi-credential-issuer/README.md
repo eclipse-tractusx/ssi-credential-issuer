@@ -31,7 +31,7 @@ To use the helm chart as a dependency:
 dependencies:
   - name: ssi-credential-issuer
     repository: https://eclipse-tractusx.github.io/charts/dev
-    version: 1.4.0
+    version: 1.4.1-rc.1
 ```
 
 ## Requirements
