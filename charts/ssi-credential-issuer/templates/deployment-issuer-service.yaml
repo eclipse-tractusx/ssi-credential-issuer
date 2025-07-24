@@ -179,6 +179,14 @@ spec:
           value: "{{ .Values.processesworker.wallet.getCredentialPath }}"
         - name: "WALLET__REVOKECREDENTIALPATH"
           value: "{{ .Values.processesworker.wallet.revokeCredentialPath }}"
+        - name: "WALLET__REQUESTCREDENTIALPATH"
+          value: "{{ .Values.processesworker.wallet.requestCredentialPath }}"
+        - name: "WALLET__CREDENTIALREQUESTSRECEIVEDAUTOAPPROVEPATH"
+          value: "{{ .Values.processesworker.wallet.credentialRequestsReceivedAutoApprovePath }}"
+        - name: "WALLET__CREDENTIALREQUESTSRECEIVEDPATH"
+          value: "{{ .Values.processesworker.wallet.credentialRequestsReceivedPath }}"
+        - name: "WALLET__CREDENTIALREQUESTSRECEIVEDDETAILPATH"
+          value: "{{ .Values.processesworker.wallet.credentialRequestsReceivedDetailPath }}"      
         ports:
         - name: http
           containerPort: {{ .Values.portContainer }}
