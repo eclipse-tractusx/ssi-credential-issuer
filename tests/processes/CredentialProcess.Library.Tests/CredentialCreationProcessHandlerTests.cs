@@ -305,7 +305,7 @@ public class CredentialCreationProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
-            .Returns(((Guid?)null, JsonDocument.Parse("{}"), "https://callback.example.com"));
+            .Returns((null, JsonDocument.Parse("{}"), "https://callback.example.com"));
         Task Act() => _sut.CheckCredentialStatus(_credentialId, CancellationToken.None);
 
         // Act & Assert
@@ -412,7 +412,7 @@ public class CredentialCreationProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialDetailById(_credentialId))
-            .Returns(((Guid?)null, JsonDocument.Parse("{}"), "https://callback.example.com"));
+            .Returns((null, JsonDocument.Parse("{}"), "https://callback.example.com"));
         Task Act() => _sut.RequestCredentialAutoApprove(_credentialId, CancellationToken.None);
 
         // Act & Assert

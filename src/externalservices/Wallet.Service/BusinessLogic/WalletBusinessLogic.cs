@@ -166,22 +166,23 @@ public class WalletBusinessLogic(
     public async Task<(string? status, string? deliveryStatus)> CheckCredentialRequestStatus(Guid companySsiDetailId, Guid externalCredentialId, string credential, CancellationToken cancellationToken)
     {
         var credentialRequestList = await GetFilteredCredentialRequestList(credential, cancellationToken);
-        foreach (var credentialRequest in credentialRequestList)
+        var credentialRequest = credentialRequestList
+            .FirstOrDefault(cr =>
+                cr.ApprovedCredentials != null &&
+                cr.ApprovedCredentials.Contains(externalCredentialId.ToString()));
+
+        if (credentialRequest != null)
         {
-            if (credentialRequest.ApprovedCredentials != null
-                    && credentialRequest.ApprovedCredentials.Contains(externalCredentialId.ToString()))
+            repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c =>
             {
-                repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyCompanySsiDetails(companySsiDetailId, c =>
-                {
-                    c.CredentialRequestId = null;
-                    c.CredentialRequestStatus = null;
-                }, c =>
-                {
-                    c.CredentialRequestId = Guid.Parse(credentialRequest.Id);
-                    c.CredentialRequestStatus = credentialRequest.Status;
-                });
-                return (credentialRequest.Status, credentialRequest.DeliveryStatus);
-            }
+                c.CredentialRequestId = null;
+                c.CredentialRequestStatus = null;
+            }, c =>
+            {
+                c.CredentialRequestId = Guid.Parse(credentialRequest.Id);
+                c.CredentialRequestStatus = credentialRequest.Status;
+            });
+            return (credentialRequest.Status, credentialRequest.DeliveryStatus);
         }
         return (null, null);
     }
@@ -198,17 +199,16 @@ public class WalletBusinessLogic(
                 continue;
             }
             var credentialRequestDetail = await walletService.GetCredentialRequestsReceivedDetail(credentialRequest.Id, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-            foreach (var matchingCredential in credentialRequestDetail.MatchingCredentials)
+            var matchingCredential = credentialRequestDetail.MatchingCredentials
+                .FirstOrDefault(mc => mc.Id == externalCredentialId.ToString());
+            if (matchingCredential != null)
             {
-                if (matchingCredential.Id == externalCredentialId.ToString())
+                var expirationDate = DateTime.Parse(credentialRequestDetail.ExpirationDate, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+                if (expirationDate <= DateTime.UtcNow)
                 {
-                    var expirationDate = DateTime.Parse(credentialRequestDetail.ExpirationDate, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
-                    if (expirationDate <= DateTime.UtcNow)
-                    {
-                        throw new ServiceException($"The credential ID that matched the following request ID {credentialRequest.Id} has expired.");
-                    }
-                    return await walletService.CredentialRequestsReceivedAutoApprove(credentialRequest.Id, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+                    throw new ServiceException($"The credential ID that matched the following request ID {credentialRequest.Id} has expired.");
                 }
+                return await walletService.CredentialRequestsReceivedAutoApprove(credentialRequest.Id, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
             }
         }
         return null;
