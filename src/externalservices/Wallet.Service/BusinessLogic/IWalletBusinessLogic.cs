@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -30,4 +30,10 @@ public interface IWalletBusinessLogic
     Task CreateCredentialForHolder(Guid companySsiDetailId, string holderWalletUrl, string clientId, EncryptionInformation encryptionInformation, string credential, CancellationToken cancellationToken);
 
     Task GetCredential(Guid credentialId, Guid externalCredentialId, VerifiedCredentialTypeKindId kindId, CancellationToken cancellationToken);
+
+    Task RequestCredentialForHolder(Guid companySsiDetailId, string holderWalletUrl, string clientId, EncryptionInformation encryptionInformation, string credential, CancellationToken cancellationToken);
+
+    Task<(string? status, string? deliveryStatus)> CheckCredentialRequestStatus(Guid companySsiDetailId, Guid externalCredentialId, string credential, CancellationToken cancellationToken);
+
+    Task<string?> CredentialRequestAutoApprove(Guid externalCredentialId, string credential, CancellationToken cancellationToken);
 }

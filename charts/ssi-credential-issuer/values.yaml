@@ -145,6 +145,14 @@ processesworker:
     getCredentialPath: "/api/v2.0.0/credentials/{0}"
     # -- path to revoke a specific credential; {0} will be replaced by the credential id
     revokeCredentialPath: "/api/v2.0.0/credentials/{0}"
+    # -- path to request a credential; {0} will be replaced by application name
+    requestCredentialPath: "/api/v2.0.0/dcp/requestCredentials/{0}"
+    # -- path to credential request received auto approve; {0} will be replaced by the credential request received id
+    credentialRequestsReceivedAutoApprovePath: "/api/v2.0.0/dcp/credentialRequestsReceived/{0}/autoApprove"
+    # -- path to credential request received;
+    credentialRequestsReceivedPath: "/api/v2.0.0/dcp/credentialRequestsReceived"
+    # -- path to credential request received detail; {0} will be replaced by the credential request received id
+    credentialRequestsReceivedDetailPath: "/api/v2.0.0/dcp/credentialRequestsReceived/{0}"
 
 credentialExpiry:
   name: "expiry"

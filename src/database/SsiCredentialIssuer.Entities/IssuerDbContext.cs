@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -35,6 +35,7 @@ public class IssuerDbContext(DbContextOptions<IssuerDbContext> options, IAuditHa
     public virtual DbSet<AuditDocument20240305> AuditDocument20240305 { get; set; } = default!;
     public virtual DbSet<AuditCompanySsiDetail20240419> AuditCompanySsiDetail20240419 { get; set; } = default!;
     public virtual DbSet<AuditDocument20240419> AuditDocument20240419 { get; set; } = default!;
+    public virtual DbSet<AuditCompanySsiDetail20240618> AuditCompanySsiDetail20240618 { get; set; } = default!;
     public virtual DbSet<CompanySsiDetail> CompanySsiDetails { get; set; } = default!;
     public virtual DbSet<CompanySsiDetailAssignedDocument> CompanySsiDetailAssignedDocuments { get; set; } = default!;
     public virtual DbSet<CompanySsiDetailStatus> CompanySsiDetailStatuses { get; set; } = default!;
@@ -105,7 +106,7 @@ public class IssuerDbContext(DbContextOptions<IssuerDbContext> options, IAuditHa
                         j.HasKey(e => new { e.DocumentId, e.CompanySsiDetailId });
                     });
 
-            entity.HasAuditV2Triggers<CompanySsiDetail, AuditCompanySsiDetail20240419>();
+            entity.HasAuditV2Triggers<CompanySsiDetail, AuditCompanySsiDetail20240618>();
         });
 
         modelBuilder.Entity<CompanySsiDetailStatus>()
