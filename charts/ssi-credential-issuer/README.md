@@ -125,7 +125,7 @@ dependencies:
 | processesworker.wallet.createSignedCredentialPath | string | `"/api/v2.0.0/credentials"` | path to create a specific credential which is directly signed |
 | processesworker.wallet.credentialRequestsReceivedAutoApprovePath | string | `"/api/v2.0.0/dcp/credentialRequestsReceived/{0}/autoApprove"` | path to credential request received auto approve; {0} will be replaced by the credential request received id |
 | processesworker.wallet.credentialRequestsReceivedDetailPath | string | `"/api/v2.0.0/dcp/credentialRequestsReceived/{0}"` | path to credential request received detail; {0} will be replaced by the credential request received id |
-| processesworker.wallet.credentialRequestsReceivedPath" | string | `"/api/v2.0.0/dcp/credentialRequestsReceived"` | path to credential request received; |
+| processesworker.wallet.credentialRequestsReceivedPath | string | `"/api/v2.0.0/dcp/credentialRequestsReceived"` | path to credential request received; |
 | processesworker.wallet.getCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to get a specific credential; {0} will be replaced by the credential id |
 | processesworker.wallet.grantType | string | `"client_credentials"` |  |
 | processesworker.wallet.requestCredentialPath | string | `"/api/v2.0.0/dcp/requestCredentials/{0}"` | path to request a credential; {0} will be replaced by application name |

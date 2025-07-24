@@ -150,7 +150,7 @@ processesworker:
     # -- path to credential request received auto approve; {0} will be replaced by the credential request received id
     credentialRequestsReceivedAutoApprovePath: "/api/v2.0.0/dcp/credentialRequestsReceived/{0}/autoApprove"
     # -- path to credential request received;
-    credentialRequestsReceivedPath": "/api/v2.0.0/dcp/credentialRequestsReceived"
+    credentialRequestsReceivedPath: "/api/v2.0.0/dcp/credentialRequestsReceived"
     # -- path to credential request received detail; {0} will be replaced by the credential request received id
     credentialRequestsReceivedDetailPath: "/api/v2.0.0/dcp/credentialRequestsReceived/{0}"
 
