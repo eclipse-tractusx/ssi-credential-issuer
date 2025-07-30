@@ -26,6 +26,7 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -104,7 +105,7 @@ public class CredentialCreationProcessHandlerTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        ex.Message.Should().Be("ExternalCredentialId must be set here");
+        ex.Message.Should().Be(CredentialProcessErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET.ToString());
     }
 
     [Fact]
@@ -144,7 +145,7 @@ public class CredentialCreationProcessHandlerTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        ex.Message.Should().Be("Credential must be set here");
+        ex.Message.Should().Be(CredentialProcessErrors.CREDENTIAL_NOT_SET.ToString());
     }
 
     [Fact]
@@ -273,7 +274,7 @@ public class CredentialCreationProcessHandlerTests
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        ex.Message.Should().Be("CallbackUrl must be set");
+        ex.Message.Should().Be(CredentialProcessErrors.CALLBACK_URL_NOT_SET.ToString());
     }
 
     [Fact]
@@ -310,7 +311,7 @@ public class CredentialCreationProcessHandlerTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
-        ex.Message.Should().Be("Credential Id must be set here");
+        ex.Message.Should().Be(CredentialProcessErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET.ToString());
     }
 
     [Fact]
@@ -324,7 +325,7 @@ public class CredentialCreationProcessHandlerTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
-        ex.Message.Should().Be("Credential must be set here");
+        ex.Message.Should().Be(CredentialProcessErrors.CREDENTIAL_NOT_SET.ToString());
     }
 
     [Fact]
@@ -417,7 +418,7 @@ public class CredentialCreationProcessHandlerTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
-        ex.Message.Should().Be("External Credential Request Id must be set here");
+        ex.Message.Should().Be(CredentialProcessErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET.ToString());
     }
 
     [Fact]
@@ -431,7 +432,7 @@ public class CredentialCreationProcessHandlerTests
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
-        ex.Message.Should().Be("Credential must be set here");
+        ex.Message.Should().Be(CredentialProcessErrors.CREDENTIAL_NOT_SET.ToString());
     }
 
     [Fact]

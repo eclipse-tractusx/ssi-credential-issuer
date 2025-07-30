@@ -21,6 +21,7 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
@@ -51,7 +52,7 @@ public class CredentialCreationProcessHandler(
         var (externalCredentialId, kindId, hasEncryptionInformation, _) = await issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId == null)
         {
-            throw new ConflictException("ExternalCredentialId must be set here");
+            throw ConflictException.Create(CredentialProcessErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET);
         }
 
         await walletBusinessLogic.GetCredential(credentialId, externalCredentialId.Value, kindId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
@@ -78,17 +79,17 @@ public class CredentialCreationProcessHandler(
 
         if (credential is null)
         {
-            throw new ConflictException("Credential must be set here");
+            throw ConflictException.Create(CredentialProcessErrors.CREDENTIAL_NOT_SET);
         }
 
         if (holderWalletData.ClientId == null || holderWalletData.WalletUrl == null)
         {
-            throw new ConflictException("Wallet information must be set");
+            throw ConflictException.Create(CredentialProcessErrors.WALLET_INFO_NOT_SET);
         }
 
         if (encryptionInformation.Secret == null || encryptionInformation.InitializationVector == null || encryptionInformation.EncryptionMode == null)
         {
-            throw new ConflictException("Wallet secret must be set");
+            throw ConflictException.Create(CredentialProcessErrors.WALLET_SECRET_NOT_SET);
         }
 
         await walletBusinessLogic.CreateCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credential, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
@@ -113,12 +114,11 @@ public class CredentialCreationProcessHandler(
 
         if (credentialJson is null)
         {
-            throw new ConflictException("Credential must be set here");
+            throw ConflictException.Create(CredentialProcessErrors.CREDENTIAL_NOT_SET);
         }
 
         if (holderWalletData.ClientId == null || holderWalletData.WalletUrl == null)
         {
-            // throw new ConflictException("Wallet information must be set");
             return (
                 Enumerable.Repeat(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK, 1),
                 ProcessStepStatusId.SKIPPED,
@@ -128,7 +128,7 @@ public class CredentialCreationProcessHandler(
 
         if (encryptionInformation.Secret == null || encryptionInformation.InitializationVector == null || encryptionInformation.EncryptionMode == null)
         {
-            throw new ConflictException("Wallet secret must be set");
+            throw ConflictException.Create(CredentialProcessErrors.WALLET_SECRET_NOT_SET);
         }
 
         await walletBusinessLogic.RequestCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
@@ -144,11 +144,11 @@ public class CredentialCreationProcessHandler(
         var (externalCredentialId, credentialJson, _) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialDetailById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId == null)
         {
-            throw new ConflictException("External Credential Request Id must be set here");
+            throw ConflictException.Create(CredentialProcessErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET);
         }
         if (credentialJson is null)
         {
-            throw new ConflictException("Credential must be set here");
+            throw ConflictException.Create(CredentialProcessErrors.CREDENTIAL_NOT_SET);
         }
 
         var credentialRequestStatus = await walletBusinessLogic.CredentialRequestAutoApprove(externalCredentialId.Value, credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
@@ -172,11 +172,11 @@ public class CredentialCreationProcessHandler(
         var (externalCredentialId, credentialJson, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialDetailById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId == null)
         {
-            throw new ConflictException("Credential Id must be set here");
+            throw ConflictException.Create(CredentialProcessErrors.EXTERNAL_CREDENTIAL_ID_NOT_SET);
         }
         if (credentialJson is null)
         {
-            throw new ConflictException("Credential must be set here");
+            throw ConflictException.Create(CredentialProcessErrors.CREDENTIAL_NOT_SET);
         }
 
         var (credentialRequestStatus, deliveryStatus) = await walletBusinessLogic.CheckCredentialRequestStatus(credentialId, externalCredentialId.Value, credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
@@ -208,7 +208,7 @@ public class CredentialCreationProcessHandler(
         var (bpn, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCallbackUrl(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (callbackUrl is null)
         {
-            throw new ConflictException("CallbackUrl must be set");
+            throw ConflictException.Create(CredentialProcessErrors.CALLBACK_URL_NOT_SET);
         }
 
         var issuerResponseData = new IssuerResponseData(bpn, IssuerResponseStatus.SUCCESSFUL, "Successfully created Credential");
