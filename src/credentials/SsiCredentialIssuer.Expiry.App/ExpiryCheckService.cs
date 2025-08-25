@@ -132,7 +132,7 @@ public class ExpiryCheckService
         }
         catch (Exception ex)
         {
-            var message = $"An error occurred while processing credential details '{ex.Message}' for ID '{data.Id}'";
+            var message = $"Failed to process credential with ID '{data.Id}': {ex.Message}";
             throw new InvalidOperationException(message, ex);
         }
     }
