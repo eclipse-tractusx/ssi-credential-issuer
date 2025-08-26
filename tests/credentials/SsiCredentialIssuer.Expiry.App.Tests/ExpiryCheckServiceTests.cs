@@ -1,22 +1,4 @@
-/********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
- *
- * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
- *
- * This program and the accompanying materials are made available under the
- * terms of the Apache License, Version 2.0 which is available at
- * https://www.apache.org/licenses/LICENSE-2.0.
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- ********************************************************************************/
-
+using Fare;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -206,5 +188,61 @@ public class ExpiryCheckServiceTests
 
         credentialNotification.GetLastValue().Should().ContainAll(VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL.GetEnumValue(), VerifiedCredentialTypeId.MEMBERSHIP.GetEnumValue());
         ssiDetail.ExpiryCheckTypeId.Should().Be(expiryCheckTypeId);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithException_LogsErrorMessage()
+    {
+        // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var credentialId = Guid.NewGuid();
+        var credentialScheduleData = _fixture.Build<CredentialScheduleData>()
+            .With(x => x.IsVcToDelete, true)
+            .Create();
+        var credentialsData = new CredentialExpiryData[]
+        {
+            new(credentialId, "INVALID_REQUESTER_ID", null, null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialTypeId.MEMBERSHIP, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
+        };
+
+        // Create a logger that captures log messages
+        var logger = A.Fake<ILogger<ExpiryCheckService>>();
+
+        var serviceProvider = A.Fake<IServiceProvider>();
+
+        // Mock GetService instead of GetRequiredService (which is an extension method)
+        A.CallTo(() => serviceProvider.GetService(typeof(IIssuerRepositories))).Returns(_issuerRepositories);
+        A.CallTo(() => serviceProvider.GetService(typeof(IDateTimeProvider))).Returns(_dateTimeProvider);
+        A.CallTo(() => serviceProvider.GetService(typeof(IPortalService))).Returns(_portalService);
+
+        var serviceScope = A.Fake<IServiceScope>();
+        A.CallTo(() => serviceScope.ServiceProvider).Returns(serviceProvider);
+        var serviceScopeFactory = A.Fake<IServiceScopeFactory>();
+        A.CallTo(() => serviceScopeFactory.CreateScope()).Returns(serviceScope);
+
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
+            .Returns(credentialsData.ToAsyncEnumerable());
+
+        // Mock RemoveSsiDetail to throw an exception
+        var testException = new Exception("Test exception");
+        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(credentialId, A<string>._, A<string>._))
+            .Throws(testException);
+
+        var sut = new ExpiryCheckService(serviceScopeFactory, logger, Options.Create(_settings));
+
+        // Act
+        await sut.ExecuteAsync(CancellationToken.None);
+
+        // Assert - Verify that the method was called
+        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(credentialId, A<string>._, A<string>._))
+            .MustHaveHappenedOnceExactly();
+
+        // Verify that error logging occurred - match the actual call signature
+        A.CallTo(logger)
+            .Where(call => call.Method.Name == "Log" &&
+                   call.Arguments.Get<LogLevel>(0) == LogLevel.Error)
+            .MustHaveHappened();
+
+        Environment.ExitCode.Should().Be(1, "Environment.ExitCode should be set to 1 when an exception occurs");
     }
 }
