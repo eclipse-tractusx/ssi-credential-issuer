@@ -211,40 +211,35 @@ public class ExpiryCheckServiceTests
     [Fact]
     public async Task ExecuteAsync_ThrowsException()
     {
+        // Arrange
         var now = DateTimeOffset.UtcNow;
-        var inactiveVcsToDelete = now.AddDays(-_settings.InactiveVcsToDeleteInDays);
         var credentialId = Guid.NewGuid();
         var credentialScheduleData = _fixture.Build<CredentialScheduleData>()
             .With(x => x.IsVcToDelete, true)
             .Create();
         var credentialsData = new CredentialExpiryData[]
         {
-            new(Guid.NewGuid(), "INVALID_REQUESTER_ID", null, null, null, Bpnl , CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialTypeId.MEMBERSHIP, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
+            new(credentialId, "INVALID_REQUESTER_ID", null, null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialTypeId.MEMBERSHIP, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
         };
+
+        // Mock logger, serviceProvider, and serviceScope
+        var logger = A.Fake<ILogger<ExpiryCheckService>>();
+        var serviceProvider = A.Fake<IServiceProvider>();
+        A.CallTo(() => serviceProvider.GetRequiredService<IIssuerRepositories>()).Returns(_issuerRepositories);
+        A.CallTo(() => serviceProvider.GetRequiredService<IDateTimeProvider>()).Returns(_dateTimeProvider);
+        A.CallTo(() => serviceProvider.GetRequiredService<IPortalService>()).Returns(_portalService);
+        var serviceScope = A.Fake<IServiceScope>();
+        A.CallTo(() => serviceScope.ServiceProvider).Returns(serviceProvider);
+        var serviceScopeFactory = A.Fake<IServiceScopeFactory>();
+        A.CallTo(() => serviceScopeFactory.CreateScope()).Returns(serviceScope);
 
         A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
         A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
             .Returns(credentialsData.ToAsyncEnumerable());
 
         // Mock RemoveSsiDetail to throw an exception
-        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(A<Guid>._, A<string>._, A<string>._))
-            .Throws(new Exception("An error occurred while processing the credentials"));
-
-        A.CallTo(() => _issuerRepositories.GetInstance<IProcessStepRepository>())
-            .Returns(_processStepRepository);
-        A.CallTo(() => _issuerRepositories.GetInstance<ICompanySsiDetailsRepository>())
-            .Returns(_companySsiDetailsRepository);
-
-        //Mock logger, serviceProvider, and serviceScope
-        var logger = A.Fake<ILogger<ExpiryCheckService>>();
-        var serviceProvider = _fixture.Create<IServiceProvider>();
-        A.CallTo(() => serviceProvider.GetService(typeof(IIssuerRepositories))).Returns(_issuerRepositories);
-        A.CallTo(() => serviceProvider.GetService(typeof(IDateTimeProvider))).Returns(_dateTimeProvider);
-        A.CallTo(() => serviceProvider.GetService(typeof(IPortalService))).Returns(_portalService);
-        var serviceScope = _fixture.Create<IServiceScope>();
-        A.CallTo(() => serviceScope.ServiceProvider).Returns(serviceProvider);
-        var serviceScopeFactory = _fixture.Create<IServiceScopeFactory>();
-        A.CallTo(() => serviceScopeFactory.CreateScope()).Returns(serviceScope);
+        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(credentialId, A<string>._, A<string>._))
+            .Throws(new Exception("Test exception"));
 
         var sut = new ExpiryCheckService(serviceScopeFactory, logger, Options.Create(_settings));
 
@@ -252,12 +247,10 @@ public class ExpiryCheckServiceTests
         await sut.ExecuteAsync(CancellationToken.None);
 
         // Assert
-        var credentialsId = credentialsData.FirstOrDefault()?.Id;
         A.CallTo(logger).Where(call => call.Method.Name == "Log")
             .WhenArgumentsMatch(args =>
                 args[0]!.Equals(LogLevel.Error) &&
-                args[3] is Exception ex &&
-                ex.Message.Contains($"An error occurred while processing credential details 'An error occurred while processing the credentials' for ID '{credentialsId}'")
+                args[2]!.ToString()!.Contains("Verified Credential expiry check failed with error: Test exception")
             )
             .MustHaveHappened();
     }
