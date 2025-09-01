@@ -31,7 +31,7 @@ To use the helm chart as a dependency:
 dependencies:
   - name: ssi-credential-issuer
     repository: https://eclipse-tractusx.github.io/charts/dev
-    version: 1.4.1-rc.1
+    version: 1.4.1-rc.2
 ```
 
 ## Requirements
@@ -120,7 +120,7 @@ dependencies:
 | dbConnection.schema | string | `"issuer"` |  |
 | dbConnection.sslMode | string | `"Disable"` |  |
 | postgresql.enabled | bool | `true` | PostgreSQL chart configuration; default configurations: host: "issuer-postgresql-primary", port: 5432; Switch to enable or disable the PostgreSQL helm chart. |
-| postgresql.image | object | `{"tag":"15-debian-12"}` | Setting image tag to major to get latest minor updates |
+| postgresql.image | object | `{"registry":"docker.io","repository":"bitnamilegacy/postgresql","tag":"15-debian-12"}` | Setting image tag to major to get latest minor updates |
 | postgresql.commonLabels."app.kubernetes.io/version" | string | `"15"` |  |
 | postgresql.auth.username | string | `"issuer"` | Non-root username. |
 | postgresql.auth.database | string | `"issuer"` | Database name. |
