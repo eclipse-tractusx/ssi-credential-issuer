@@ -188,6 +188,8 @@ postgresql:
   enabled: true
   # -- Setting image tag to major to get latest minor updates
   image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
     tag: "15-debian-12"
   commonLabels:
     app.kubernetes.io/version: "15"
