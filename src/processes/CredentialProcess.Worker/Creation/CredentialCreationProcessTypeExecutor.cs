@@ -79,7 +79,9 @@ public class CredentialCreationProcessTypeExecutor(
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => await credentialCreationProcessHandler.SaveCredentialDocument(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
-                ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await credentialCreationProcessHandler.CreateCredentialForHolder(_credentialId, cancellationToken)
+                // ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await credentialCreationProcessHandler.CreateCredentialForHolder(_credentialId, cancellationToken)
+                //     .ConfigureAwait(ConfigureAwaitOptions.None),
+                ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await credentialCreationProcessHandler.OfferCredentialToHolder(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.TRIGGER_CALLBACK => await credentialCreationProcessHandler.TriggerCallback(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),

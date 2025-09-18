@@ -36,4 +36,5 @@ public interface ICredentialRepository
     Task<(VerifiedCredentialExternalTypeId ExternalTypeId, string RequesterId)> GetCredentialNotificationData(Guid credentialId);
     Task<(bool Exists, bool IsSameCompany, IEnumerable<(DocumentStatusId StatusId, byte[] Content)> Documents)> GetSignedCredentialForCredentialId(Guid credentialId, string bpnl);
     Task<(bool Exists, bool IsSameCompany, string FileName, DocumentStatusId StatusId, byte[] Content, MediaTypeId MediaTypeId)> GetDocumentById(Guid documentId, string bpnl);
+    Task<(bool IsIssuerCompany, Guid? ExternalCredentialId, JsonDocument? CredentialJson, string? CallbackUrl)> GetCredentialById(Guid credentialId);
 }

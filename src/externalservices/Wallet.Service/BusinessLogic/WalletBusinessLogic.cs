@@ -117,4 +117,11 @@ public class WalletBusinessLogic(
                 c.EncryptionMode = null;
             });
     }
+
+    public async Task OfferCredentialToHolder(Guid externalCredentialId, string credential, CancellationToken cancellationToken)
+    {
+        await walletService
+            .OfferCredentialToHolder(externalCredentialId, credential, cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.None);
+    }
 }

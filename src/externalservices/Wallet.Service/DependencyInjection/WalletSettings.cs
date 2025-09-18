@@ -48,4 +48,6 @@ public class WalletSettings : BasicAuthSettings
 
     [Required]
     public string RevokeCredentialPath { get; set; } = null!;
+    [Required]
+    public string OfferCredentialPath { get; set; } = null!;
 }

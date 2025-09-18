@@ -43,7 +43,8 @@ public class WalletServiceTests
             CreateSignedCredentialPath = "/api/v2.0.0/credentials",
             CreateCredentialPath = "api/v2.0.0/credentials",
             GetCredentialPath = "/api/v2.0.0/credentials/{0}",
-            RevokeCredentialPath = "/api/v2.0.0/credentials/{0}"
+            RevokeCredentialPath = "/api/v2.0.0/credentials/{0}",
+            OfferCredentialPath = "/api/v2.0.0/dcp/credentialOffers/send"
         });
         _sut = new WalletService(_basicAuthTokenService, _options);
     }

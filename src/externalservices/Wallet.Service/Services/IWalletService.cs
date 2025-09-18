@@ -26,6 +26,7 @@ public interface IWalletService
 {
     Task<CreateSignedCredentialResponse> CreateSignedCredential(JsonDocument payload, CancellationToken cancellationToken);
     Task<Guid> CreateCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, string credential, CancellationToken cancellationToken);
+    Task OfferCredentialToHolder(Guid externalCredentialId, string credential, CancellationToken cancellationToken);
     Task<JsonDocument> GetCredential(Guid externalCredentialId, CancellationToken cancellationToken);
     Task RevokeCredentialForIssuer(Guid externalCredentialId, CancellationToken cancellationToken);
 }

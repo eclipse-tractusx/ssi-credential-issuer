@@ -94,6 +94,23 @@ public class WalletService(
         return response.Id;
     }
 
+    public async Task OfferCredentialToHolder(Guid externalCredentialId, string credential, CancellationToken cancellationToken)
+    {
+        ICredential credentialBase = JsonSerializer.Deserialize<Credential>(credential)!;
+        if (credentialBase == null)
+        {
+            throw new UnexpectedConditionException("Credential must not be null");
+        }
+        var issuerDid = credentialBase.Issuer;
+        var holderDid = credentialBase.CredentialSubject.Id;
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        var data = new OfferCredentialRequest(new List<string> { externalCredentialId.ToString() }, issuerDid, holderDid);
+        await client.PostAsJsonAsync(_settings.OfferCredentialPath, data, Options, cancellationToken)
+            .CatchingIntoServiceExceptionFor("offer-credential-to-holder", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+    }
+
     public async Task RevokeCredentialForIssuer(Guid externalCredentialId, CancellationToken cancellationToken)
     {
         using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);

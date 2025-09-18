@@ -226,7 +226,9 @@ public class CredentialCreationProcessTypeExecutorTests
             .Throws(new ServiceException("this is a test"));
         A.CallTo(() => _credentialCreationProcessHandler.SaveCredentialDocument(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
-        A.CallTo(() => _credentialCreationProcessHandler.CreateCredentialForHolder(credentialId, A<CancellationToken>._))
+        // A.CallTo(() => _credentialCreationProcessHandler.CreateCredentialForHolder(credentialId, A<CancellationToken>._))
+        //     .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialCreationProcessHandler.OfferCredentialToHolder(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
         A.CallTo(() => _credentialCreationProcessHandler.TriggerCallback(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
