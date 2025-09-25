@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -125,99 +125,65 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER);
     }
 
     #endregion
 
-    #region CreateCredentialForHolder
+    #region OfferCredentialToHolder
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithCredentialNotSet_SkipsStep()
+    public async Task OfferCredentialToHolder_WithCredentialNotSet_SkipsStep()
     {
         // Arrange
-        A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns(default((bool, HolderWalletData, string?, EncryptionTransformationData, string?)));
-        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+        A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
+            .Returns(default((bool, Guid?, JsonDocument?, string?)));
+        Task Act() => _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        ex.Message.Should().Be("Credential must be set here");
+        ex.Message.Should().Be("Credential json must be set here");
     }
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithClientIdNull_SkipsStep()
+    public async Task OfferCredentialToHolder_WithExternalCredentialIdNull_SkipsStep()
     {
         // Arrange
-        A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((false, new HolderWalletData(null, null), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
-        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+        A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
+            .Returns((false, null, JsonDocument.Parse("{}"), "https://example.org"));
+        Task Act() => _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
 
         // Act
         var ex = await Assert.ThrowsAsync<ConflictException>(Act);
 
         // Assert
-        ex.Message.Should().Be("Wallet information must be set");
+        ex.Message.Should().Be("ExternalCredentialId must be set here");
     }
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithWalletUrlNull_SkipsStep()
+    public async Task OfferCredentialToHolder_WithValidData_ReturnsExpected()
     {
         // Arrange
-        A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((false, new HolderWalletData(null, "c1"), "test", _fixture.Create<EncryptionTransformationData>(), "https://example.org"));
-        Task Act() => _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+        var id = Guid.NewGuid();
+        var credentialJson = """
+        {
+            "issuer": "did:example:issuer123",
+            "credentialSubject": {
+                "id": "did:example:holder456"
+            }
+        }
+        """;
+        A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
+            .Returns((false, id, JsonDocument.Parse(credentialJson), "https://example.org"));
 
         // Act
-        var ex = await Assert.ThrowsAsync<ConflictException>(Act);
+        var result = await _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
 
         // Assert
-        ex.Message.Should().Be("Wallet information must be set");
-    }
-
-    [Fact]
-    public async Task CreateCredentialForHolder_WithEncryptionNotSet_SkipsStep()
-    {
-        // Arrange
-        A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((
-                false,
-                new HolderWalletData("https://example.org", "c1"),
-                "test",
-                new EncryptionTransformationData("test"u8.ToArray(), "test"u8.ToArray(), 0),
-                "https://example.org"));
-
-        // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
-
-        // Assert
-        result.modified.Should().BeFalse();
-        result.processMessage.Should().BeNull();
-        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
-        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
-    }
-
-    [Fact]
-    public async Task CreateCredentialForHolder_WithValidData_ReturnsExpected()
-    {
-        // Arrange
-        A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((
-                false,
-                new HolderWalletData("https://example.org", "c1"),
-                "test",
-                _fixture.Create<EncryptionTransformationData>(),
-                "https://example.org"));
-
-        // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
-
-        // Assert
-        A.CallTo(() => _walletBusinessLogic.CreateCredentialForHolder(_credentialId, "https://example.org", "c1", A<EncryptionInformation>._, "test", A<CancellationToken>._))
+        A.CallTo(() => _walletBusinessLogic.OfferCredentialToHolder(id, credentialJson, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
-
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
@@ -225,24 +191,25 @@ public class CredentialCreationProcessHandlerTests
     }
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithIssuerAsHolder_ReturnsExpected()
+    public async Task OfferCredentialToHolder_WithIssuerAsHolder_ReturnsExpected()
     {
         // Arrange
-        A.CallTo(() => _credentialRepository.GetCredentialData(_credentialId))
-            .Returns((
-                true,
-                new HolderWalletData("https://example.org", "c1"),
-                "test",
-                _fixture.Create<EncryptionTransformationData>(),
-                "https://example.org"));
+        var id = Guid.NewGuid();
+        var credentialJson = """
+        {
+            "issuer": "did:example:issuer123",
+            "credentialSubject": {
+                "id": "did:example:holder456"
+            }
+        }
+        """;
+        A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
+            .Returns((true, id, JsonDocument.Parse(credentialJson), "https://example.org"));
 
         // Act
-        var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
+        var result = await _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletBusinessLogic.CreateCredentialForHolder(A<Guid>._, A<string>._, A<string>._, A<EncryptionInformation>._, A<string>._, A<CancellationToken>._))
-            .MustNotHaveHappened();
-
         result.modified.Should().BeFalse();
         result.processMessage.Should().Be("ProcessStep was skipped because the holder is the issuer");
         result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);

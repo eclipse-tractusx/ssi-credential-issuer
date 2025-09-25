@@ -92,32 +92,6 @@ public class WalletBusinessLogic(
         }
     }
 
-    public async Task CreateCredentialForHolder(Guid companySsiDetailId, string holderWalletUrl, string clientId, EncryptionInformation encryptionInformation, string credential, CancellationToken cancellationToken)
-    {
-        var cryptoHelper = _settings.EncryptionConfigs.GetCryptoHelper(_settings.EncryptionConfigIndex);
-        var secret = cryptoHelper.Decrypt(encryptionInformation.Secret, encryptionInformation.InitializationVector);
-
-        await walletService
-            .CreateCredentialForHolder(holderWalletUrl, clientId, secret, credential, cancellationToken)
-            .ConfigureAwait(ConfigureAwaitOptions.None);
-
-        repositories.GetInstance<ICompanySsiDetailsRepository>().AttachAndModifyProcessData(companySsiDetailId,
-            c =>
-            {
-                c.ClientId = clientId;
-                c.ClientSecret = encryptionInformation.Secret;
-                c.InitializationVector = encryptionInformation.InitializationVector;
-                c.EncryptionMode = encryptionInformation.EncryptionMode;
-            },
-            c =>
-            {
-                c.ClientId = null;
-                c.ClientSecret = null;
-                c.InitializationVector = null;
-                c.EncryptionMode = null;
-            });
-    }
-
     public async Task OfferCredentialToHolder(Guid externalCredentialId, string credential, CancellationToken cancellationToken)
     {
         await walletService

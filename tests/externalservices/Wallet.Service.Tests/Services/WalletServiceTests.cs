@@ -1,3 +1,22 @@
+/********************************************************************************
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ********************************************************************************/
+
 using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
@@ -168,15 +187,22 @@ public class WalletServiceTests
 
     #endregion
 
-    #region CreateCredentialForHolder
+    #region OfferCredentialToHolder
 
     [Fact]
-    public async Task CreateCredentialForHolder_WithValid_DoesNotThrowException()
+    public async Task OfferCredentialToHolder_WithValid_DoesNotThrowException()
     {
         // Arrange
         var id = Guid.NewGuid();
-        var response = new CreateCredentialResponse(id);
-        var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK, new StringContent(JsonSerializer.Serialize(response)));
+        var credentialJson = """
+        {
+            "issuer": "did:example:issuer123",
+            "credentialSubject": {
+                "id": "did:example:holder456"
+            }
+        }
+        """;
+        var httpMessageHandlerMock = new HttpMessageHandlerMock(HttpStatusCode.OK);
         using var httpClient = new HttpClient(httpMessageHandlerMock)
         {
             BaseAddress = new Uri("https://base.address.com")
@@ -185,25 +211,31 @@ public class WalletServiceTests
             .Returns(httpClient);
 
         // Act
-        var result = await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None);
+        await _sut.OfferCredentialToHolder(id, credentialJson, CancellationToken.None);
 
         // Assert
         httpMessageHandlerMock.RequestMessage.Should().Match<HttpRequestMessage>(x =>
-            x.Content is JsonContent &&
-            (x.Content as JsonContent)!.ObjectType == typeof(DeriveCredentialData) &&
-            ((x.Content as JsonContent)!.Value as DeriveCredentialData)!.Application == "catena-x-portal"
+            x.Content is JsonContent && (x.Content as JsonContent)!.ObjectType == typeof(OfferCredentialRequest)
         );
-        result.Should().Be(id);
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.Conflict, "{ \"message\": \"Framework test!\" }", "call to external system create-holder-credential failed with statuscode 409 - Message: { \"message\": \"Framework test!\" }")]
-    [InlineData(HttpStatusCode.BadRequest, "{ \"test\": \"123\" }", "call to external system create-holder-credential failed with statuscode 400 - Message: { \"test\": \"123\" }")]
-    [InlineData(HttpStatusCode.BadRequest, "this is no json", "call to external system create-holder-credential failed with statuscode 400 - Message: this is no json")]
-    [InlineData(HttpStatusCode.Forbidden, null, "call to external system create-holder-credential failed with statuscode 403")]
-    public async Task CreateCredentialForHolder_WithConflict_ThrowsServiceExceptionWithErrorContent(HttpStatusCode statusCode, string? content, string message)
+    [InlineData(HttpStatusCode.Conflict, "{ \"message\": \"Framework test!\" }", "call to external system offer-credential-to-holder failed with statuscode 409 - Message: { \"message\": \"Framework test!\" }")]
+    [InlineData(HttpStatusCode.BadRequest, "{ \"test\": \"123\" }", "call to external system offer-credential-to-holder failed with statuscode 400 - Message: { \"test\": \"123\" }")]
+    [InlineData(HttpStatusCode.BadRequest, "this is no json", "call to external system offer-credential-to-holder failed with statuscode 400 - Message: this is no json")]
+    [InlineData(HttpStatusCode.Forbidden, null, "call to external system offer-credential-to-holder failed with statuscode 403")]
+    public async Task OfferCredentialToHolder_WithConflict_ThrowsServiceExceptionWithErrorContent(HttpStatusCode statusCode, string? content, string message)
     {
         // Arrange
+        var id = Guid.NewGuid();
+        var credentialJson = """
+        {
+            "issuer": "did:example:issuer123",
+            "credentialSubject": {
+                "id": "did:example:holder456"
+            }
+        }
+        """;
         var httpMessageHandlerMock = content == null
             ? new HttpMessageHandlerMock(statusCode)
             : new HttpMessageHandlerMock(statusCode, new StringContent(content));
@@ -214,7 +246,7 @@ public class WalletServiceTests
         A.CallTo(() => _basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(A<BasicAuthSettings>._, A<CancellationToken>._)).Returns(httpClient);
 
         // Act
-        async Task Act() => await _sut.CreateCredentialForHolder("https://example.org", "test", "testSec", "testCred", CancellationToken.None);
+        async Task Act() => await _sut.OfferCredentialToHolder(id, credentialJson, CancellationToken.None);
 
         // Assert
         var ex = await Assert.ThrowsAsync<ServiceException>(Act);
