@@ -39,7 +39,6 @@ public class WalletBusinessLogic(
     IOptions<WalletSettings> options)
     : IWalletBusinessLogic
 {
-    private readonly WalletSettings _settings = options.Value;
 
     public async Task CreateSignedCredential(Guid companySsiDetailId, JsonDocument schema, CancellationToken cancellationToken)
     {
