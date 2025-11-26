@@ -5,7 +5,7 @@ After the initial wallet creation which is executed by the portal the process wi
 The portal will request a bpn credential via the endpoint `POST: api/issuer/bpn` which will create a process and a process step.
 After the process has successfully finished the issuer component will do the callback to the portal with the successfully created bpn credential. The portal will than request the creation of the membership credential via `POST: api/issuer/membership`. The same as for the bpn credential applies for the membership credential.
 
-**Note**: Since the issuer and holder of the credentials are the same, process step `CREATE_CREDENTIAL_FOR_HOLDER` will be skipped.
+**Note**: Since the issuer and holder of the credentials are the same, process step `OFFER_CREDENTIAL_TO_HOLDER` will be skipped.
 
 ## NOTICE
 

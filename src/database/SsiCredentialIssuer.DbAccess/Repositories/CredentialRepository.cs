@@ -113,4 +113,14 @@ public class CredentialRepository(IssuerDbContext dbContext) : ICredentialReposi
                 x.DocumentContent,
                 x.MediaTypeId))
             .SingleOrDefaultAsync();
+
+    public Task<(bool IsIssuerCompany, Guid? ExternalCredentialId, JsonDocument? CredentialJson, string? CallbackUrl)> GetCredentialById(Guid credentialId) =>
+        dbContext.CompanySsiDetails
+            .Where(x => x.Id == credentialId)
+            .Select(x => new ValueTuple<bool, Guid?, JsonDocument?, string?>(
+                x.Bpnl == x.IssuerBpn,
+                x.ExternalCredentialId,
+                x.CompanySsiProcessData!.Schema,
+                x.CompanySsiProcessData!.CallbackUrl))
+            .SingleOrDefaultAsync();
 }

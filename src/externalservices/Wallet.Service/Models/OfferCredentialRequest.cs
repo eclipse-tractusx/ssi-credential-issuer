@@ -1,5 +1,6 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Cofinity-X GmbH
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,17 +18,12 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using System.Text.Json;
-using EncryptionInformation = Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models.EncryptionInformation;
+using System.Text.Json.Serialization;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 
-public interface IWalletBusinessLogic
-{
-    Task CreateSignedCredential(Guid companySsiDetailId, JsonDocument schema, CancellationToken cancellationToken);
-
-    Task OfferCredentialToHolder(Guid externalCredentialId, string credential, CancellationToken cancellationToken);
-
-    Task GetCredential(Guid credentialId, Guid externalCredentialId, VerifiedCredentialTypeKindId kindId, CancellationToken cancellationToken);
-}
+public record OfferCredentialRequest(
+    [property: JsonPropertyName("credentials")] List<string> Credentials,
+    [property: JsonPropertyName("issuerDid")] string Name,
+    [property: JsonPropertyName("holderDid")] string Description
+);
