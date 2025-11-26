@@ -512,19 +512,18 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         companyCredentialDetailsRepository.CreateProcessData(ssiDetailId, JsonDocument.Parse(schema), kindId,
             c =>
             {
-                if (technicalUserDetails == null)
+                if (technicalUserDetails != null)
                 {
-                    return;
+                    var cryptoHelper = _settings.EncryptionConfigs.GetCryptoHelper(_settings.EncryptionConfigIndex);
+                    var (secret, initializationVector) = cryptoHelper.Encrypt(technicalUserDetails.ClientSecret);
+
+                    c.ClientId = technicalUserDetails.ClientId;
+                    c.ClientSecret = secret;
+                    c.InitializationVector = initializationVector;
+                    c.EncryptionMode = _settings.EncryptionConfigIndex;
+                    c.HolderWalletUrl = technicalUserDetails.WalletUrl;
                 }
 
-                var cryptoHelper = _settings.EncryptionConfigs.GetCryptoHelper(_settings.EncryptionConfigIndex);
-                var (secret, initializationVector) = cryptoHelper.Encrypt(technicalUserDetails.ClientSecret);
-
-                c.ClientId = technicalUserDetails.ClientId;
-                c.ClientSecret = secret;
-                c.InitializationVector = initializationVector;
-                c.EncryptionMode = _settings.EncryptionConfigIndex;
-                c.HolderWalletUrl = technicalUserDetails.WalletUrl;
                 c.CallbackUrl = callbackUrl;
             });
 
