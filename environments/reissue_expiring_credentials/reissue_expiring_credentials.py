@@ -331,6 +331,7 @@ def get_auth_token(auth_base_url: str, auth_path: str, client_id: str, client_se
     else:
         payload = f"client_id={client_id}&grant_type=client_credentials&client_secret={client_secret}"
 
+    logging.debug(f"Getting token from {urljoin(auth_base_url, auth_path)}")
     response: Response = requests.post(urljoin(auth_base_url, auth_path), headers=headers, data=payload)
     if response.status_code != 200:
         raise requests.HTTPError(f"Failed to get access token: {response.status_code} {response.text}")
@@ -537,7 +538,7 @@ def revoke_credential(auth_url: str, client_id: str, client_secret: str, issuer_
 
 def parse_cli_args() -> tuple[Namespace, list[str]]:
     parser = argparse.ArgumentParser(description="Reissue expiring credentials")
-    parser.add_argument("--stage", required=True, choices=["integration", "beta", "svc"], help="Environment stage")
+    parser.add_argument("--stage", required=True, choices=["int"], help="Environment stage")
     parser.add_argument("--start_date", type=date.fromisoformat, required=True,
                         help="yyyy-mm-dd - Credentials expiring on or after this date and on or before end_date will be reissued.")
     parser.add_argument("--end_date", type=date.fromisoformat, required=True,
