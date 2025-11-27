@@ -106,7 +106,7 @@ def fetch_active_credentials(auth_base_url: str, client_id: str, client_secret: 
         AUTHORIZATION: BEARER_TOKEN.format(issuer_service_auth_token),
     }
 
-    current_page = 1
+    current_page = 0
     total_num_pages = 1
     credential_list_acc: list = []
 
@@ -128,7 +128,7 @@ def fetch_active_credentials(auth_base_url: str, client_id: str, client_secret: 
                 f"Issuer service returned 200, but the response contained invalid JSON for page={current_page}: {response.text}")
             raise jsonDecodeError
         # Determine total number of pages
-        if current_page == 1:
+        if current_page == 0:
             try:
                 total_num_pages = response_json["meta"]["totalPages"]
             except JSONDecodeError as jsonDecodeError:
