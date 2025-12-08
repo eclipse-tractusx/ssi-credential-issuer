@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,7 +25,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 
@@ -48,26 +47,24 @@ public class CredentialCreationProcessHandler(
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> SaveCredentialDocument(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (externalCredentialId, kindId, hasEncryptionInformation, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (externalCredentialId, kindId, _, _) = await issuerRepositories.GetInstance<ICredentialRepository>().GetExternalCredentialAndKindId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (externalCredentialId == null)
         {
             throw new ConflictException("ExternalCredentialId must be set here");
         }
 
         await walletBusinessLogic.GetCredential(credentialId, externalCredentialId.Value, kindId, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        var nextProcessStep = callbackUrl == null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1);
+
         return (
-            hasEncryptionInformation
-                ? Enumerable.Repeat(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, 1)
-                : nextProcessStep,
+            Enumerable.Repeat(ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER, 1),
             ProcessStepStatusId.DONE,
             false,
             null);
     }
 
-    public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> CreateCredentialForHolder(Guid credentialId, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> OfferCredentialToHolder(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (isIssuerCompany, holderWalletData, credential, encryptionInformation, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialData(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (isIssuerCompany, externalCredentialId, credentialJson, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (isIssuerCompany)
         {
             return (
@@ -77,22 +74,16 @@ public class CredentialCreationProcessHandler(
                 "ProcessStep was skipped because the holder is the issuer");
         }
 
-        if (credential is null)
+        if (credentialJson is null)
         {
-            throw new ConflictException("Credential must be set here");
+            throw new ConflictException("Credential json must be set here");
+        }
+        if (externalCredentialId == null)
+        {
+            throw new ConflictException("ExternalCredentialId must be set here");
         }
 
-        if (holderWalletData.ClientId == null || holderWalletData.WalletUrl == null)
-        {
-            throw new ConflictException("Wallet information must be set");
-        }
-
-        if (encryptionInformation.Secret == null || encryptionInformation.InitializationVector == null || encryptionInformation.EncryptionMode == null)
-        {
-            throw new ConflictException("Wallet secret must be set");
-        }
-
-        await walletBusinessLogic.CreateCredentialForHolder(credentialId, holderWalletData.WalletUrl, holderWalletData.ClientId, new EncryptionInformation(encryptionInformation.Secret, encryptionInformation.InitializationVector, encryptionInformation.EncryptionMode.Value), credential, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        await walletBusinessLogic.OfferCredentialToHolder(externalCredentialId.Value, credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         return (
             callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
             ProcessStepStatusId.DONE,

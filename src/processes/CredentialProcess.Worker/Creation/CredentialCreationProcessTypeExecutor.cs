@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -37,7 +37,7 @@ public class CredentialCreationProcessTypeExecutor(
     private readonly IEnumerable<ProcessStepTypeId> _executableProcessSteps = ImmutableArray.Create(
         ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
         ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
-        ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
+        ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER,
         ProcessStepTypeId.TRIGGER_CALLBACK);
 
     private Guid _credentialId;
@@ -79,7 +79,7 @@ public class CredentialCreationProcessTypeExecutor(
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => await credentialCreationProcessHandler.SaveCredentialDocument(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
-                ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => await credentialCreationProcessHandler.CreateCredentialForHolder(_credentialId, cancellationToken)
+                ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER => await credentialCreationProcessHandler.OfferCredentialToHolder(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.TRIGGER_CALLBACK => await credentialCreationProcessHandler.TriggerCallback(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),

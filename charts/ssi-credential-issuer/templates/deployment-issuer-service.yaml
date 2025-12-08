@@ -179,6 +179,8 @@ spec:
           value: "{{ .Values.processesworker.wallet.getCredentialPath }}"
         - name: "WALLET__REVOKECREDENTIALPATH"
           value: "{{ .Values.processesworker.wallet.revokeCredentialPath }}"
+        - name: "WALLET__OFFERCREDENTIALPATH"
+          value: "{{ .Values.processesworker.wallet.offerCredentialPath }}"
         ports:
         - name: http
           containerPort: {{ .Values.portContainer }}
