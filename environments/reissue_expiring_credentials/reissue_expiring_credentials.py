@@ -331,7 +331,6 @@ def get_auth_token(auth_base_url: str, auth_path: str, client_id: str, client_se
     else:
         payload = f"client_id={client_id}&grant_type=client_credentials&client_secret={client_secret}"
 
-    logging.debug(f"Getting token from {urljoin(auth_base_url, auth_path)}")
     response: Response = requests.post(urljoin(auth_base_url, auth_path), headers=headers, data=payload)
     if response.status_code != 200:
         raise requests.HTTPError(f"Failed to get access token: {response.status_code} {response.text}")
