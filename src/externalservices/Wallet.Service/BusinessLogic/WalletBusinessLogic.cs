@@ -97,4 +97,11 @@ public class WalletBusinessLogic(
             .OfferCredentialToHolder(externalCredentialId, credential, cancellationToken)
             .ConfigureAwait(ConfigureAwaitOptions.None);
     }
+
+    public async Task RevokeCredential(Guid externalCredentialId, CancellationToken cancellationToken)
+    {
+        await walletService
+            .RevokeCredentialForIssuer(externalCredentialId, cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.None);
+    }
 }

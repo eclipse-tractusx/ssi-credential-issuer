@@ -1,4 +1,5 @@
 /********************************************************************************
+ * Copyright (c) 2025 Cofinity-X GmbH
  * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,27 +18,18 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
-public enum ProcessStepTypeId
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.DependencyInjection;
+
+/// <summary>
+/// Settings for the ReissuanceService
+/// </summary>
+public class ReissuanceServiceSettings
 {
-    // CREATE CREDENTIAL PROCESS
-    CREATE_SIGNED_CREDENTIAL = 1,
-    SAVE_CREDENTIAL_DOCUMENT = 3,
-    OFFER_CREDENTIAL_TO_HOLDER = 4,
-    TRIGGER_CALLBACK = 5,
-    REVOKE_OLD_CREDENTIAL = 10,
-    RETRIGGER_CREATE_SIGNED_CREDENTIAL = 6,
-    RETRIGGER_SAVE_CREDENTIAL_DOCUMENT = 7,
-    RETRIGGER_OFFER_CREDENTIAL_TO_HOLDER = 8,
-    RETRIGGER_TRIGGER_CALLBACK = 9,
-    RETRIGGER_REVOKE_OLD_CREDENTIAL = 11,
-
-    // DECLINE PROCESS
-    REVOKE_CREDENTIAL = 100,
-    TRIGGER_NOTIFICATION = 101,
-    TRIGGER_MAIL = 102,
-    RETRIGGER_REVOKE_CREDENTIAL = 103,
-    RETRIGGER_TRIGGER_NOTIFICATION = 104,
-    RETRIGGER_TRIGGER_MAIL = 105
+    /// <summary>
+    /// Vcs which are older than the given value will be reissued
+    /// </summary>
+    [Required]
+    public int ExpiredVcsToReissueInDays { get; init; }
 }

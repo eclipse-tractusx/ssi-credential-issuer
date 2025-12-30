@@ -38,6 +38,7 @@ public class CredentialCreationProcessTypeExecutor(
         ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
         ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
         ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER,
+        ProcessStepTypeId.REVOKE_OLD_CREDENTIAL,
         ProcessStepTypeId.TRIGGER_CALLBACK);
 
     private Guid _credentialId;
@@ -80,6 +81,8 @@ public class CredentialCreationProcessTypeExecutor(
                 ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => await credentialCreationProcessHandler.SaveCredentialDocument(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER => await credentialCreationProcessHandler.OfferCredentialToHolder(_credentialId, cancellationToken)
+                    .ConfigureAwait(ConfigureAwaitOptions.None),
+                ProcessStepTypeId.REVOKE_OLD_CREDENTIAL => await credentialCreationProcessHandler.RevokeOldCredential(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),
                 ProcessStepTypeId.TRIGGER_CALLBACK => await credentialCreationProcessHandler.TriggerCallback(_credentialId, cancellationToken)
                     .ConfigureAwait(ConfigureAwaitOptions.None),

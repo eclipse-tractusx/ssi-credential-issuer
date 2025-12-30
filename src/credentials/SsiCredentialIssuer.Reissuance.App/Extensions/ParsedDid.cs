@@ -1,4 +1,5 @@
 /********************************************************************************
+ * Copyright (c) 2025 Cofinity-X GmbH
  * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,27 +18,30 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Reissuance.App.Extensions;
 
-public enum ProcessStepTypeId
+/// <summary>
+/// Represents a parsed DID
+/// </summary>
+public class ParsedDid
 {
-    // CREATE CREDENTIAL PROCESS
-    CREATE_SIGNED_CREDENTIAL = 1,
-    SAVE_CREDENTIAL_DOCUMENT = 3,
-    OFFER_CREDENTIAL_TO_HOLDER = 4,
-    TRIGGER_CALLBACK = 5,
-    REVOKE_OLD_CREDENTIAL = 10,
-    RETRIGGER_CREATE_SIGNED_CREDENTIAL = 6,
-    RETRIGGER_SAVE_CREDENTIAL_DOCUMENT = 7,
-    RETRIGGER_OFFER_CREDENTIAL_TO_HOLDER = 8,
-    RETRIGGER_TRIGGER_CALLBACK = 9,
-    RETRIGGER_REVOKE_OLD_CREDENTIAL = 11,
+    /// <summary>
+    /// The full DID
+    /// </summary>
+    public string Did { get; init; } = null!;
 
-    // DECLINE PROCESS
-    REVOKE_CREDENTIAL = 100,
-    TRIGGER_NOTIFICATION = 101,
-    TRIGGER_MAIL = 102,
-    RETRIGGER_REVOKE_CREDENTIAL = 103,
-    RETRIGGER_TRIGGER_NOTIFICATION = 104,
-    RETRIGGER_TRIGGER_MAIL = 105
+    /// <summary>
+    /// The DID method
+    /// </summary>
+    public string Method { get; init; } = null!;
+
+    /// <summary>
+    /// The DID ID
+    /// </summary>
+    public string Id { get; init; } = null!;
+
+    /// <summary>
+    /// The original DID URL
+    /// </summary>
+    public string DidUrl { get; init; } = null!;
 }

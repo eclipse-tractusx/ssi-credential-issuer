@@ -1,4 +1,5 @@
 /********************************************************************************
+ * Copyright (c) 2025 Cofinity-X GmbH
  * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -19,17 +20,17 @@
 
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using System.Text.Json;
-using EncryptionInformation = Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models.EncryptionInformation;
 
-namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
+namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 
-public interface IWalletBusinessLogic
-{
-    Task CreateSignedCredential(Guid companySsiDetailId, JsonDocument schema, CancellationToken cancellationToken);
-
-    Task OfferCredentialToHolder(Guid externalCredentialId, string credential, CancellationToken cancellationToken);
-
-    Task GetCredential(Guid credentialId, Guid externalCredentialId, VerifiedCredentialTypeKindId kindId, CancellationToken cancellationToken);
-
-    Task RevokeCredential(Guid externalCredentialId, CancellationToken cancellationToken);
-}
+public record ReissueCredential(
+    Guid Id,
+    string RequesterId,
+    DateTimeOffset? ExpiryDate,
+    ExpiryCheckTypeId? ExpiryCheckTypeId,
+    Guid VerifiedCredentialExternalTypeDetailVersionId,
+    string Bpnl,
+    CompanySsiDetailStatusId CompanySsiDetailStatusId,
+    VerifiedCredentialTypeId VerifiedCredentialTypeId,
+    VerifiedCredentialExternalTypeId? VerifiedCredentialExternalTypeId,
+    JsonDocument? CredentialJson);

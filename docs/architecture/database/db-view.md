@@ -64,6 +64,7 @@ erDiagram
         integer expiry_check_type_id FK
         uuid process_id
         uuid external_credential_id
+        uuid reissued_credential_id
         text credential
         timestamp date_last_changed
         text last_editor_id
@@ -232,6 +233,7 @@ The database is organized into several key tables, each serving a specific purpo
 - **expiry_check_type_id (INTEGER)**: A foreign key referencing `id` in the `EXPIRY_CHECK_TYPES` table.
 - **process_id (UUID)**: A foreign key referencing `id` in the `PROCESSES` table.
 - **external_credential_id (UUID)**: A unique identifier for the external credential.
+- **reissued_credential_id (UUID)**: The ID of the credential that was reissued by this credential.
 - **credential (TEXT)**: The credential information.
 - **date_last_changed (TIMESTAMP)**: The timestamp when the company SSI detail was last changed.
 - **last_editor_id (TEXT)**: The user ID of the last editor.
@@ -324,6 +326,7 @@ The database is organized into several key tables, each serving a specific purpo
 - `SAVE_CREDENTIAL_DOCUMENT`: Saves the credential in the database.
 - `OFFER_CREDENTIAL_TO_HOLDER`: Offer credential to the holder wallet.
 - `TRIGGER_CALLBACK`: Triggers the callback to the portal.
+- `REVOKE_OLD_CREDENTIAL`: Revokes the old credential during reissuance.
 - `REVOKE_CREDENTIAL`: Revokes the credential.
 - `TRIGGER_NOTIFICATION`: Triggers the notification sending.
 - `TRIGGER_MAIL`: Triggers the mail sending.

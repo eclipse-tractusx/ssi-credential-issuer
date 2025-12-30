@@ -64,9 +64,14 @@ public class CredentialCreationProcessHandler(
 
     public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> OfferCredentialToHolder(Guid credentialId, CancellationToken cancellationToken)
     {
-        var (isIssuerCompany, externalCredentialId, credentialJson, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        var (isIssuerCompany, externalCredentialId, credentialJson, callbackUrl, oldCredentialId) = await issuerRepositories.GetInstance<ICredentialRepository>().GetCredentialById(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
         if (isIssuerCompany)
         {
+            if (oldCredentialId != null)
+            {
+                return (Enumerable.Repeat(ProcessStepTypeId.REVOKE_OLD_CREDENTIAL, 1), ProcessStepStatusId.SKIPPED, false, "ProcessStep was skipped because the holder is the issuer");
+            }
+
             return (
                 callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
                 ProcessStepStatusId.SKIPPED,
@@ -84,6 +89,11 @@ public class CredentialCreationProcessHandler(
         }
 
         await walletBusinessLogic.OfferCredentialToHolder(externalCredentialId.Value, credentialJson.RootElement.GetRawText(), cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (oldCredentialId != null)
+        {
+            return (Enumerable.Repeat(ProcessStepTypeId.REVOKE_OLD_CREDENTIAL, 1), ProcessStepStatusId.DONE, false, null);
+        }
+
         return (
             callbackUrl is null ? null : Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1),
             ProcessStepStatusId.DONE,
@@ -105,6 +115,40 @@ public class CredentialCreationProcessHandler(
             null,
             ProcessStepStatusId.DONE,
             false,
+            null);
+    }
+
+    public async Task<(IEnumerable<ProcessStepTypeId>? nextStepTypeIds, ProcessStepStatusId stepStatusId, bool modified, string? processMessage)> RevokeOldCredential(Guid credentialId, CancellationToken cancellationToken)
+    {
+        var (oldCredentialId, callbackUrl) = await issuerRepositories.GetInstance<ICredentialRepository>().GetOldCredentialId(credentialId).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (oldCredentialId == null)
+        {
+            return (null, ProcessStepStatusId.SKIPPED, false, "No old credential found for revocation.");
+        }
+
+        var (exists, _, externalId, status, _) = await issuerRepositories.GetInstance<ICredentialRepository>().GetRevocationDataById(oldCredentialId.Value, string.Empty).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (!exists || externalId == null)
+        {
+            return (null, ProcessStepStatusId.SKIPPED, false, "Old credential not found or no external ID.");
+        }
+
+        if (status == CompanySsiDetailStatusId.REVOKED)
+        {
+            return (null, ProcessStepStatusId.SKIPPED, false, "Old credential already revoked.");
+        }
+
+        await walletBusinessLogic.RevokeCredential(externalId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+
+        issuerRepositories.GetInstance<ICredentialRepository>().AttachAndModifyCredential(oldCredentialId.Value, null, c =>
+        {
+            c.CompanySsiDetailStatusId = CompanySsiDetailStatusId.REVOKED;
+            c.DateLastChanged = DateTimeOffset.UtcNow;
+        });
+
+        return (
+            callbackUrl != null ? Enumerable.Repeat(ProcessStepTypeId.TRIGGER_CALLBACK, 1) : null,
+            ProcessStepStatusId.DONE,
+            true,
             null);
     }
 }

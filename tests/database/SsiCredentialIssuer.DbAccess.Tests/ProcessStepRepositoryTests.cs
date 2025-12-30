@@ -267,6 +267,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
             ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER,
+            ProcessStepTypeId.REVOKE_OLD_CREDENTIAL,
             ProcessStepTypeId.TRIGGER_CALLBACK
         };
 
@@ -289,6 +290,7 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
             ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER,
+            ProcessStepTypeId.REVOKE_OLD_CREDENTIAL,
             ProcessStepTypeId.TRIGGER_CALLBACK
         };
 

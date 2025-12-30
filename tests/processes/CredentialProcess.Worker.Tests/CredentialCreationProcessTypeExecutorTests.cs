@@ -73,10 +73,11 @@ public class CredentialCreationProcessTypeExecutorTests
     public void GetExecutableStepTypeIds_ReturnsExpected()
     {
         // Assert
-        _sut.GetExecutableStepTypeIds().Should().HaveCount(4).And.Satisfy(
+        _sut.GetExecutableStepTypeIds().Should().HaveCount(5).And.Satisfy(
             x => x == ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             x => x == ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
             x => x == ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER,
+            x => x == ProcessStepTypeId.REVOKE_OLD_CREDENTIAL,
             x => x == ProcessStepTypeId.TRIGGER_CALLBACK);
     }
 
@@ -205,6 +206,7 @@ public class CredentialCreationProcessTypeExecutorTests
     [InlineData(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL)]
     [InlineData(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT)]
     [InlineData(ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER, ProcessStepTypeId.RETRIGGER_OFFER_CREDENTIAL_TO_HOLDER)]
+    [InlineData(ProcessStepTypeId.REVOKE_OLD_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_OLD_CREDENTIAL)]
     [InlineData(ProcessStepTypeId.TRIGGER_CALLBACK, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK)]
     public async Task ExecuteProcessStep_WithServiceException_ReturnsFailedAndRetriggerStep(ProcessStepTypeId processStepTypeId, ProcessStepTypeId expectedRetriggerStep)
     {
@@ -227,6 +229,8 @@ public class CredentialCreationProcessTypeExecutorTests
         A.CallTo(() => _credentialCreationProcessHandler.SaveCredentialDocument(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
         A.CallTo(() => _credentialCreationProcessHandler.OfferCredentialToHolder(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialCreationProcessHandler.RevokeOldCredential(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
         A.CallTo(() => _credentialCreationProcessHandler.TriggerCallback(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));

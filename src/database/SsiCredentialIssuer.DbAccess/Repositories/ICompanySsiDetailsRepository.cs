@@ -73,7 +73,7 @@ public interface ICompanySsiDetailsRepository
     /// <param name="verifiedCredentialTypeId">Id of the vc type</param>
     /// <param name="bpnl">The business partner number of the current user</param>
     /// <returns>Returns a valueTuple with identifiers if the externalTypeUseCaseDetailId exists and the corresponding credentialTypeId</returns>
-    Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry, bool PendingCredentialRequestExists)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId, string bpnl);
+    Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry, bool ActiveCredentialRequestExists)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId, string bpnl);
 
     /// <summary>
     /// Checks whether the given credentialTypeId is a <see cref="VerifiedCredentialTypeKindId"/> Certificate
@@ -106,4 +106,5 @@ public interface ICompanySsiDetailsRepository
     void RemoveSsiDetail(Guid companySsiDetailId, string bpnl, string userId);
     void CreateProcessData(Guid companySsiDetailId, JsonDocument schema, VerifiedCredentialTypeKindId credentialTypeKindId, Action<CompanySsiProcessData>? setOptionalFields);
     void AttachAndModifyProcessData(Guid companySsiDetailId, Action<CompanySsiProcessData>? initialize, Action<CompanySsiProcessData> setOptionalFields);
+    IAsyncEnumerable<ReissueCredential> GetExpiryCredentials(DateTimeOffset expiredVcsToReissue);
 }

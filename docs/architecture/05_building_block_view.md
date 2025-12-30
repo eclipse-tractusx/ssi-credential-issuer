@@ -11,6 +11,7 @@ flowchart LR
     ING(Ingress)
     IS(Issuer Service)
     ES(Expiry Service)
+    RS(Reissuance Service)
     PW(Process Worker)
     P(Portal)
     HW(Holder Wallet)
@@ -22,6 +23,7 @@ flowchart LR
         PHD
         IS
         ES
+        RS
         PW
     end
 
@@ -37,6 +39,8 @@ flowchart LR
     ES-->|"Revokes Credentials"|HW
     ES-->|"Creates Mails & Notifications"|P
     ES-->|"Reads & updates credentials"|PHD
+    RS-->|"Read Credentials"|PHD
+    RS-->|"Reissues Credentials"|IS
     PW-->|"Read, Write & Sign Credentials"|IW
     PW-->|"Write Credentials"|HW
     PW-->|"Creates Mails & Notifications"|P

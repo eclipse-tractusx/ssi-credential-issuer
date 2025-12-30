@@ -137,7 +137,7 @@ public class CredentialCreationProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
-            .Returns(default((bool, Guid?, JsonDocument?, string?)));
+            .Returns(default((bool, Guid?, JsonDocument?, string?, Guid?)));
         Task Act() => _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
 
         // Act
@@ -152,7 +152,7 @@ public class CredentialCreationProcessHandlerTests
     {
         // Arrange
         A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
-            .Returns((false, null, JsonDocument.Parse("{}"), "https://example.org"));
+            .Returns((false, null, JsonDocument.Parse("{}"), "https://example.org", null));
         Task Act() => _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
 
         // Act
@@ -176,7 +176,7 @@ public class CredentialCreationProcessHandlerTests
         }
         """;
         A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
-            .Returns((false, id, JsonDocument.Parse(credentialJson), "https://example.org"));
+            .Returns((false, id, JsonDocument.Parse(credentialJson), "https://example.org", null));
 
         // Act
         var result = await _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
@@ -204,7 +204,7 @@ public class CredentialCreationProcessHandlerTests
         }
         """;
         A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
-            .Returns((true, id, JsonDocument.Parse(credentialJson), "https://example.org"));
+            .Returns((true, id, JsonDocument.Parse(credentialJson), "https://example.org", null));
 
         // Act
         var result = await _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
@@ -214,6 +214,62 @@ public class CredentialCreationProcessHandlerTests
         result.processMessage.Should().Be("ProcessStep was skipped because the holder is the issuer");
         result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
         result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+    }
+
+    [Fact]
+    public async Task OfferCredentialToHolder_WithOldCredentialId_MovesToRevokeStep()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var oldId = Guid.NewGuid();
+        var credentialJson = """
+        {
+            "issuer": "did:example:issuer123",
+            "credentialSubject": {
+                "id": "did:example:holder456"
+            }
+        }
+        """;
+        A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
+            .Returns((false, id, JsonDocument.Parse(credentialJson), "https://example.org", oldId));
+
+        // Act
+        var result = await _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _walletBusinessLogic.OfferCredentialToHolder(id, credentialJson, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().BeNull();
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REVOKE_OLD_CREDENTIAL);
+    }
+
+    [Fact]
+    public async Task OfferCredentialToHolder_WithIssuerAsHolderAndOldCredentialId_MovesToRevokeStep()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var oldId = Guid.NewGuid();
+        var credentialJson = """
+        {
+            "issuer": "did:example:issuer123",
+            "credentialSubject": {
+                "id": "did:example:holder456"
+            }
+        }
+        """;
+        A.CallTo(() => _credentialRepository.GetCredentialById(_credentialId))
+            .Returns((true, id, JsonDocument.Parse(credentialJson), "https://example.org", oldId));
+
+        // Act
+        var result = await _sut.OfferCredentialToHolder(_credentialId, CancellationToken.None);
+
+        // Assert
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().Be("ProcessStep was skipped because the holder is the issuer");
+        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.REVOKE_OLD_CREDENTIAL);
     }
 
     #endregion
@@ -252,6 +308,74 @@ public class CredentialCreationProcessHandlerTests
         result.modified.Should().BeFalse();
         result.processMessage.Should().BeNull();
         result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().BeNull();
+    }
+
+    #endregion
+
+    #region RevokeOldCredential
+
+    [Fact]
+    public async Task RevokeOldCredential_WithValidData_ReturnsExpected()
+    {
+        // Arrange
+        var oldId = Guid.NewGuid();
+        var externalId = Guid.NewGuid();
+        A.CallTo(() => _credentialRepository.GetOldCredentialId(_credentialId))
+            .Returns((oldId, "https://example.org"));
+        A.CallTo(() => _credentialRepository.GetRevocationDataById(oldId, string.Empty))
+            .Returns((true, true, externalId, CompanySsiDetailStatusId.ACTIVE, Enumerable.Empty<(Guid, DocumentStatusId)>()));
+
+        // Act
+        var result = await _sut.RevokeOldCredential(_credentialId, CancellationToken.None);
+
+        // Assert
+        A.CallTo(() => _walletBusinessLogic.RevokeCredential(externalId, A<CancellationToken>._))
+            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _credentialRepository.AttachAndModifyCredential(oldId, null, A<Action<Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities.CompanySsiDetail>>._))
+            .MustHaveHappenedOnceExactly();
+
+        result.modified.Should().BeTrue();
+        result.processMessage.Should().BeNull();
+        result.stepStatusId.Should().Be(ProcessStepStatusId.DONE);
+        result.nextStepTypeIds.Should().ContainSingle().Which.Should().Be(ProcessStepTypeId.TRIGGER_CALLBACK);
+    }
+
+    [Fact]
+    public async Task RevokeOldCredential_WithNoOldCredential_SkipsStep()
+    {
+        // Arrange
+        A.CallTo(() => _credentialRepository.GetOldCredentialId(_credentialId))
+            .Returns(default((Guid?, string?)));
+
+        // Act
+        var result = await _sut.RevokeOldCredential(_credentialId, CancellationToken.None);
+
+        // Assert
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().Be("No old credential found for revocation.");
+        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
+        result.nextStepTypeIds.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task RevokeOldCredential_WithAlreadyRevoked_SkipsStep()
+    {
+        // Arrange
+        var oldId = Guid.NewGuid();
+        var externalId = Guid.NewGuid();
+        A.CallTo(() => _credentialRepository.GetOldCredentialId(_credentialId))
+            .Returns((oldId, "https://example.org"));
+        A.CallTo(() => _credentialRepository.GetRevocationDataById(oldId, string.Empty))
+            .Returns((true, true, externalId, CompanySsiDetailStatusId.REVOKED, Enumerable.Empty<(Guid, DocumentStatusId)>()));
+
+        // Act
+        var result = await _sut.RevokeOldCredential(_credentialId, CancellationToken.None);
+
+        // Assert
+        result.modified.Should().BeFalse();
+        result.processMessage.Should().Be("Old credential already revoked.");
+        result.stepStatusId.Should().Be(ProcessStepStatusId.SKIPPED);
         result.nextStepTypeIds.Should().BeNull();
     }
 
