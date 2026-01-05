@@ -87,6 +87,15 @@ public class IssuerDbContext(DbContextOptions<IssuerDbContext> options, IAuditHa
                 .HasForeignKey(t => t.VerifiedCredentialExternalTypeDetailVersionId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
+            entity.HasOne(c => c.ReissuedCredential)
+                .WithMany()
+                .HasForeignKey(t => t.ReissuedCredentialId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasIndex(e => e.Bpnl);
+            entity.HasIndex(e => e.ReissuedCredentialId)
+                .IsUnique();
+
             entity.HasMany(t => t.Documents)
                 .WithMany(o => o.CompanySsiDetails)
                 .UsingEntity<CompanySsiDetailAssignedDocument>(

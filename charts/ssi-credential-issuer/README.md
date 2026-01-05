@@ -105,6 +105,7 @@ dependencies:
 | processesworker.wallet.createSignedCredentialPath | string | `"/api/v2.0.0/credentials"` | path to create a specific credential which is directly signed |
 | processesworker.wallet.getCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to get a specific credential; {0} will be replaced by the credential id |
 | processesworker.wallet.revokeCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to revoke a specific credential; {0} will be replaced by the credential id |
+| processesworker.wallet.offerCredentialPath | string | `"/api/v2.0.0/dcp/credentialOffers/send"` | path to offer a credential to holder |
 | credentialExpiry.name | string | `"expiry"` |  |
 | credentialExpiry.image.name | string | `"docker.io/tractusx/ssi-credential-expiry-app"` |  |
 | credentialExpiry.image.tag | string | `""` |  |
@@ -115,6 +116,15 @@ dependencies:
 | credentialExpiry.logging.default | string | `"Information"` |  |
 | credentialExpiry.expiry.expiredVcsToDeleteInMonth | int | `12` |  |
 | credentialExpiry.expiry.inactiveVcsToDeleteInWeeks | int | `12` |  |
+| credentialReissuance.name | string | `"reissuance"` |  |
+| credentialReissuance.image.name | string | `"docker.io/tractusx/ssi-credential-reissuance-app"` |  |
+| credentialReissuance.image.tag | string | `""` |  |
+| credentialReissuance.image.pullSecrets | list | `[]` |  |
+| credentialReissuance.imagePullPolicy | string | `"IfNotPresent"` |  |
+| credentialReissuance.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| credentialReissuance.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
+| credentialReissuance.logging.default | string | `"Information"` |  |
+| credentialReissuance.reissuance.expiredVcsToReissueInDays | int | `30` |  |
 | existingSecret | string | `""` | Secret containing the client-secrets for the connection to portal and wallet as well as encryptionKeys for issuer.credential and processesworker.wallet |
 | dotnetEnvironment | string | `"Production"` |  |
 | dbConnection.schema | string | `"issuer"` |  |

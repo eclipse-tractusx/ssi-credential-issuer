@@ -272,6 +272,50 @@ public class CredentialRepositoryTests : IAssemblyFixture<TestDbFixture>
 
     #endregion
 
+    #region GetCredentialById
+
+    [Fact]
+    public async Task GetCredentialById_WithReissuedCredential_ReturnsOldCredentialId()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+        var oldId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03");
+        var newId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b04");
+        var detail = await context.CompanySsiDetails.SingleAsync(x => x.Id == oldId);
+        detail.ReissuedCredentialId = newId;
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await sut.GetCredentialById(newId);
+
+        // Assert
+        result.OldCredentialId.Should().Be(oldId);
+    }
+
+    #endregion
+
+    #region GetOldCredentialId
+
+    [Fact]
+    public async Task GetOldCredentialId_WithReissuedCredential_ReturnsOldCredentialId()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+        var oldId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b03");
+        var newId = new Guid("9f5b9934-4014-4099-91e9-7b1aee696b05");
+        var detail = await context.CompanySsiDetails.SingleAsync(x => x.Id == oldId);
+        detail.ReissuedCredentialId = newId;
+        await context.SaveChangesAsync();
+
+        // Act
+        var result = await sut.GetOldCredentialId(newId);
+
+        // Assert
+        result.OldCredentialId.Should().Be(oldId);
+    }
+
+    #endregion
+
     #region Setup
 
     private async Task<CredentialRepository> CreateSut()

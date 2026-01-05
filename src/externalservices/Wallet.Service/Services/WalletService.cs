@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,7 +20,6 @@
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.HttpClientExtensions;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 using System.Net.Http.Json;
@@ -71,27 +70,21 @@ public class WalletService(
         return response.Credential;
     }
 
-    public async Task<Guid> CreateCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, string credential, CancellationToken cancellationToken)
+    public async Task OfferCredentialToHolder(Guid externalCredentialId, string credential, CancellationToken cancellationToken)
     {
-        var authSettings = new BasicAuthSettings
+        ICredential credentialBase = JsonSerializer.Deserialize<Credential>(credential)!;
+        if (credentialBase == null)
         {
-            ClientId = clientId,
-            ClientSecret = clientSecret,
-            TokenAddress = $"{holderWalletUrl}/oauth/token"
-        };
-        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(authSettings, cancellationToken);
-        var data = new DeriveCredentialData(_settings.WalletApplication, new DeriveCredentialPayload(new DeriveCredential(credential)));
-        var result = await client.PostAsJsonAsync(_settings.CreateCredentialPath, data, Options, cancellationToken)
-            .CatchingIntoServiceExceptionFor("create-holder-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+            throw new UnexpectedConditionException("Credential must not be null");
+        }
+        var issuerDid = credentialBase.Issuer;
+        var holderDid = credentialBase.CredentialSubject.Id;
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        var data = new OfferCredentialRequest(new List<string> { externalCredentialId.ToString() }, issuerDid, holderDid);
+        await client.PostAsJsonAsync(_settings.OfferCredentialPath, data, Options, cancellationToken)
+            .CatchingIntoServiceExceptionFor("offer-credential-to-holder", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
-        var response = await result.Content.ReadFromJsonAsync<CreateCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
-        if (response is null)
-        {
-            throw new ServiceException(NoIdErrorMessage, true);
-        }
-
-        return response.Id;
     }
 
     public async Task RevokeCredentialForIssuer(Guid externalCredentialId, CancellationToken cancellationToken)

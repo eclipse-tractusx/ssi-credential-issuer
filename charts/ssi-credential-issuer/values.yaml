@@ -145,6 +145,8 @@ processesworker:
     getCredentialPath: "/api/v2.0.0/credentials/{0}"
     # -- path to revoke a specific credential; {0} will be replaced by the credential id
     revokeCredentialPath: "/api/v2.0.0/credentials/{0}"
+    # -- path to offer credential
+    offerCredentialPath: "/api/v2.0.0/dcp/credentialOffers/send"
 
 credentialExpiry:
   name: "expiry"

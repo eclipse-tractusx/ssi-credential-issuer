@@ -1,3 +1,22 @@
+/********************************************************************************
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ********************************************************************************/
+
 using AutoFixture;
 using AutoFixture.AutoFakeItEasy;
 using FakeItEasy;
@@ -5,7 +24,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Configuration;
-using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Encryption;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -99,32 +117,28 @@ public class WalletBusinessLogicTests
 
     #endregion
 
-    #region CreateCredentialForHolder
+    #region OfferCredentialToHolder
 
     [Fact]
-    public async Task CreateCredentialForHolder_CallsExpected()
+    public async Task OfferCredentialToHolder_CallsExpected()
     {
         // Arrange
         var id = Guid.NewGuid();
-        var processData = new CompanySsiProcessData(id, null!, VerifiedCredentialTypeKindId.BPN) { ClientId = "123" };
-        var (secret, vector) = CryptoHelper.Encrypt("test", Convert.FromHexString(_encryptionModeConfig.EncryptionKey), _encryptionModeConfig.CipherMode, _encryptionModeConfig.PaddingMode);
-        A.CallTo(() => _companySsiDetailRepository.AttachAndModifyProcessData(A<Guid>._, A<Action<CompanySsiProcessData>>._, A<Action<CompanySsiProcessData>>._))
-            .Invokes((Guid _, Action<CompanySsiProcessData>? initialize, Action<CompanySsiProcessData> setupOptionalFields) =>
-            {
-                initialize?.Invoke(processData);
-                setupOptionalFields(processData);
-            });
+        var credentialJson = """
+        {
+            "issuer": "did:example:issuer123",
+            "credentialSubject": {
+                "id": "did:example:holder456"
+            }
+        }
+        """;
 
         // Act
-        await _sut.CreateCredentialForHolder(id, "https://example.org/wallet", "test1", new EncryptionInformation(secret, vector, 0), "thisisatestsecret", CancellationToken.None);
+        await _sut.OfferCredentialToHolder(id, credentialJson, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _companySsiDetailRepository.AttachAndModifyProcessData(id, A<Action<CompanySsiProcessData>>._, A<Action<CompanySsiProcessData>>._))
+        A.CallTo(() => _walletService.OfferCredentialToHolder(A<Guid>._, A<string>._, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _walletService.CreateCredentialForHolder(A<string>._, A<string>._, A<string>._, A<string>._, A<CancellationToken>._))
-            .MustHaveHappenedOnceExactly();
-        processData.ClientId.Should().BeNull();
-        processData.ClientSecret.Should().BeNull();
     }
 
     #endregion
