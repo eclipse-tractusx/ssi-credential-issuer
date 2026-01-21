@@ -117,14 +117,15 @@ dependencies:
 | credentialExpiry.expiry.expiredVcsToDeleteInMonth | int | `12` |  |
 | credentialExpiry.expiry.inactiveVcsToDeleteInWeeks | int | `12` |  |
 | credentialReissuance.name | string | `"reissuance"` |  |
-| credentialReissuance.image.name | string | `"docker.io/tractusx/ssi-credential-reissuance-app"` |  |
+| credentialReissuance.image.name | string | `"docker.io/tractusx/ssi-credential-reissuance-job"` |  |
 | credentialReissuance.image.tag | string | `""` |  |
 | credentialReissuance.image.pullSecrets | list | `[]` |  |
 | credentialReissuance.imagePullPolicy | string | `"IfNotPresent"` |  |
 | credentialReissuance.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
 | credentialReissuance.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
 | credentialReissuance.logging.default | string | `"Information"` |  |
-| credentialReissuance.reissuance.expiredVcsToReissueInDays | int | `30` |  |
+| credentialReissuance.reissuance.expiredVcsToReissueInDays | int | `14` | Number of days before which the credentials need to be re-issued. |
+| credentialReissuance.reissuance.creatorUserId | string | `""` | The user id of the technical user who creates the new version of the credential. This is used only for auditing. |
 | existingSecret | string | `""` | Secret containing the client-secrets for the connection to portal and wallet as well as encryptionKeys for issuer.credential and processesworker.wallet |
 | dotnetEnvironment | string | `"Production"` |  |
 | dbConnection.schema | string | `"issuer"` |  |
