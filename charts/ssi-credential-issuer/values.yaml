@@ -172,7 +172,7 @@ credentialExpiry:
     inactiveVcsToDeleteInWeeks: 12
 
 credentialReissuance:
-  name: "credential-reissuance"
+  name: "reissuance"
   image:
     name: "docker.io/tractusx/ssi-credential-reissuance-job"
     tag: ""
