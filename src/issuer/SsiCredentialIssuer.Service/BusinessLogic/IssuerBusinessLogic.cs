@@ -375,9 +375,15 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         return await HandleCredentialProcessCreation(requestData.HolderBpn, VerifiedCredentialTypeKindId.MEMBERSHIP, VerifiedCredentialTypeId.MEMBERSHIP, expiryDate, schema, requestData.TechnicalUserDetails, null, requestData.CallbackUrl, companyCredentialDetailsRepository);
     }
 
-    public async Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken)
+    public Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken) =>
+        CreateFrameworkCredentialInternal(requestData, false, cancellationToken);
+
+    public Task<Guid> CreateFrameworkCredentialBySystem(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken) =>
+        CreateFrameworkCredentialInternal(requestData, true, cancellationToken);
+
+    private async Task<Guid> CreateFrameworkCredentialInternal(CreateFrameworkCredentialRequest requestData, bool isSystem, CancellationToken cancellationToken)
     {
-        if (_identity.IsServiceAccount || _identity.CompanyUserId == null)
+        if (!isSystem && (_identity.IsServiceAccount || _identity.CompanyUserId == null))
         {
             throw UnexpectedConditionException.Create(CredentialErrors.USER_MUST_NOT_BE_TECHNICAL_USER, new ErrorParameter[] { new("identityId", _identity.IdentityId) });
         }
@@ -409,7 +415,7 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
             throw ControllerArgumentException.Create(IssuerErrors.MULTIPLE_USE_CASES);
         }
 
-        if (result.PendingCredentialRequestExists)
+        if (!isSystem && result.ActiveCredentialRequestExists)
         {
             throw ConflictException.Create(IssuerErrors.PENDING_CREDENTIAL_ALREADY_EXISTS, new ErrorParameter[] { new("versionId", requestData.UseCaseFrameworkVersionId.ToString()), new("frameworkId", requestData.UseCaseFrameworkId.ToString()) });
         }
@@ -512,19 +518,18 @@ public class IssuerBusinessLogic : IIssuerBusinessLogic
         companyCredentialDetailsRepository.CreateProcessData(ssiDetailId, JsonDocument.Parse(schema), kindId,
             c =>
             {
-                if (technicalUserDetails == null)
+                if (technicalUserDetails != null)
                 {
-                    return;
+                    var cryptoHelper = _settings.EncryptionConfigs.GetCryptoHelper(_settings.EncryptionConfigIndex);
+                    var (secret, initializationVector) = cryptoHelper.Encrypt(technicalUserDetails.ClientSecret);
+
+                    c.ClientId = technicalUserDetails.ClientId;
+                    c.ClientSecret = secret;
+                    c.InitializationVector = initializationVector;
+                    c.EncryptionMode = _settings.EncryptionConfigIndex;
+                    c.HolderWalletUrl = technicalUserDetails.WalletUrl;
                 }
 
-                var cryptoHelper = _settings.EncryptionConfigs.GetCryptoHelper(_settings.EncryptionConfigIndex);
-                var (secret, initializationVector) = cryptoHelper.Encrypt(technicalUserDetails.ClientSecret);
-
-                c.ClientId = technicalUserDetails.ClientId;
-                c.ClientSecret = secret;
-                c.InitializationVector = initializationVector;
-                c.EncryptionMode = _settings.EncryptionConfigIndex;
-                c.HolderWalletUrl = technicalUserDetails.WalletUrl;
                 c.CallbackUrl = callbackUrl;
             });
 

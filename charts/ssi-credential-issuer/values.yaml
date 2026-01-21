@@ -145,6 +145,8 @@ processesworker:
     getCredentialPath: "/api/v2.0.0/credentials/{0}"
     # -- path to revoke a specific credential; {0} will be replaced by the credential id
     revokeCredentialPath: "/api/v2.0.0/credentials/{0}"
+    # -- path to offer credential
+    offerCredentialPath: "/api/v2.0.0/dcp/credentialOffers/send"
 
 credentialExpiry:
   name: "expiry"
@@ -169,6 +171,31 @@ credentialExpiry:
     expiredVcsToDeleteInMonth: 12
     inactiveVcsToDeleteInWeeks: 12
 
+credentialReissuance:
+  name: "reissuance"
+  image:
+    name: "docker.io/tractusx/ssi-credential-reissuance-job"
+    tag: ""
+    pullSecrets: []
+  imagePullPolicy: "IfNotPresent"
+  # -- We recommend to review the default resource limits as this should a conscious choice.
+  resources:
+    requests:
+      cpu: 15m
+      memory: 100M
+    limits:
+      cpu: 500m
+      memory: 512M
+  processIdentity:
+    identityId: a4620a07-49f1-4cba-98f4-fad40f042bb4
+  logging:
+    default: "Information"
+  reissue:
+    # -- Number of days before which the credentials need to be re-issued.
+    expiredVcsToReissueInDays: 14
+    # -- The user id of the technical user who creates the new version of the credential. This is used only for auditing.
+    creatorUserId: ""
+
 # -- Secret containing the client-secrets for the connection to portal and wallet
 # as well as encryptionKeys for issuer.credential and processesworker.wallet
 existingSecret: ""
@@ -188,6 +215,8 @@ postgresql:
   enabled: true
   # -- Setting image tag to major to get latest minor updates
   image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
     tag: "15-debian-12"
   commonLabels:
     app.kubernetes.io/version: "15"

@@ -568,6 +568,83 @@ public class CompanySsiDetailsRepositoryTests
         result.Where(x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING).Should().HaveCount(3);
         result.Where(x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.INACTIVE).Should().HaveCount(3);
     }
+    #endregion
+
+    #region GetExpiryCredentials
+
+    [Fact]
+    public async Task GetExpiryCredentials_ReturnsExpected()
+    {
+        // Arrange
+        var now = new DateTimeOffset(2025, 01, 1, 1, 1, 1, TimeSpan.Zero);
+        var detailId1 = Guid.NewGuid();
+        var detailId2 = Guid.NewGuid();
+        const string ExpiredBpnl = "BPNL00000003EXPR";
+        var sut = await CreateSut(null, context =>
+        {
+            context.CompanySsiDetails.Add(new CompanySsiDetail(detailId1, ExpiredBpnl, VerifiedCredentialTypeId.CIRCULAR_ECONOMY, CompanySsiDetailStatusId.ACTIVE, "BPNL000003ISSUER", _userId, now.AddMonths(-1)) { ExpiryDate = now.AddDays(-1), VerifiedCredentialExternalTypeDetailVersionId = new Guid("1268a76a-ca19-4dd8-b932-01f24071d565") });
+            context.CompanySsiDetails.Add(new CompanySsiDetail(detailId2, ExpiredBpnl, VerifiedCredentialTypeId.FRAMEWORK_AGREEMENT_QUALITY, CompanySsiDetailStatusId.ACTIVE, "BPNL000003ISSUER", _userId, now.AddMonths(-1)) { ExpiryDate = now.AddDays(-1), VerifiedCredentialExternalTypeDetailVersionId = new Guid("37aa6259-b452-4d50-b09e-827929dcfa15") });
+            context.CompanySsiProcessData.Add(new CompanySsiProcessData(detailId1, JsonDocument.Parse("{\"root\":\"test\"}"), VerifiedCredentialTypeKindId.FRAMEWORK));
+            context.CompanySsiProcessData.Add(new CompanySsiProcessData(detailId2, JsonDocument.Parse("{\"root\":\"test\"}"), VerifiedCredentialTypeKindId.FRAMEWORK));
+        });
+
+        // Act
+        var result = await sut.GetExpiryCredentials(now).ToListAsync();
+
+        // Assert
+        result.Should().NotBeEmpty();
+        var initialCount = result.Count;
+        result.Should().OnlyContain(x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE);
+        result.Should().OnlyContain(x => x.ExpiryDate <= now);
+        result.Should().Contain(x => x.Id == detailId1 || x.Id == detailId2);
+
+        // Arrange - Set reissued on one
+        var (sut2, context) = await CreateSutWithContext();
+        var detail = context.CompanySsiDetails.First(x => x.Id == detailId1);
+        var otherDetail = context.CompanySsiDetails.First(x => x.Id == detailId2);
+        detail.ReissuedCredentialId = otherDetail.Id;
+        await context.SaveChangesAsync();
+
+        // Act - Again
+        var result2 = await sut2.GetExpiryCredentials(now).ToListAsync();
+
+        // Assert - Count should be one less
+        result2.Should().HaveCount(initialCount - 1);
+        result2.Should().NotContain(x => x.Id == detailId1);
+    }
+
+    [Fact]
+    public async Task GetExpiryCredentials_WithNoExpiring_ReturnsEmpty()
+    {
+        // Arrange
+        var now = new DateTimeOffset(2020, 01, 1, 1, 1, 1, TimeSpan.Zero);
+        var sut = await CreateSut();
+
+        // Act
+        var result = await sut.GetExpiryCredentials(now).ToListAsync();
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    #endregion
+
+    #region UniqueConstraints
+
+    [Fact]
+    public async Task Save_DuplicateReissuedCredentialId_ThrowsException()
+    {
+        // Arrange
+        var (sut, context) = await CreateSutWithContext();
+        var reissuedId = Guid.NewGuid();
+
+        // Create two records pointing to the same reissued ID
+        sut.CreateSsiDetails(ValidBpnl, VerifiedCredentialTypeId.MEMBERSHIP, CompanySsiDetailStatusId.ACTIVE, ValidBpnl, _userId, x => x.ReissuedCredentialId = reissuedId);
+        sut.CreateSsiDetails(ValidBpnl, VerifiedCredentialTypeId.BUSINESS_PARTNER_NUMBER, CompanySsiDetailStatusId.ACTIVE, ValidBpnl, _userId, x => x.ReissuedCredentialId = reissuedId);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<DbUpdateException>(() => context.SaveChangesAsync());
+    }
 
     #endregion
 
@@ -669,9 +746,9 @@ public class CompanySsiDetailsRepositoryTests
 
     #region Setup
 
-    private async Task<CompanySsiDetailsRepository> CreateSut()
+    private async Task<CompanySsiDetailsRepository> CreateSut(Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider.IDateTimeProvider? dateTimeProvider = null, params Action<IssuerDbContext>[] seedActions)
     {
-        var context = await _dbTestDbFixture.GetDbContext();
+        var context = await _dbTestDbFixture.GetDbContext(dateTimeProvider, seedActions);
         return new CompanySsiDetailsRepository(context);
     }
 

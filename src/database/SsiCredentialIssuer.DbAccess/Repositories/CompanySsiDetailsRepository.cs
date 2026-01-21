@@ -139,7 +139,7 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 (verifiedCredentialExternalTypeUseCaseDetailId == null || x.VerifiedCredentialExternalTypeDetailVersionId == verifiedCredentialExternalTypeUseCaseDetailId));
 
     /// <inheritdoc />
-    public Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry, bool PendingCredentialRequestExists)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId, string bpnl) =>
+    public Task<(bool Exists, string? Version, string? Template, IEnumerable<VerifiedCredentialExternalTypeId> ExternalTypeIds, DateTimeOffset Expiry, bool ActiveCredentialRequestExists)> CheckCredentialTypeIdExistsForExternalTypeDetailVersionId(Guid verifiedCredentialExternalTypeUseCaseDetailId, VerifiedCredentialTypeId verifiedCredentialTypeId, string bpnl) =>
         context.VerifiedCredentialExternalTypeDetailVersions
             .Where(x =>
                 x.Id == verifiedCredentialExternalTypeUseCaseDetailId &&
@@ -150,7 +150,7 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
                 x.Template,
                 x.VerifiedCredentialExternalType!.VerifiedCredentialTypeAssignedExternalTypes.Select(y => y.VerifiedCredentialExternalTypeId),
                 x.Expiry,
-                x.CompanySsiDetails.Any(ssi => ssi.Bpnl == bpnl && ssi.CompanySsiDetailStatusId == CompanySsiDetailStatusId.PENDING)))
+                x.CompanySsiDetails.Any(ssi => ssi.Bpnl == bpnl && ssi.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE)))
             .SingleOrDefaultAsync();
 
     /// <inheritdoc />
@@ -333,5 +333,26 @@ public class CompanySsiDetailsRepository(IssuerDbContext context)
         initialize?.Invoke(companySsiDetailData);
         context.CompanySsiProcessData.Attach(companySsiDetailData);
         setOptionalFields(companySsiDetailData);
+    }
+
+    public IAsyncEnumerable<ReissueCredential> GetExpiryCredentials(DateTimeOffset expiredVcsToReissue)
+    {
+        return context.CompanySsiDetails
+            .Where(x => x.CompanySsiDetailStatusId == CompanySsiDetailStatusId.ACTIVE &&
+                x.ExpiryDate.HasValue &&
+                x.ExpiryDate.Value <= expiredVcsToReissue &&
+                x.ReissuedCredentialId == null)
+            .Select(x => new ReissueCredential(
+                x.Id,
+                x.CreatorUserId,
+                x.ExpiryDate,
+                x.ExpiryCheckTypeId,
+                x.VerifiedCredentialExternalTypeDetailVersion != null ? x.VerifiedCredentialExternalTypeDetailVersion.Id : Guid.Empty,
+                x.Bpnl,
+                x.CompanySsiDetailStatusId,
+                x.VerifiedCredentialTypeId,
+                x.VerifiedCredentialType!.VerifiedCredentialTypeAssignedExternalType!.VerifiedCredentialExternalTypeId,
+                x.CompanySsiProcessData!.Schema)
+            ).AsAsyncEnumerable();
     }
 }

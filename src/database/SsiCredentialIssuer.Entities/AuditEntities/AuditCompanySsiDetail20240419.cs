@@ -43,6 +43,7 @@ public class AuditCompanySsiDetail20240419 : IAuditEntityV2
     public ExpiryCheckTypeId? ExpiryCheckTypeId { get; set; }
     public Guid? ProcessId { get; set; }
     public Guid? ExternalCredentialId { get; set; }
+    public Guid? ReissuedCredentialId { get; set; }
     public string? Credential { get; set; }
     public DateTimeOffset? DateLastChanged { get; set; }
     public string? LastEditorId { get; set; }
