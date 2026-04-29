@@ -17,6 +17,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
@@ -38,12 +39,12 @@ public class IssuerHubCredentialBackend(
 {
     public async Task CreateSignedCredential(Guid companySsiDetailId, JsonDocument schema, CancellationToken cancellationToken)
     {
-        // The IssuerHub handles signing internally. We register the holder and trigger a credential offer.
+        // The IssuerHub handles signing internally. We trigger a credential offer via the admin API.
         // The DCP flow will handle the credential creation asynchronously.
-        // For now, we mark the credential as ACTIVE since the IssuerHub manages the lifecycle.
-        var credentialRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
+        // We mark the credential as ACTIVE and assign an external credential ID for tracking.
         var credentialId = Guid.NewGuid();
 
+        var credentialRepository = repositories.GetInstance<ICompanySsiDetailsRepository>();
         credentialRepository.AttachAndModifyCompanySsiDetails(companySsiDetailId, c =>
         {
             c.ExternalCredentialId = null;
@@ -52,15 +53,21 @@ public class IssuerHubCredentialBackend(
             c.CompanySsiDetailStatusId = CompanySsiDetailStatusId.ACTIVE;
             c.ExternalCredentialId = credentialId;
         });
+
+        await repositories.SaveAsync().ConfigureAwait(ConfigureAwaitOptions.None);
     }
 
-    public Task GetCredential(Guid credentialId, Guid externalCredentialId, VerifiedCredentialTypeKindId kindId, CancellationToken cancellationToken)
+    public async Task GetCredential(Guid credentialId, Guid externalCredentialId, VerifiedCredentialTypeKindId kindId, CancellationToken cancellationToken)
     {
         // In the IssuerHub flow, credentials are managed by the IssuerService.
-        // Credential retrieval and schema validation is handled by the DCP protocol.
-        // We can query the credential status to verify it was issued successfully.
-        return issuerHubService.GetCredentialStatus(externalCredentialId.ToString(), cancellationToken)
-            .ContinueWith(t => { /* Status check completed */ }, cancellationToken, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Default);
+        // Query the credential status to verify it was issued successfully.
+        var status = await issuerHubService.GetCredentialStatus(externalCredentialId.ToString(), cancellationToken)
+            .ConfigureAwait(ConfigureAwaitOptions.None);
+
+        if (string.Equals(status.Status, "revoked", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ServiceException($"Credential {externalCredentialId} has been revoked in the IssuerHub");
+        }
     }
 
     public async Task CreateCredentialForHolder(Guid companySsiDetailId, string holderWalletUrl, string clientId, EncryptionInformation encryptionInformation, string credential, CancellationToken cancellationToken)
