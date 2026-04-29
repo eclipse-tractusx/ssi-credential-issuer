@@ -1,4 +1,5 @@
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Backend;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
@@ -6,7 +7,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 using System.Collections.Immutable;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Tests.BusinessLogic;
@@ -20,7 +20,7 @@ public class RevocationBusinessLogicTests
     private readonly ICredentialRepository _credentialRepository;
 
     private readonly IRevocationBusinessLogic _sut;
-    private readonly IWalletService _walletService;
+    private readonly ICredentialBackend _credentialBackend;
     private readonly IIdentityService _identityService;
     private readonly IIdentityData _identityData;
     private readonly IIssuerRepositories _issuerRepositories;
@@ -35,7 +35,7 @@ public class RevocationBusinessLogicTests
         _issuerRepositories = A.Fake<IIssuerRepositories>();
         _documentRepository = A.Fake<IDocumentRepository>();
         _credentialRepository = A.Fake<ICredentialRepository>();
-        _walletService = A.Fake<IWalletService>();
+        _credentialBackend = A.Fake<ICredentialBackend>();
         _identityService = A.Fake<IIdentityService>();
         _identityData = A.Fake<IIdentityData>();
         A.CallTo(() => _identityData.Bpnl).Returns(Bpnl);
@@ -44,7 +44,7 @@ public class RevocationBusinessLogicTests
         A.CallTo(() => _issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
 
-        _sut = new RevocationBusinessLogic(_issuerRepositories, _walletService, _identityService);
+        _sut = new RevocationBusinessLogic(_issuerRepositories, _credentialBackend, _identityService);
     }
 
     #region RevokeIssuerCredential
@@ -108,7 +108,7 @@ public class RevocationBusinessLogicTests
         await _sut.RevokeCredential(CredentialId, true, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletService.RevokeCredentialForIssuer(A<Guid>._, A<CancellationToken>._)).MustNotHaveHappened();
+        A.CallTo(() => _credentialBackend.RevokeCredential(A<Guid>._, A<CancellationToken>._)).MustNotHaveHappened();
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class RevocationBusinessLogicTests
         await _sut.RevokeCredential(CredentialId, true, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletService.RevokeCredentialForIssuer(A<Guid>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _credentialBackend.RevokeCredential(A<Guid>._, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         document.DocumentStatusId.Should().Be(DocumentStatusId.INACTIVE);
         credential.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.REVOKED);
         A.CallTo(() => _issuerRepositories.SaveAsync()).MustHaveHappenedOnceExactly();

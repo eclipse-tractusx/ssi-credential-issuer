@@ -24,7 +24,9 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling.Web;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models.Extensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Web;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.IssuerHub.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Authentication;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Controllers;
@@ -57,6 +59,8 @@ await WebApplicationBuildRunner
                     })
                 .AddServices(builder.Configuration)
                 .AddWalletService(builder.Configuration)
+                .AddIssuerHubServiceIfConfigured(builder.Configuration)
+                .AddCredentialBackend(builder.Configuration)
                 .AddPortalService(builder.Configuration.GetSection("Portal"))
                 .AddSingleton<IErrorMessageService, ErrorMessageService>()
                 .AddSingleton<IErrorMessageContainer, IssuerErrorMessageContainer>()

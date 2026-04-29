@@ -23,6 +23,7 @@ using FakeItEasy;
 using FluentAssertions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Backend;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
@@ -30,7 +31,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 using System.Collections.Immutable;
 using Xunit;
 
@@ -40,7 +40,7 @@ public class CredentialExpiryProcessHandlerTests
 {
     private readonly Guid _credentialId = Guid.NewGuid();
 
-    private readonly IWalletService _walletService;
+    private readonly ICredentialBackend _credentialBackend;
     private readonly IIssuerRepositories _issuerRepositories;
     private readonly ICredentialRepository _credentialRepository;
     private readonly IPortalService _portalService;
@@ -63,10 +63,10 @@ public class CredentialExpiryProcessHandlerTests
         A.CallTo(() => _issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
         A.CallTo(() => _issuerRepositories.GetInstance<IDocumentRepository>()).Returns(_documentRepository);
 
-        _walletService = A.Fake<IWalletService>();
+        _credentialBackend = A.Fake<ICredentialBackend>();
         _portalService = A.Fake<IPortalService>();
 
-        _sut = new CredentialExpiryProcessHandler(_issuerRepositories, _walletService, _portalService);
+        _sut = new CredentialExpiryProcessHandler(_issuerRepositories, _credentialBackend, _portalService);
     }
 
     #region RevokeCredential
@@ -111,7 +111,7 @@ public class CredentialExpiryProcessHandlerTests
         var result = await _sut.RevokeCredential(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletService.RevokeCredentialForIssuer(externalCredentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialBackend.RevokeCredential(externalCredentialId, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
 
         credential.CompanySsiDetailStatusId.Should().Be(CompanySsiDetailStatusId.REVOKED);
@@ -136,7 +136,7 @@ public class CredentialExpiryProcessHandlerTests
 
         // Assert
         ex.Message.Should().Be($"Credential {_credentialId} does not exist");
-        A.CallTo(() => _walletService.RevokeCredentialForIssuer(externalCredentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialBackend.RevokeCredential(externalCredentialId, A<CancellationToken>._))
             .MustNotHaveHappened();
     }
 
@@ -154,7 +154,7 @@ public class CredentialExpiryProcessHandlerTests
 
         // Assert
         ex.Message.Should().Be($"External Credential Id must be set for {_credentialId}");
-        A.CallTo(() => _walletService.RevokeCredentialForIssuer(externalCredentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialBackend.RevokeCredential(externalCredentialId, A<CancellationToken>._))
             .MustNotHaveHappened();
     }
 

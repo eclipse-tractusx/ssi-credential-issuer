@@ -25,12 +25,12 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.Services;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Backend;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.BusinessLogic;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 using System.Text.Json;
 using Xunit;
@@ -41,7 +41,7 @@ public class CredentialCreationProcessHandlerTests
 {
     private readonly Guid _credentialId = Guid.NewGuid();
 
-    private readonly IWalletBusinessLogic _walletBusinessLogic;
+    private readonly ICredentialBackend _credentialBackend;
     private readonly ICredentialRepository _credentialRepository;
 
     private readonly CredentialCreationProcessHandler _sut;
@@ -60,10 +60,10 @@ public class CredentialCreationProcessHandlerTests
 
         A.CallTo(() => issuerRepositories.GetInstance<ICredentialRepository>()).Returns(_credentialRepository);
 
-        _walletBusinessLogic = A.Fake<IWalletBusinessLogic>();
+        _credentialBackend = A.Fake<ICredentialBackend>();
         _callbackService = A.Fake<ICallbackService>();
 
-        _sut = new CredentialCreationProcessHandler(issuerRepositories, _walletBusinessLogic, _callbackService);
+        _sut = new CredentialCreationProcessHandler(issuerRepositories, _credentialBackend, _callbackService);
     }
 
     #region CreateCredential
@@ -79,7 +79,7 @@ public class CredentialCreationProcessHandlerTests
         var result = await _sut.CreateSignedCredential(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletBusinessLogic.CreateSignedCredential(_credentialId, A<JsonDocument>._, A<CancellationToken>._))
+        A.CallTo(() => _credentialBackend.CreateSignedCredential(_credentialId, A<JsonDocument>._, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
 
         result.modified.Should().BeFalse();
@@ -119,7 +119,7 @@ public class CredentialCreationProcessHandlerTests
         var result = await _sut.SaveCredentialDocument(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletBusinessLogic.GetCredential(_credentialId, externalCredentialId, VerifiedCredentialTypeKindId.BPN, A<CancellationToken>._))
+        A.CallTo(() => _credentialBackend.GetCredential(_credentialId, externalCredentialId, VerifiedCredentialTypeKindId.BPN, A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
 
         result.modified.Should().BeFalse();
@@ -215,7 +215,7 @@ public class CredentialCreationProcessHandlerTests
         var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletBusinessLogic.CreateCredentialForHolder(_credentialId, "https://example.org", "c1", A<EncryptionInformation>._, "test", A<CancellationToken>._))
+        A.CallTo(() => _credentialBackend.CreateCredentialForHolder(_credentialId, "https://example.org", "c1", A<EncryptionInformation>._, "test", A<CancellationToken>._))
             .MustHaveHappenedOnceExactly();
 
         result.modified.Should().BeFalse();
@@ -240,7 +240,7 @@ public class CredentialCreationProcessHandlerTests
         var result = await _sut.CreateCredentialForHolder(_credentialId, CancellationToken.None);
 
         // Assert
-        A.CallTo(() => _walletBusinessLogic.CreateCredentialForHolder(A<Guid>._, A<string>._, A<string>._, A<EncryptionInformation>._, A<string>._, A<CancellationToken>._))
+        A.CallTo(() => _credentialBackend.CreateCredentialForHolder(A<Guid>._, A<string>._, A<string>._, A<EncryptionInformation>._, A<string>._, A<CancellationToken>._))
             .MustNotHaveHappened();
 
         result.modified.Should().BeFalse();

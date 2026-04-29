@@ -20,20 +20,20 @@
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Backend;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 using System.Text.Json;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
 
 public class CredentialExpiryProcessHandler(
     IIssuerRepositories repositories,
-    IWalletService walletService,
+    ICredentialBackend credentialBackend,
     IPortalService portalService)
     : ICredentialExpiryProcessHandler
 {
@@ -54,8 +54,8 @@ public class CredentialExpiryProcessHandler(
             throw new ConflictException($"External Credential Id must be set for {credentialId}");
         }
 
-        // call walletService
-        await walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        // call credential backend to revoke
+        await credentialBackend.RevokeCredential(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
 
         repositories.GetInstance<IDocumentRepository>().AttachAndModifyDocuments(
             data.Documents.Select(d => new ValueTuple<Guid, Action<Document>?, Action<Document>>(

@@ -17,7 +17,9 @@
  * SPDX-License-Identifier: Apache-2.0
  ********************************************************************************/
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Backend;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Creation;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Expiry;
 
@@ -37,6 +39,25 @@ public static class CredentialHandlerExtensions
     {
         services
             .AddTransient<ICredentialExpiryProcessHandler, CredentialExpiryProcessHandler>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the credential backend based on the "CredentialBackend" configuration value.
+    /// Use "IssuerHub" to use the Identity Hub Issuer Service, or "Wallet" (default) for the legacy Wallet.Service.
+    /// </summary>
+    public static IServiceCollection AddCredentialBackend(this IServiceCollection services, IConfiguration config)
+    {
+        var backendType = config.GetValue<string>("CredentialBackend") ?? "Wallet";
+        if (string.Equals(backendType, "IssuerHub", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddScoped<ICredentialBackend, IssuerHubCredentialBackend>();
+        }
+        else
+        {
+            services.AddScoped<ICredentialBackend, WalletCredentialBackend>();
+        }
 
         return services;
     }

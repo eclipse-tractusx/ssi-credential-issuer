@@ -23,9 +23,11 @@ using Org.Eclipse.TractusX.Portal.Backend.Framework.Logging;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Worker.Library;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Token;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Callback.Service.DependencyInjection;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Worker.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.IssuerHub.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Processes.ProcessIdentity;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjection;
@@ -47,6 +49,8 @@ try
                 .AddPortalService(hostContext.Configuration.GetSection("Portal"))
                 .AddCallbackService(hostContext.Configuration.GetSection("Callback"))
                 .AddWalletService(hostContext.Configuration)
+                .AddIssuerHubServiceIfConfigured(hostContext.Configuration)
+                .AddCredentialBackend(hostContext.Configuration)
                 .AddCredentialCreationProcessExecutor()
                 .AddCredentialExpiryProcessExecutor();
         })

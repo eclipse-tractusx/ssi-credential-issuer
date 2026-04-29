@@ -18,26 +18,26 @@
  ********************************************************************************/
 
 using Org.Eclipse.TractusX.Portal.Backend.Framework.ErrorHandling;
+using Org.Eclipse.TractusX.SsiCredentialIssuer.CredentialProcess.Library.Backend;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Entities;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.ErrorHandling;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Service.Identity;
-using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Service.BusinessLogic;
 
 public class RevocationBusinessLogic : IRevocationBusinessLogic
 {
     private readonly IIssuerRepositories _repositories;
-    private readonly IWalletService _walletService;
+    private readonly ICredentialBackend _credentialBackend;
     private readonly IIdentityData _identityData;
 
-    public RevocationBusinessLogic(IIssuerRepositories repositories, IWalletService walletService, IIdentityService identityService)
+    public RevocationBusinessLogic(IIssuerRepositories repositories, ICredentialBackend credentialBackend, IIdentityService identityService)
     {
         _repositories = repositories;
-        _walletService = walletService;
+        _credentialBackend = credentialBackend;
         _identityData = identityService.IdentityData;
     }
 
@@ -66,8 +66,8 @@ public class RevocationBusinessLogic : IRevocationBusinessLogic
             return;
         }
 
-        // call walletService
-        await _walletService.RevokeCredentialForIssuer(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        // call credential backend to revoke
+        await _credentialBackend.RevokeCredential(data.ExternalCredentialId.Value, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
         _repositories.GetInstance<IDocumentRepository>().AttachAndModifyDocuments(
             data.Documents.Select(d => new ValueTuple<Guid, Action<Document>?, Action<Document>>(
                 d.DocumentId,
