@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -73,10 +73,12 @@ public class CredentialCreationProcessTypeExecutorTests
     public void GetExecutableStepTypeIds_ReturnsExpected()
     {
         // Assert
-        _sut.GetExecutableStepTypeIds().Should().HaveCount(4).And.Satisfy(
+        _sut.GetExecutableStepTypeIds().Should().HaveCount(6).And.Satisfy(
             x => x == ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             x => x == ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
-            x => x == ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
+            x => x == ProcessStepTypeId.REQUEST_CREDENTIAL_FOR_HOLDER,
+            x => x == ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE,
+            x => x == ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK,
             x => x == ProcessStepTypeId.TRIGGER_CALLBACK);
     }
 
@@ -204,7 +206,9 @@ public class CredentialCreationProcessTypeExecutorTests
     [Theory]
     [InlineData(ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL)]
     [InlineData(ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT)]
-    [InlineData(ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER, ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessStepTypeId.REQUEST_CREDENTIAL_FOR_HOLDER, ProcessStepTypeId.RETRIGGER_REQUEST_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessStepTypeId.REQUEST_CREDENTIAL_AUTO_APPROVE, ProcessStepTypeId.RETRIGGER_REQUEST_CREDENTIAL_AUTO_APPROVE)]
+    [InlineData(ProcessStepTypeId.REQUEST_CREDENTIAL_STATUS_CHECK, ProcessStepTypeId.RETRIGGER_REQUEST_CREDENTIAL_STATUS_CHECK)]
     [InlineData(ProcessStepTypeId.TRIGGER_CALLBACK, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK)]
     public async Task ExecuteProcessStep_WithServiceException_ReturnsFailedAndRetriggerStep(ProcessStepTypeId processStepTypeId, ProcessStepTypeId expectedRetriggerStep)
     {
@@ -226,7 +230,11 @@ public class CredentialCreationProcessTypeExecutorTests
             .Throws(new ServiceException("this is a test"));
         A.CallTo(() => _credentialCreationProcessHandler.SaveCredentialDocument(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
-        A.CallTo(() => _credentialCreationProcessHandler.CreateCredentialForHolder(credentialId, A<CancellationToken>._))
+        A.CallTo(() => _credentialCreationProcessHandler.RequestCredentialForHolder(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialCreationProcessHandler.RequestCredentialAutoApprove(credentialId, A<CancellationToken>._))
+            .Throws(new ServiceException("this is a test"));
+        A.CallTo(() => _credentialCreationProcessHandler.CheckCredentialStatus(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));
         A.CallTo(() => _credentialCreationProcessHandler.TriggerCallback(credentialId, A<CancellationToken>._))
             .Throws(new ServiceException("this is a test"));

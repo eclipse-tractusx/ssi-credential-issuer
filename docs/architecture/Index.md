@@ -10,6 +10,7 @@ This documentation follows the arc42 template to provide a comprehensive overvie
 - [05. Building Block View](./05_building_block_view.md)
 - [08. Concepts](./08_concepts.md)
 - [10. Quality Requirements](./10_quality_requirements.md)
+- [11. Migration](./11_migration.md)
 
 ## NOTICE
 

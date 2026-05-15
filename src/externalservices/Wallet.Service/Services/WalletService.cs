@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,6 +25,7 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.DependencyInjectio
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Models;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Web;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Wallet.Service.Services;
 
@@ -102,5 +103,96 @@ public class WalletService(
             .CatchingIntoServiceExceptionFor("revoke-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
                 async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
             .ConfigureAwait(false);
+    }
+
+    public async Task<Guid> RequestCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, string credential, CancellationToken cancellationToken)
+    {
+        var authSettings = new BasicAuthSettings
+        {
+            ClientId = clientId,
+            ClientSecret = clientSecret,
+            TokenAddress = $"{holderWalletUrl}/oauth/token"
+        };
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(authSettings, cancellationToken);
+        ICredential credentialBase = JsonSerializer.Deserialize<Credential>(credential)!;
+        if (credentialBase == null)
+        {
+            throw new UnexpectedConditionException("Credential must not be null");
+        }
+
+        var type = credentialBase.Type.ElementAt(1);
+        var issuerDid = credentialBase.Issuer;
+        var holderDid = credentialBase.CredentialSubject.Id;
+        var expirationDate = credentialBase.ExpirationDate;
+
+        var data = new RequestCredential(
+            Enumerable.Repeat(
+                new RequestedCredentials(type, "vcdm11_jwt"), 1),
+                 issuerDid, holderDid, expirationDate);
+        var result = await client.PostAsJsonAsync(string.Format(_settings.RequestCredentialPath, _settings.WalletApplication), data, Options, cancellationToken)
+            .CatchingIntoServiceExceptionFor("request-holder-credential", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<RequestCredentialResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (response is null)
+        {
+            throw new ServiceException(NoIdErrorMessage, true);
+        }
+
+        return response.Id;
+    }
+
+    public async Task<IEnumerable<CredentialRequestReceived>> GetCredentialRequestsReceived(string holderDid, CancellationToken cancellationToken)
+    {
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+        var filterString = $"holderDid eq {holderDid}";
+        var result = await client.GetAsync(_settings.CredentialRequestsReceivedPath + $"?filter={HttpUtility.UrlEncode(filterString)}", cancellationToken)
+            .CatchingIntoServiceExceptionFor("get-credential-requests-received-list", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<GetCredentialRequestReceivedResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (response is null)
+        {
+            throw new ServiceException(NoIdErrorMessage, true);
+        }
+
+        return response.Data;
+    }
+
+    public async Task<CredentialRequestReceived> GetCredentialRequestsReceivedDetail(string credentialRequestId, CancellationToken cancellationToken)
+    {
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+
+        var result = await client.GetAsync(string.Format(_settings.CredentialRequestsReceivedDetailPath, credentialRequestId), cancellationToken)
+            .CatchingIntoServiceExceptionFor("get-credential-requests-received-detail", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<CredentialRequestReceived>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (response is null)
+        {
+            throw new ServiceException(NoIdErrorMessage, true);
+        }
+
+        return response;
+    }
+
+    public async Task<string> CredentialRequestsReceivedAutoApprove(string credentialRequestId, CancellationToken cancellationToken)
+    {
+        using var client = await basicAuthTokenService.GetBasicAuthorizedClient<WalletService>(_settings, cancellationToken);
+
+        var result = await client.PostAsync(string.Format(_settings.CredentialRequestsReceivedAutoApprovePath, credentialRequestId), null, cancellationToken)
+            .CatchingIntoServiceExceptionFor("credential-requests-received-auto-approve", HttpAsyncResponseMessageExtension.RecoverOptions.INFRASTRUCTURE,
+                async x => (false, await x.Content.ReadAsStringAsync().ConfigureAwait(ConfigureAwaitOptions.None)))
+            .ConfigureAwait(false);
+        var response = await result.Content.ReadFromJsonAsync<RequestedCredentialAutoApproveResponse>(Options, cancellationToken).ConfigureAwait(ConfigureAwaitOptions.None);
+        if (response is null)
+        {
+            throw new ServiceException(NoIdErrorMessage, true);
+        }
+        if (response.Reason != null)
+        {
+            throw new ServiceException(response.Reason, false);
+        }
+        return response.Status;
     }
 }

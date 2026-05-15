@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -26,6 +26,10 @@ public interface IWalletService
 {
     Task<CreateSignedCredentialResponse> CreateSignedCredential(JsonDocument payload, CancellationToken cancellationToken);
     Task<Guid> CreateCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, string credential, CancellationToken cancellationToken);
+    Task<Guid> RequestCredentialForHolder(string holderWalletUrl, string clientId, string clientSecret, string credential, CancellationToken cancellationToken);
     Task<JsonDocument> GetCredential(Guid externalCredentialId, CancellationToken cancellationToken);
     Task RevokeCredentialForIssuer(Guid externalCredentialId, CancellationToken cancellationToken);
+    Task<IEnumerable<CredentialRequestReceived>> GetCredentialRequestsReceived(string holderDid, CancellationToken cancellationToken);
+    Task<CredentialRequestReceived> GetCredentialRequestsReceivedDetail(string credentialRequestId, CancellationToken cancellationToken);
+    Task<string> CredentialRequestsReceivedAutoApprove(string credentialRequestId, CancellationToken cancellationToken);
 }

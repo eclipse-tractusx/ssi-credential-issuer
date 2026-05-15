@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -28,13 +28,14 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 
 public class CredentialRepository(IssuerDbContext dbContext) : ICredentialRepository
 {
-    public Task<(bool IsIssuerCompany, HolderWalletData HolderWalletData, string? Credential, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId) =>
+    public Task<(bool IsIssuerCompany, HolderWalletData HolderWalletData, string? Credential, JsonDocument? CredentialJson, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId) =>
         dbContext.CompanySsiDetails
             .Where(x => x.Id == credentialId)
-            .Select(x => new ValueTuple<bool, HolderWalletData, string?, EncryptionTransformationData, string?>(
+            .Select(x => new ValueTuple<bool, HolderWalletData, string?, JsonDocument?, EncryptionTransformationData, string?>(
                 x.Bpnl == x.IssuerBpn,
                 new HolderWalletData(x.CompanySsiProcessData!.HolderWalletUrl, x.CompanySsiProcessData.ClientId),
                 x.Credential,
+                x.CompanySsiProcessData!.Schema,
                 new EncryptionTransformationData(x.CompanySsiProcessData!.ClientSecret, x.CompanySsiProcessData.InitializationVector, x.CompanySsiProcessData.EncryptionMode),
                 x.CompanySsiProcessData!.CallbackUrl))
             .SingleOrDefaultAsync();
@@ -112,5 +113,11 @@ public class CredentialRepository(IssuerDbContext dbContext) : ICredentialReposi
                 x.DocumentStatusId,
                 x.DocumentContent,
                 x.MediaTypeId))
+            .SingleOrDefaultAsync();
+
+    public Task<(Guid? ExternalCredentialId, JsonDocument? CredentialJson, string? CallbackUrl)> GetCredentialDetailById(Guid credentialId) =>
+        dbContext.CompanySsiProcessData
+            .Where(x => x.CompanySsiDetailId == credentialId)
+            .Select(x => new ValueTuple<Guid?, JsonDocument?, string?>(x.CompanySsiDetail!.ExternalCredentialId, x.Schema, x.CallbackUrl))
             .SingleOrDefaultAsync();
 }

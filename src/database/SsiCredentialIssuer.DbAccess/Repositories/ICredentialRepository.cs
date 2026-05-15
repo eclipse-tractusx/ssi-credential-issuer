@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -26,7 +26,7 @@ namespace Org.Eclipse.TractusX.SsiCredentialIssuer.DBAccess.Repositories;
 
 public interface ICredentialRepository
 {
-    Task<(bool IsIssuerCompany, HolderWalletData HolderWalletData, string? Credential, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId);
+    Task<(bool IsIssuerCompany, HolderWalletData HolderWalletData, string? Credential, JsonDocument? CredentialJson, EncryptionTransformationData EncryptionInformation, string? CallbackUrl)> GetCredentialData(Guid credentialId);
     Task<(bool Exists, Guid CredentialId)> GetDataForProcessId(Guid processId);
     Task<(VerifiedCredentialTypeKindId CredentialTypeKindId, JsonDocument Schema)> GetCredentialStorageInformationById(Guid credentialId);
     Task<(Guid? ExternalCredentialId, VerifiedCredentialTypeKindId KindId, bool HasEncryptionInformation, string? CallbackUrl)> GetExternalCredentialAndKindId(Guid credentialId);
@@ -36,4 +36,5 @@ public interface ICredentialRepository
     Task<(VerifiedCredentialExternalTypeId ExternalTypeId, string RequesterId)> GetCredentialNotificationData(Guid credentialId);
     Task<(bool Exists, bool IsSameCompany, IEnumerable<(DocumentStatusId StatusId, byte[] Content)> Documents)> GetSignedCredentialForCredentialId(Guid credentialId, string bpnl);
     Task<(bool Exists, bool IsSameCompany, string FileName, DocumentStatusId StatusId, byte[] Content, MediaTypeId MediaTypeId)> GetDocumentById(Guid documentId, string bpnl);
+    Task<(Guid? ExternalCredentialId, JsonDocument? CredentialJson, string? CallbackUrl)> GetCredentialDetailById(Guid credentialId);
 }
