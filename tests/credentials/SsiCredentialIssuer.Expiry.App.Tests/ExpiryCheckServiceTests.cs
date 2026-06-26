@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -21,7 +21,6 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Extensions;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.DateTimeProvider;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Models;
 using Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.DBAccess;
@@ -34,7 +33,6 @@ using Org.Eclipse.TractusX.SsiCredentialIssuer.Entities.Enums;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.DependencyInjection;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Models;
 using Org.Eclipse.TractusX.SsiCredentialIssuer.Portal.Service.Services;
-using System.Runtime.CompilerServices;
 
 namespace Org.Eclipse.TractusX.SsiCredentialIssuer.Expiry.App.Tests;
 
@@ -206,5 +204,61 @@ public class ExpiryCheckServiceTests
 
         credentialNotification.GetLastValue().Should().ContainAll(VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL.GetEnumValue(), VerifiedCredentialTypeId.MEMBERSHIP.GetEnumValue());
         ssiDetail.ExpiryCheckTypeId.Should().Be(expiryCheckTypeId);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithException_LogsErrorMessage()
+    {
+        // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var credentialId = Guid.NewGuid();
+        var credentialScheduleData = _fixture.Build<CredentialScheduleData>()
+            .With(x => x.IsVcToDelete, true)
+            .Create();
+        var credentialsData = new CredentialExpiryData[]
+        {
+            new(credentialId, "INVALID_REQUESTER_ID", null, null, null, Bpnl, CompanySsiDetailStatusId.INACTIVE, VerifiedCredentialTypeId.MEMBERSHIP, VerifiedCredentialExternalTypeId.MEMBERSHIP_CREDENTIAL, credentialScheduleData)
+        };
+
+        // Create a logger that captures log messages
+        var logger = A.Fake<ILogger<ExpiryCheckService>>();
+
+        var serviceProvider = A.Fake<IServiceProvider>();
+
+        // Mock GetService instead of GetRequiredService (which is an extension method)
+        A.CallTo(() => serviceProvider.GetService(typeof(IIssuerRepositories))).Returns(_issuerRepositories);
+        A.CallTo(() => serviceProvider.GetService(typeof(IDateTimeProvider))).Returns(_dateTimeProvider);
+        A.CallTo(() => serviceProvider.GetService(typeof(IPortalService))).Returns(_portalService);
+
+        var serviceScope = A.Fake<IServiceScope>();
+        A.CallTo(() => serviceScope.ServiceProvider).Returns(serviceProvider);
+        var serviceScopeFactory = A.Fake<IServiceScopeFactory>();
+        A.CallTo(() => serviceScopeFactory.CreateScope()).Returns(serviceScope);
+
+        A.CallTo(() => _dateTimeProvider.OffsetNow).Returns(now);
+        A.CallTo(() => _companySsiDetailsRepository.GetExpiryData(A<DateTimeOffset>._, A<DateTimeOffset>._, A<DateTimeOffset>._))
+            .Returns(credentialsData.ToAsyncEnumerable());
+
+        // Mock RemoveSsiDetail to throw an exception
+        var testException = new Exception("Test exception");
+        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(credentialId, A<string>._, A<string>._))
+            .Throws(testException);
+
+        var sut = new ExpiryCheckService(serviceScopeFactory, logger, Options.Create(_settings));
+
+        // Act
+        await sut.ExecuteAsync(CancellationToken.None);
+
+        // Assert - Verify that the method was called
+        A.CallTo(() => _companySsiDetailsRepository.RemoveSsiDetail(credentialId, A<string>._, A<string>._))
+            .MustHaveHappenedOnceExactly();
+
+        // Verify that error logging occurred - match the actual call signature
+        A.CallTo(logger)
+            .Where(call => call.Method.Name == "Log" &&
+                   call.Arguments.Get<LogLevel>(0) == LogLevel.Error)
+            .MustHaveHappened();
+
+        Environment.ExitCode.Should().Be(1, "Environment.ExitCode should be set to 1 when an exception occurs");
     }
 }
