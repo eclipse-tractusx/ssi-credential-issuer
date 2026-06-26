@@ -105,6 +105,7 @@ dependencies:
 | processesworker.wallet.createSignedCredentialPath | string | `"/api/v2.0.0/credentials"` | path to create a specific credential which is directly signed |
 | processesworker.wallet.getCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to get a specific credential; {0} will be replaced by the credential id |
 | processesworker.wallet.revokeCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to revoke a specific credential; {0} will be replaced by the credential id |
+| processesworker.wallet.offerCredentialPath | string | `"/api/v2.0.0/dcp/credentialOffers/send"` | path to offer a credential to holder |
 | credentialExpiry.name | string | `"expiry"` |  |
 | credentialExpiry.image.name | string | `"docker.io/tractusx/ssi-credential-expiry-app"` |  |
 | credentialExpiry.image.tag | string | `""` |  |

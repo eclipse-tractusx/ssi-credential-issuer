@@ -322,7 +322,7 @@ The database is organized into several key tables, each serving a specific purpo
 - `CREATE_CREDENTIAL`: Creates a credential in the issuer wallet.
 - `SIGN_CREDENTIAL`: Signs the credential in the issuer wallet.
 - `SAVE_CREDENTIAL_DOCUMENT`: Saves the credential in the database.
-- `CREATE_CREDENTIAL_FOR_HOLDER`: Creates the credential in the holder wallet.
+- `OFFER_CREDENTIAL_TO_HOLDER`: Offer credential to the holder wallet.
 - `TRIGGER_CALLBACK`: Triggers the callback to the portal.
 - `REVOKE_CREDENTIAL`: Revokes the credential.
 - `TRIGGER_NOTIFICATION`: Triggers the notification sending.

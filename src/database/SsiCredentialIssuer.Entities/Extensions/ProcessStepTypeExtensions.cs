@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -28,7 +28,7 @@ public static class ProcessStepTypeExtensions
         {
             ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL => ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT => ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT,
-            ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER => ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER,
+            ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER => ProcessStepTypeId.RETRIGGER_OFFER_CREDENTIAL_TO_HOLDER,
             ProcessStepTypeId.TRIGGER_CALLBACK => ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK,
             ProcessStepTypeId.REVOKE_CREDENTIAL => ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL,
             ProcessStepTypeId.TRIGGER_NOTIFICATION => ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION,
@@ -41,7 +41,7 @@ public static class ProcessStepTypeExtensions
         {
             ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL => (ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL),
             ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT => (ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT),
-            ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER => (ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER),
+            ProcessStepTypeId.RETRIGGER_OFFER_CREDENTIAL_TO_HOLDER => (ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER),
             ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK => (ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.TRIGGER_CALLBACK),
             ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL => (ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.REVOKE_CREDENTIAL),
             ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION => (ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.TRIGGER_NOTIFICATION),
