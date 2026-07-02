@@ -41,5 +41,6 @@ public interface IIssuerBusinessLogic
     Task<Guid> CreateBpnCredential(CreateBpnCredentialRequest requestData, CancellationToken cancellationToken);
     Task<Guid> CreateMembershipCredential(CreateMembershipCredentialRequest requestData, CancellationToken cancellationToken);
     Task<Guid> CreateFrameworkCredential(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken);
+    Task<Guid> CreateFrameworkCredentialBySystem(CreateFrameworkCredentialRequest requestData, CancellationToken cancellationToken);
     Task RetriggerProcessStep(Guid processId, ProcessStepTypeId processStepTypeId, CancellationToken cancellationToken);
 }

@@ -40,6 +40,7 @@ See Docker notice files for more information:
 - [credential-issuer-service](./docker//notice-credential-issuer-service.md)
 - [credential-issuer-processes-worker](./docker/notice-credential-issuer-processes-worker.md)
 - [credential-expiry-app](./docker/notice-credential-expiry-app.md)
+- [credential-reissuance-app](./docker/notice-credential-reissuance-app.md)
 - [credential-issuer-migrations](./docker/notice-credential-issuer-migrations.md)
 
 ## Contributing

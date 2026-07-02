@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -24,12 +24,14 @@ public enum ProcessStepTypeId
     // CREATE CREDENTIAL PROCESS
     CREATE_SIGNED_CREDENTIAL = 1,
     SAVE_CREDENTIAL_DOCUMENT = 3,
-    CREATE_CREDENTIAL_FOR_HOLDER = 4,
+    OFFER_CREDENTIAL_TO_HOLDER = 4,
     TRIGGER_CALLBACK = 5,
+    REVOKE_OLD_CREDENTIAL = 10,
     RETRIGGER_CREATE_SIGNED_CREDENTIAL = 6,
     RETRIGGER_SAVE_CREDENTIAL_DOCUMENT = 7,
-    RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER = 8,
+    RETRIGGER_OFFER_CREDENTIAL_TO_HOLDER = 8,
     RETRIGGER_TRIGGER_CALLBACK = 9,
+    RETRIGGER_REVOKE_OLD_CREDENTIAL = 11,
 
     // DECLINE PROCESS
     REVOKE_CREDENTIAL = 100,

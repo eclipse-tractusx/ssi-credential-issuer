@@ -8,6 +8,7 @@ The process worker supports the following processes:
 
 - [CreateCredential](../processes/01.%20create_credential.md) - handles the creation of new credentials
 - [DeleteCredential](../processes/02.%20delete_credential.md) - handles the revocation of credentials
+- [ReissueCredential](../processes/03.%20reissue_credential.md) - handles the reissuance of expiring credentials
 
 ## Retriggering
 

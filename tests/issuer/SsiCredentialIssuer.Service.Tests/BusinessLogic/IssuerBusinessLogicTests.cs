@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -1039,7 +1039,7 @@ public class IssuerBusinessLogicTests
     [Theory]
     [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL)]
     [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT)]
-    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_OFFER_CREDENTIAL_TO_HOLDER)]
     [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK)]
     [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL)]
     [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION)]
@@ -1086,7 +1086,8 @@ public class IssuerBusinessLogicTests
     [Theory]
     [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_SIGNED_CREDENTIAL, ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL)]
     [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_SAVE_CREDENTIAL_DOCUMENT, ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT)]
-    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_CREATE_CREDENTIAL_FOR_HOLDER, ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_OFFER_CREDENTIAL_TO_HOLDER, ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER)]
+    [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_OLD_CREDENTIAL, ProcessStepTypeId.REVOKE_OLD_CREDENTIAL)]
     [InlineData(ProcessTypeId.CREATE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_CALLBACK, ProcessStepTypeId.TRIGGER_CALLBACK)]
     [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_REVOKE_CREDENTIAL, ProcessStepTypeId.REVOKE_CREDENTIAL)]
     [InlineData(ProcessTypeId.DECLINE_CREDENTIAL, ProcessStepTypeId.RETRIGGER_TRIGGER_NOTIFICATION, ProcessStepTypeId.TRIGGER_NOTIFICATION)]

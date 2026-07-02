@@ -31,7 +31,7 @@ To use the helm chart as a dependency:
 dependencies:
   - name: ssi-credential-issuer
     repository: https://eclipse-tractusx.github.io/charts/dev
-    version: 1.4.1-rc.1
+    version: 1.4.1-rc.3
 ```
 
 ## Requirements
@@ -105,6 +105,7 @@ dependencies:
 | processesworker.wallet.createSignedCredentialPath | string | `"/api/v2.0.0/credentials"` | path to create a specific credential which is directly signed |
 | processesworker.wallet.getCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to get a specific credential; {0} will be replaced by the credential id |
 | processesworker.wallet.revokeCredentialPath | string | `"/api/v2.0.0/credentials/{0}"` | path to revoke a specific credential; {0} will be replaced by the credential id |
+| processesworker.wallet.offerCredentialPath | string | `"/api/v2.0.0/dcp/credentialOffers/send"` | path to offer a credential to holder |
 | credentialExpiry.name | string | `"expiry"` |  |
 | credentialExpiry.image.name | string | `"docker.io/tractusx/ssi-credential-expiry-app"` |  |
 | credentialExpiry.image.tag | string | `""` |  |
@@ -115,12 +116,22 @@ dependencies:
 | credentialExpiry.logging.default | string | `"Information"` |  |
 | credentialExpiry.expiry.expiredVcsToDeleteInMonth | int | `12` |  |
 | credentialExpiry.expiry.inactiveVcsToDeleteInWeeks | int | `12` |  |
+| credentialReissuance.name | string | `"reissuance"` |  |
+| credentialReissuance.image.name | string | `"docker.io/tractusx/ssi-credential-reissuance-job"` |  |
+| credentialReissuance.image.tag | string | `""` |  |
+| credentialReissuance.image.pullSecrets | list | `[]` |  |
+| credentialReissuance.imagePullPolicy | string | `"IfNotPresent"` |  |
+| credentialReissuance.resources | object | `{"limits":{"cpu":"45m","memory":"105M"},"requests":{"cpu":"15m","memory":"105M"}}` | We recommend to review the default resource limits as this should a conscious choice. |
+| credentialReissuance.processIdentity.identityId | string | `"ac1cf001-7fbc-1f2f-817f-bce058020006"` |  |
+| credentialReissuance.logging.default | string | `"Information"` |  |
+| credentialReissuance.reissuance.expiredVcsToReissueInDays | int | `14` | Number of days before which the credentials need to be re-issued. |
+| credentialReissuance.reissuance.creatorUserId | string | `""` | The user id of the technical user who creates the new version of the credential. This is used only for auditing. |
 | existingSecret | string | `""` | Secret containing the client-secrets for the connection to portal and wallet as well as encryptionKeys for issuer.credential and processesworker.wallet |
 | dotnetEnvironment | string | `"Production"` |  |
 | dbConnection.schema | string | `"issuer"` |  |
 | dbConnection.sslMode | string | `"Disable"` |  |
 | postgresql.enabled | bool | `true` | PostgreSQL chart configuration; default configurations: host: "issuer-postgresql-primary", port: 5432; Switch to enable or disable the PostgreSQL helm chart. |
-| postgresql.image | object | `{"tag":"15-debian-12"}` | Setting image tag to major to get latest minor updates |
+| postgresql.image | object | `{"registry":"docker.io","repository":"bitnamilegacy/postgresql","tag":"15-debian-12"}` | Setting image tag to major to get latest minor updates |
 | postgresql.commonLabels."app.kubernetes.io/version" | string | `"15"` |  |
 | postgresql.auth.username | string | `"issuer"` | Non-root username. |
 | postgresql.auth.database | string | `"issuer"` | Database name. |

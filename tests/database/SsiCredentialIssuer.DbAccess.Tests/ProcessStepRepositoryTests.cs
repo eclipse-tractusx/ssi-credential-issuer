@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -266,7 +266,8 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         var processStepTypeIds = new[] {
             ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
-            ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
+            ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER,
+            ProcessStepTypeId.REVOKE_OLD_CREDENTIAL,
             ProcessStepTypeId.TRIGGER_CALLBACK
         };
 
@@ -288,7 +289,8 @@ public class ProcessStepRepositoryTests : IAssemblyFixture<TestDbFixture>
         var processStepTypeIds = new[] {
             ProcessStepTypeId.CREATE_SIGNED_CREDENTIAL,
             ProcessStepTypeId.SAVE_CREDENTIAL_DOCUMENT,
-            ProcessStepTypeId.CREATE_CREDENTIAL_FOR_HOLDER,
+            ProcessStepTypeId.OFFER_CREDENTIAL_TO_HOLDER,
+            ProcessStepTypeId.REVOKE_OLD_CREDENTIAL,
             ProcessStepTypeId.TRIGGER_CALLBACK
         };
 

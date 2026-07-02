@@ -150,6 +150,8 @@ spec:
               value: "{{ .Values.processesworker.wallet.getCredentialPath }}"
             - name: "WALLET__REVOKECREDENTIALPATH"
               value: "{{ .Values.processesworker.wallet.revokeCredentialPath }}"
+            - name: "WALLET__OFFERCREDENTIALPATH"
+              value: "{{ .Values.processesworker.wallet.offerCredentialPath }}"
             - name: "SERILOG__MINIMUMLEVEL__Default"
               value: "{{ .Values.processesworker.logging.default }}"
             - name: "PROCESSES__IDENTITYID"
